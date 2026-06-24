@@ -500,6 +500,245 @@ input:focus,select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0
 <div id="toast"></div>
 
 <script>
+// ═══════════════════════════════════════════════════════
+// QR Code 產生器 — 完整實作（Version 1-10, EC Level M）
+// 不依賴任何外部函式庫，直接繪製到 canvas
+// ═══════════════════════════════════════════════════════
+const QREngine = (() => {
+
+  // ── Galois Field GF(256) ──
+  const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+  (()=>{
+    let x=1;
+    for(let i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x=x<128?x*2:(x*2)^0x11D;}
+    for(let i=255;i<512;i++) EXP[i]=EXP[i-255];
+  })();
+  const gm=(a,b)=>(a&&b)?EXP[(LOG[a]+LOG[b])%255]:0;
+
+  function rsPoly(ec){
+    let p=[1];
+    for(let i=0;i<ec;i++){
+      const q=[1,EXP[i]], r=new Array(p.length+q.length-1).fill(0);
+      for(let j=0;j<p.length;j++) for(let k=0;k<q.length;k++) r[j+k]^=gm(p[j],q[k]);
+      p=r;
+    }
+    return p;
+  }
+
+  function rsEncode(data, ec){
+    const g=rsPoly(ec), msg=[...data,...new Array(ec).fill(0)];
+    for(let i=0;i<data.length;i++){const c=msg[i];if(c)for(let j=0;j<g.length;j++)msg[i+j]^=gm(g[j],c);}
+    return msg.slice(data.length);
+  }
+
+  // ── Version tables (EC Level M) ──
+  // [total_data_cw, ec_per_block, num_blocks_g1, dw_per_block_g1, num_blocks_g2, dw_per_block_g2]
+  const VER = [
+    null,
+    [16,10,1,16,0,0],   // 1
+    [28,16,1,28,0,0],   // 2
+    [44,26,1,44,0,0],   // 3
+    [64,18,2,32,0,0],   // 4
+    [86,24,2,43,0,0],   // 5
+    [108,16,4,27,0,0],  // 6
+    [124,18,4,31,0,0],  // 7
+    [154,22,2,38,4,39], // 8
+    [182,22,3,36,5,37], // 9
+    [216,26,4,43,1,44], // 10
+  ];
+  const TOTAL = [0,16,28,44,64,86,108,124,154,182,216]; // total data codewords
+
+  // Alignment pattern centers
+  const ALIGN = [[],[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,28,46],[6,26,46]];
+
+  // Remainder bits
+  const REM = [0,0,7,7,7,0,0,0,0,0,0];
+
+  // Format info strings (EC=M=00, masks 0-7) XOR'd with 101010000010010
+  const FMT = [
+    0b101010000010010, // mask 0 – (r+c)%2==0
+    0b101000100100101, // mask 1 – r%2==0
+    0b101111001111100, // mask 2 – c%3==0
+    0b101101101001011, // mask 3 – (r+c)%3==0
+    0b100010111111001, // mask 4 – (floor(r/2)+floor(c/3))%2==0
+    0b100000011001110, // mask 5 – (r*c)%2+(r*c)%3==0
+    0b100111110010111, // mask 6 – ((r*c)%2+(r*c)%3)%2==0
+    0b100101010100000, // mask 7 – ((r+c)%2+(r*c)%3)%2==0
+  ];
+
+  function pickVersion(byteLen) {
+    for(let v=1;v<=10;v++) if(byteLen+2 <= TOTAL[v]) return v;
+    return 10;
+  }
+
+  function buildData(bytes, version) {
+    const bits=[], add=(v,n)=>{for(let i=n-1;i>=0;i--)bits.push((v>>i)&1);};
+    add(4,4); add(bytes.length,8);
+    for(const b of bytes) add(b,8);
+    add(0,4);
+    while(bits.length%8) bits.push(0);
+    const pads=[0xEC,0x11]; let pi=0;
+    while(bits.length < TOTAL[version]*8){ add(pads[pi%2],8); pi++; }
+
+    // Convert to codewords
+    const cw=[];
+    for(let i=0;i<bits.length;i+=8){
+      let b=0; for(let j=0;j<8;j++) b=(b<<1)|(bits[i+j]||0);
+      cw.push(b);
+    }
+    return cw;
+  }
+
+  function interleaveAndEC(cw, version) {
+    const [totalDW,ecPB,n1,k1,n2,k2] = VER[version];
+    const blocks=[];
+    let ptr=0;
+    for(let i=0;i<n1;i++){ blocks.push(cw.slice(ptr,ptr+k1)); ptr+=k1; }
+    for(let i=0;i<n2;i++){ blocks.push(cw.slice(ptr,ptr+k2)); ptr+=k2; }
+    const ecBlocks = blocks.map(b => rsEncode(b, ecPB));
+
+    // Interleave data
+    const out=[];
+    const maxLen = Math.max(k1,k2);
+    for(let i=0;i<maxLen;i++) for(const b of blocks) if(i<b.length) out.push(b[i]);
+    // Interleave EC
+    for(let i=0;i<ecPB;i++) for(const b of ecBlocks) out.push(b[i]);
+    return out;
+  }
+
+  function makeMask(maskId) {
+    return [
+      (r,c)=>(r+c)%2===0,
+      (r,c)=>r%2===0,
+      (r,c)=>c%3===0,
+      (r,c)=>(r+c)%3===0,
+      (r,c)=>(Math.floor(r/2)+Math.floor(c/3))%2===0,
+      (r,c)=>(r*c)%2+(r*c)%3===0,
+      (r,c)=>((r*c)%2+(r*c)%3)%2===0,
+      (r,c)=>((r+c)%2+(r*c)%3)%2===0,
+    ][maskId];
+  }
+
+  function score(mat, dim) {
+    let s=0;
+    // Rule 1: 5+ same in row/col
+    for(let r=0;r<dim;r++){let n=1,v=mat[r][0];for(let c=1;c<dim;c++){if(mat[r][c]===v)n++;else{if(n>=5)s+=n-2;n=1;v=mat[r][c];}if(n>=5)s+=n-2;}    }
+    for(let c=0;c<dim;c++){let n=1,v=mat[0][c];for(let r=1;r<dim;r++){if(mat[r][c]===v)n++;else{if(n>=5)s+=n-2;n=1;v=mat[r][c];}if(n>=5)s+=n-2;}    }
+    // Rule 2: 2x2 blocks
+    for(let r=0;r<dim-1;r++) for(let c=0;c<dim-1;c++) if(mat[r][c]===mat[r][c+1]&&mat[r][c]===mat[r+1][c]&&mat[r][c]===mat[r+1][c+1]) s+=3;
+    // Rule 4: dark proportion
+    let dark=0; for(let r=0;r<dim;r++) for(let c=0;c<dim;c++) if(mat[r][c]) dark++;
+    const pct=dark*100/(dim*dim), k=Math.floor(Math.abs(pct-50)/5);
+    s+=k*10;
+    return s;
+  }
+
+  function generate(text, canvas, size) {
+    const bytes=[...new TextEncoder().encode(text)];
+    const version=pickVersion(bytes.length);
+    const dim=version*4+17;
+
+    // Build final codeword stream
+    const dataCW=buildData(bytes,version);
+    const allCW=interleaveAndEC(dataCW,version);
+    const allBits=[];
+    for(const c of allCW) for(let i=7;i>=0;i--) allBits.push((c>>i)&1);
+    for(let i=0;i<(REM[version]||0);i++) allBits.push(0);
+
+    // Try all 8 masks, pick best score
+    let bestMat=null, bestScore=Infinity;
+    for(let maskId=0;maskId<8;maskId++){
+      const M=Array.from({length:dim},()=>new Uint8Array(dim));
+      const FN=Array.from({length:dim},()=>new Uint8Array(dim)); // function modules
+
+      const setM=(r,c,v,fn=false)=>{if(r>=0&&r<dim&&c>=0&&c<dim){M[r][c]=v;if(fn)FN[r][c]=1;}};
+
+      // Finder patterns
+      const finder=(tr,tc)=>{
+        for(let dr=-1;dr<=7;dr++) for(let dc=-1;dc<=7;dc++){
+          if(tr+dr<0||tr+dr>=dim||tc+dc<0||tc+dc>=dim) continue;
+          if(dr>=-1&&dr<=7&&dc>=-1&&dc<=7){
+            const v=(dr>=0&&dr<=6&&dc>=0&&dc<=6)&&(dr===0||dr===6||dc===0||dc===6||(dr>=2&&dr<=4&&dc>=2&&dc<=4))?1:0;
+            setM(tr+dr,tc+dc,v,true);
+          }
+        }
+      };
+      finder(0,0); finder(0,dim-7); finder(dim-7,0);
+
+      // Timing
+      for(let i=8;i<dim-8;i++){
+        if(!FN[6][i]){setM(6,i,i%2===0?1:0,true);}
+        if(!FN[i][6]){setM(i,6,i%2===0?1:0,true);}
+      }
+
+      // Dark module
+      setM(dim-8,8,1,true);
+
+      // Alignment patterns
+      const ap=ALIGN[version]||[];
+      for(const ar of ap) for(const ac of ap){
+        if(FN[ar][ac]) continue;
+        for(let dr=-2;dr<=2;dr++) for(let dc=-2;dc<=2;dc++)
+          setM(ar+dr,ac+dc,(Math.abs(dr)===2||Math.abs(dc)===2||dr===0&&dc===0)?1:0,true);
+      }
+
+      // Format info placeholders (mark as function)
+      [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8],
+       [8,dim-1],[8,dim-2],[8,dim-3],[8,dim-4],[8,dim-5],[8,dim-6],[8,dim-7],
+       [dim-7,8],[dim-6,8],[dim-5,8],[dim-4,8],[dim-3,8],[dim-2,8],[dim-1,8]
+      ].forEach(([r,c])=>{FN[r][c]=1;});
+
+      // Place data bits (two-column zigzag)
+      let bi=0,up=true,col=dim-1;
+      while(col>=0){
+        if(col===6) col--;
+        for(let row=0;row<dim;row++){
+          const r=up?dim-1-row:row;
+          for(let dc=0;dc<2;dc++){
+            const c=col-dc;
+            if(!FN[r][c] && bi<allBits.length) M[r][c]=allBits[bi++];
+          }
+        }
+        up=!up; col-=2;
+      }
+
+      // Apply mask
+      const mfn=makeMask(maskId);
+      for(let r=0;r<dim;r++) for(let c=0;c<dim;c++)
+        if(!FN[r][c] && mfn(r,c)) M[r][c]^=1;
+
+      // Write format info
+      const fmt=FMT[maskId];
+      const fb=[]; for(let i=14;i>=0;i--) fb.push((fmt>>i)&1);
+      for(let i=0;i<6;i++) M[8][i]=fb[i];
+      M[8][7]=fb[6]; M[8][8]=fb[7]; M[7][8]=fb[8];
+      for(let i=0;i<6;i++) M[5-i][8]=fb[9+i];
+      for(let i=0;i<8;i++) M[dim-1-i][8]=fb[i];
+      for(let i=0;i<7;i++) M[8][dim-7+i]=fb[8+i];
+
+      const s=score(M,dim);
+      if(s<bestScore){bestScore=s;bestMat=M.map(r=>Uint8Array.from(r));}
+    }
+
+    // Draw to canvas
+    const ctx=canvas.getContext('2d');
+    const quiet=4;
+    const total=dim+quiet*2;
+    canvas.width=size; canvas.height=size;
+    const cell=size/total;
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,size,size);
+    ctx.fillStyle='#000000';
+    for(let r=0;r<dim;r++) for(let c=0;c<dim;c++)
+      if(bestMat[r][c]) ctx.fillRect((quiet+c)*cell,(quiet+r)*cell,cell,cell);
+    return true;
+  }
+
+  return {generate};
+})();
+
+</script>
+
+<script>
 // ═══════════════════ 常數 & 狀態 ═══════════════════
 const STUDENT_URL = 'https://pin-xian.github.io/rollcall/student.html';
 const LS = {
@@ -755,17 +994,15 @@ function getQRUrl(){
   return STUDENT_URL+'?'+p.toString();
 }
 
-function qrImgSrc(url,size){
-  return 'https://chart.googleapis.com/chart?cht=qr&chs='+size+'x'+size
-        +'&chl='+encodeURIComponent(url)+'&choe=UTF-8&chld=M|2';
-}
-
 function renderQR(containerId,size){
   const el=document.getElementById(containerId); if(!el) return;
   const url=getQRUrl();
-  el.innerHTML='<img src="'+qrImgSrc(url,size)+'" width="'+size+'" height="'+size
-    +'" style="display:block;border-radius:6px" alt="QR Code"'
-    +' onerror="this.parentNode.innerHTML=\'<div style=&quot;color:var(--red);font-size:13px;padding:1.5rem;text-align:center&quot;>⚠️ QR Code 載入失敗<br><small>請確認網路連線</small></div>\'">';
+  el.innerHTML='';
+  const c=document.createElement('canvas');
+  c.style.cssText='display:block;border-radius:6px';
+  el.appendChild(c);
+  try{ QREngine.generate(url,c,size); }
+  catch(e){ el.innerHTML='<div style="color:var(--red);font-size:13px;padding:1.5rem;text-align:center">❌ QR 產生失敗：'+e.message+'</div>'; }
 }
 
 function generateQR(){
@@ -808,14 +1045,23 @@ function resizeQR(v){
 
 function openQRNewTab(){
   if(!QR_GENERATED){toast('請先產生 QR Code');return;}
-  window.open(qrImgSrc(getQRUrl(),600));
+  const _c=document.querySelector('#qr-container canvas');
+  if(!_c){toast('QR Code 尚未產生');return;}
+  const _a=document.createElement('a');
+  _a.download='QRCode_'+(CFG.cls||'')+'_'+(CFG.dateStr||'')+'.png';
+  _a.href=_c.toDataURL('image/png'); _a.click();
+  toast('✅ QR Code 已下載');
 }
 
 function openFS(){
   if(!QR_GENERATED){toast('請先產生 QR Code');return;}
   document.getElementById('fs-ov').classList.add('open');
-  const url=getQRUrl();
-  document.getElementById('fs-qr').innerHTML='<img src="'+qrImgSrc(url,500)+'" width="500" height="500" style="display:block;border-radius:8px" alt="QR">';
+  const _fw=document.getElementById('fs-qr');
+  _fw.innerHTML='';
+  const _fc=document.createElement('canvas');
+  _fc.style.cssText='display:block;border-radius:8px';
+  _fw.appendChild(_fc);
+  QREngine.generate(getQRUrl(),_fc,500);
   document.getElementById('fs-title').textContent=CFG.cls+' · '+CFG.course+'　'+CFG.dateStr+'　截止 '+CFG.lateDeadline;
 }
 function closeFS(){document.getElementById('fs-ov').classList.remove('open')}
