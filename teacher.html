@@ -745,10 +745,12 @@ function renderRecList(cls){
 
 // ═══════════════════ QR Code ═══════════════════
 function getQRUrl(){
+  // ★ api 網址存在 student.html，不放進 QR（避免太長掃不到）
   const p=new URLSearchParams({
-    c:CFG.course,d:CFG.dateStr,t:CFG.classTime,
-    dl:CFG.lateDeadline,cls:CFG.cls,tk:TOKEN,
-    api:API_URL
+    t:CFG.classTime,
+    dl:CFG.lateDeadline,
+    cls:CFG.cls,
+    tk:TOKEN
   });
   return STUDENT_URL+'?'+p.toString();
 }
@@ -775,7 +777,7 @@ function generateQR(){
   const today=new Date();
   const dateStr=today.toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
   const lateDeadline=addMins(classTime,lateMin);
-  TOKEN='tk'+Date.now();
+  TOKEN=String(Date.now()).slice(-8);  // 只取後 8 碼，縮短 QR URL
   CFG={course,classTime,lateMin,dateStr,lateDeadline,cls,token:TOKEN};
   QR_GENERATED=true; saveCfg();
 
