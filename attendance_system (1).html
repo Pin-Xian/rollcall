@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>點名系統</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f3;min-height:100vh}
+.app{max-width:720px;margin:0 auto;padding:1rem}
+.header{background:#fff;border-radius:12px;border:0.5px solid #e0e0e0;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.header-title{font-size:16px;font-weight:600}
+.header-sub{font-size:12px;color:#888;margin-top:2px}
+.tab-bar{display:flex;background:#fff;border-radius:12px;border:0.5px solid #e0e0e0;margin-bottom:1rem;overflow:hidden}
+.tab{flex:1;padding:10px 6px;cursor:pointer;font-size:12px;color:#888;border-bottom:2px solid transparent;transition:all .15s;text-align:center;display:flex;align-items:center;justify-content:center;gap:3px;border-right:0.5px solid #e0e0e0}
+.tab:last-child{border-right:none}
+.tab.active{color:#1a1a1a;border-bottom:2px solid #1a1a1a;font-weight:500;background:#fafafa}
+.tab:hover:not(.active){color:#1a1a1a;background:#f9f9f9}
+.panel{display:none}.panel.active{display:block}
+.card{background:#fff;border:0.5px solid #e0e0e0;border-radius:12px;padding:1.1rem 1.25rem;margin-bottom:.9rem}
+.card-title{font-size:11px;color:#888;margin-bottom:.75rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+.row{display:flex;gap:8px;margin-bottom:.75rem;align-items:flex-end;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:100px}
+.field label{font-size:12px;color:#666}
+input[type=text],input[type=time],input[type=number],select{height:36px;padding:0 10px;border-radius:8px;border:0.5px solid #d0d0d0;background:#fff;color:#1a1a1a;font-size:13px;font-family:inherit;width:100%}
+input:focus,select:focus{outline:none;border-color:#888;box-shadow:0 0 0 2px rgba(0,0,0,.06)}
+.btn{height:36px;padding:0 14px;border-radius:8px;border:0.5px solid #d0d0d0;background:#fff;color:#1a1a1a;font-size:13px;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .12s;white-space:nowrap}
+.btn:hover{background:#f5f5f3}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btn-primary:hover{background:#333;border-color:#333}
+.btn-sm{height:30px;padding:0 10px;font-size:12px}
+.btn-blue{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.btn-blue:hover{background:#dbeafe}
+.btn-green{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}
+.btn-green:hover{background:#dcfce7}
+.btn-red{background:#fef2f2;color:#b91c1c;border-color:#fca5a5}
+.qr-canvas-box{display:inline-flex;align-items:center;justify-content:center;background:#fff;padding:14px;border-radius:10px;border:0.5px solid #e0e0e0}
+.size-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#888;width:100%}
+.size-row input[type=range]{flex:1;accent-color:#1a1a1a}
+.size-val{font-weight:500;min-width:40px;color:#1a1a1a}
+.stat-row{display:grid;gap:8px;margin-bottom:.9rem}
+.stat-card{background:#fafafa;border-radius:8px;padding:.65rem .85rem;text-align:center;border:0.5px solid #ebebeb}
+.stat-num{font-size:22px;font-weight:600}
+.stat-lbl{font-size:11px;color:#888;margin-top:2px}
+.n-green{color:#15803d}.n-red{color:#b91c1c}.n-gray{color:#6b7280}.n-amber{color:#b45309}
+.record-list{display:flex;flex-direction:column;gap:5px;max-height:220px;overflow-y:auto}
+.record-item{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:#fafafa;border-radius:8px;font-size:13px;border:0.5px solid #f0f0f0}
+.record-meta{font-size:11px;color:#888;margin-top:1px}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:500}
+.b-ok{background:#f0fdf4;color:#15803d}.b-late{background:#fef2f2;color:#b91c1c}
+.b-abs{background:#f5f5f3;color:#6b7280}.b-warn{background:#fffbeb;color:#b45309}
+.podium{text-align:center;font-size:11px;color:#aaa;padding:5px 0;margin-bottom:6px;border-bottom:0.5px solid #ebebeb}
+.seat-grid{display:grid;gap:5px}
+.seat{border-radius:6px;border:0.5px solid #e0e0e0;font-size:11px;font-weight:500;text-align:center;padding:5px 3px;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.3}
+.seat-empty{background:#fafafa;color:#bbb;border-style:dashed}
+.seat-present{background:#f0fdf4;color:#15803d;border-color:#86efac}
+.seat-late{background:#fef2f2;color:#b91c1c;border-color:#fca5a5}
+.seat-absent{background:#f5f5f3;color:#9ca3af}
+.seat-blocked{background:#fffbeb;color:#b45309;border-color:#fcd34d}
+.seat-name{font-size:10px;margin-top:1px;opacity:.75;max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.info-box{background:#fafafa;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;border:0.5px solid #f0f0f0}
+.info-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:4px 0;border-bottom:0.5px solid #f0f0f0}
+.info-row:last-child{border-bottom:none}
+.info-val{font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;border:0.5px solid #e0e0e0;color:#888;background:#fafafa}
+.gps-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px;font-size:12px;font-weight:500}
+.gps-on{background:#f0fdf4;color:#15803d;border:0.5px solid #86efac}
+.steps{display:flex;align-items:center;margin-bottom:1.25rem}
+.step-item{flex:1;text-align:center;font-size:11px;color:#aaa}
+.step-dot{width:24px;height:24px;border-radius:50%;border:0.5px solid #d0d0d0;background:#fafafa;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;font-size:11px;font-weight:500}
+.step-item.active .step-dot{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.step-item.done .step-dot{background:#f0fdf4;color:#15803d;border-color:#86efac}
+.step-item.active{color:#1a1a1a;font-weight:500}
+.step-line{flex:1;height:0.5px;background:#e0e0e0;margin-bottom:18px}
+.alert{border-radius:8px;padding:10px 14px;font-size:13px;display:flex;align-items:flex-start;gap:8px;margin-bottom:.75rem}
+.alert-success{background:#f0fdf4;color:#15803d;border:0.5px solid #86efac}
+.alert-danger{background:#fef2f2;color:#b91c1c;border:0.5px solid #fca5a5}
+.alert-warn{background:#fffbeb;color:#b45309;border:0.5px solid #fcd34d}
+.violation-item{padding:10px 13px;background:#fffbeb;border-radius:8px;font-size:13px;border:0.5px solid #fcd34d;margin-bottom:5px}
+.export-table{width:100%;border-collapse:collapse;font-size:13px}
+.export-table th{font-size:11px;color:#888;font-weight:500;text-align:left;padding:6px 8px;border-bottom:0.5px solid #e0e0e0}
+.export-table td{padding:7px 8px;border-bottom:0.5px solid #f0f0f0}
+.export-table tr:last-child td{border-bottom:none}
+.export-table tr:hover td{background:#fafafa}
+.stu-page{max-width:400px;margin:0 auto;padding:.5rem}
+.stu-center{text-align:center}
+.s-icon{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px}
+.s-title{font-size:18px;font-weight:600;margin-bottom:8px}
+.s-sub{font-size:13px;color:#666;margin-bottom:1.25rem;line-height:1.7}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{display:inline-block;animation:spin 1s linear infinite}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:9px 18px;border-radius:100px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+#toast.show{opacity:1}
+#fs-ov{display:none;position:fixed;inset:0;background:#fff;z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:16px;cursor:pointer}
+#fs-lbl{font-size:18px;font-weight:600;color:#1a1a1a;text-align:center}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8888;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:1.5rem;width:90%;max-width:620px;max-height:85vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.modal-header-title{font-size:15px;font-weight:600}
+.seat-editor-grid{display:grid;gap:5px;margin-bottom:.75rem}
+.seat-cell{display:flex;flex-direction:column;gap:2px}
+.seat-cell-lbl{font-size:10px;color:#aaa;text-align:center}
+.seat-cell input{text-align:center;font-size:12px;height:30px;padding:0 4px}
+.empty{text-align:center;padding:1.5rem;color:#aaa;font-size:13px}
+.empty .ico{font-size:28px;display:block;margin-bottom:6px}
+.save-indicator{font-size:11px;color:#15803d;display:inline-flex;align-items:center;gap:4px}
+@media(max-width:500px){.stat-row{grid-template-columns:repeat(2,1fr)!important}.row{flex-direction:column}.tab{font-size:11px;padding:9px 3px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div>
+      <div class="header-title">📋 點名系統</div>
+      <div class="header-sub">GPS 位置驗證 · 固定座位對應 · 防代簽</div>
+    </div>
+    <div id="now-time" style="font-size:13px;color:#888;font-weight:500;text-align:right"></div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('teacher',this)">🏫 老師端</div>
+    <div class="tab" onclick="switchTab('student',this)">📱 學生端</div>
+    <div class="tab" onclick="switchTab('violations',this)">⚠️ 異常 <span id="viol-badge" style="display:none;background:#fef2f2;color:#b91c1c;border-radius:100px;padding:0 5px;font-size:10px;margin-left:2px"></span></div>
+    <div class="tab" onclick="switchTab('roster',this)">📄 名冊</div>
+  </div>
+
+  <!-- 老師端 -->
+  <div id="panel-teacher" class="panel active">
+    <div class="card">
+      <div class="card-title">課程設定</div>
+      <div class="row">
+        <div class="field" style="flex:2"><label>課程名稱</label><input type="text" id="course-name" value="資訊科技概論"/></div>
+        <div class="field" style="max-width:110px"><label>上課時間</label><input type="time" id="class-time" value="09:00"/></div>
+        <div class="field" style="max-width:90px"><label>遲到寬限（分）</label><input type="number" id="late-min" value="15" min="1" max="60"/></div>
+      </div>
+      <div class="row" style="margin-bottom:.5rem">
+        <div class="field"><label>教室緯度</label><input type="text" id="cls-lat" value="25.033964"/></div>
+        <div class="field"><label>教室經度</label><input type="text" id="cls-lng" value="121.564468"/></div>
+        <div class="field" style="max-width:100px"><label>允許誤差（公尺）</label><input type="number" id="cls-radius" value="80" min="20" max="500"/></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:.9rem;flex-wrap:wrap">
+        <button class="btn btn-sm btn-blue" onclick="getMyLocation()">📍 抓取目前位置</button>
+        <span id="loc-status" style="font-size:12px;color:#888">在教室現場按此自動填入座標</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="generateQR()">🔲 產生今日 QR Code</button>
+        <button class="btn btn-sm btn-blue" onclick="openSeatEditor()">🪑 座位表設定</button>
+        <button class="btn btn-sm" onclick="resetAll()">🔄 重置今日</button>
+      </div>
+    </div>
+
+    <div id="qr-section" style="display:none" class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:6px">
+        <div class="card-title" style="margin-bottom:0">今日 QR Code</div>
+        <span class="gps-badge gps-on">📍 GPS 驗證已啟用</span>
+      </div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:1.25rem;align-items:start">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+          <div class="qr-canvas-box"><canvas id="qr-canvas"></canvas></div>
+          <div class="size-row">
+            <span>－</span>
+            <input type="range" id="qr-size" min="120" max="400" value="200" oninput="resizeQR(this.value)">
+            <span>＋</span>
+            <span class="size-val" id="size-lbl">200px</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-sm" onclick="downloadQR()">⬇️ 下載 PNG</button>
+            <button class="btn btn-sm btn-green" onclick="openFS()">⛶ 全螢幕</button>
+          </div>
+        </div>
+        <div>
+          <div class="info-box">
+            <div class="info-row"><span style="color:#888">課程</span><span class="info-val" id="qi-course"></span></div>
+            <div class="info-row"><span style="color:#888">日期</span><span class="info-val" id="qi-date"></span></div>
+            <div class="info-row"><span style="color:#888">上課</span><span class="info-val" id="qi-time"></span></div>
+            <div class="info-row"><span style="color:#888">遲到截止</span><span class="info-val" id="qi-late"></span></div>
+            <div class="info-row"><span style="color:#888">GPS 範圍</span><span class="info-val" id="qi-radius"></span></div>
+          </div>
+          <div style="font-size:12px;color:#888;line-height:1.9">
+            <div>✅ 學生掃碼 → 瀏覽器要求定位 → 確認在教室內 → 輸入姓名</div>
+            <div>🚫 超出範圍或拒絕定位 → 簽到被拒並記錄異常</div>
+            <div style="color:#b45309;margin-top:4px">⚠️ 室內 GPS 誤差約 20–80m，建議誤差設 80–150m</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:.9rem">
+      <div class="card" style="margin-bottom:0">
+        <div class="card-title">即時統計</div>
+        <div class="stat-row" style="grid-template-columns:repeat(2,1fr)">
+          <div class="stat-card"><div class="stat-num n-green" id="s-on">0</div><div class="stat-lbl">準時到課</div></div>
+          <div class="stat-card"><div class="stat-num n-red" id="s-late">0</div><div class="stat-lbl">遲到</div></div>
+          <div class="stat-card"><div class="stat-num n-gray" id="s-abs">0</div><div class="stat-lbl">缺席</div></div>
+          <div class="stat-card"><div class="stat-num n-amber" id="s-viol">0</div><div class="stat-lbl">GPS 異常</div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="card-title">簽到紀錄</div>
+        <div class="record-list" id="record-list">
+          <div class="empty"><span class="ico">🕐</span>等待學生簽到</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:6px">
+        <div class="card-title" style="margin-bottom:0">即時座位表</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <span class="chip" style="background:#f0fdf4;color:#15803d;border-color:#86efac">● 準時</span>
+          <span class="chip" style="background:#fef2f2;color:#b91c1c;border-color:#fca5a5">● 遲到</span>
+          <span class="chip" style="background:#fffbeb;color:#b45309;border-color:#fcd34d">! GPS異常</span>
+          <span class="chip">○ 缺席</span>
+        </div>
+      </div>
+      <div class="podium">— 講台 —</div>
+      <div class="seat-grid" id="seat-grid"></div>
+    </div>
+  </div>
+
+  <!-- 學生端 -->
+  <div id="panel-student" class="panel">
+    <div class="stu-page">
+      <div class="steps" id="steps">
+        <div class="step-item active" id="step1"><div class="step-dot">1</div>掃描</div>
+        <div class="step-line"></div>
+        <div class="step-item" id="step2"><div class="step-dot">2</div>定位</div>
+        <div class="step-line"></div>
+        <div class="step-item" id="step3"><div class="step-dot">3</div>姓名</div>
+        <div class="step-line"></div>
+        <div class="step-item" id="step4"><div class="step-dot">4</div>完成</div>
+      </div>
+      <div id="stu-scan" class="stu-center">
+        <div class="s-icon" style="background:#eff6ff">🔲</div>
+        <div class="s-title">掃描 QR Code 簽到</div>
+        <div class="s-sub">用手機相機掃描老師螢幕上的 QR Code，瀏覽器會自動開啟簽到頁面。<br><br>（此介面用於展示，點下方按鈕模擬流程）</div>
+        <button class="btn btn-primary" onclick="stuStep1()" style="width:100%;justify-content:center;height:42px;font-size:14px">📲 模擬掃描 QR Code</button>
+      </div>
+      <div id="stu-gps" style="display:none" class="stu-center">
+        <div class="s-icon" style="background:#fffbeb">📍</div>
+        <div class="s-title">驗證你的位置</div>
+        <div class="s-sub">系統需要確認你在教室範圍內才能完成簽到。請點下方按鈕並在提示出現時選擇「允許」。</div>
+        <button class="btn btn-primary" id="gps-btn" onclick="stuGetGPS()" style="width:100%;justify-content:center;height:42px;font-size:14px">📍 允許取得我的位置</button>
+        <div class="card" style="margin-top:1.25rem;text-align:left">
+          <div class="card-title">⚙️ 模擬情境（展示用）</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button class="btn btn-sm btn-green" onclick="mockGPS(true)" style="justify-content:center">✅ 模擬：在教室內（距離 35m）</button>
+            <button class="btn btn-sm btn-red" onclick="mockGPS(false)" style="justify-content:center">❌ 模擬：不在教室（距離 520m）</button>
+            <button class="btn btn-sm" onclick="mockGPSDenied()" style="justify-content:center">🚫 模擬：拒絕位置授權</button>
+          </div>
+        </div>
+      </div>
+      <div id="stu-form" style="display:none">
+        <div class="alert alert-success">✅ <div><strong>位置驗證通過</strong><div id="gps-dist-info" style="font-size:12px;margin-top:2px"></div></div></div>
+        <div class="card">
+          <div class="card-title">課程確認</div>
+          <div class="info-box">
+            <div class="info-row"><span style="color:#888">課程</span><span class="info-val" id="sf-course"></span></div>
+            <div class="info-row"><span style="color:#888">日期</span><span class="info-val" id="sf-date"></span></div>
+            <div class="info-row"><span style="color:#888">上課時間</span><span class="info-val" id="sf-time"></span></div>
+          </div>
+          <div class="field" style="margin-bottom:.75rem">
+            <label>你的姓名</label>
+            <input type="text" id="stu-name" placeholder="請輸入真實姓名（需與名冊相符）"/>
+          </div>
+          <button class="btn btn-primary" onclick="stuSubmit()" style="width:100%;justify-content:center;height:40px;font-size:14px">✔ 確認簽到</button>
+        </div>
+      </div>
+      <div id="stu-done" style="display:none" class="stu-center">
+        <div class="s-icon" id="done-icon">✅</div>
+        <div class="s-title" id="done-title">簽到成功！</div>
+        <div class="info-box" style="text-align:left;width:100%;margin-top:.75rem">
+          <div class="info-row"><span style="color:#888">姓名</span><span class="info-val" id="done-name"></span></div>
+          <div class="info-row"><span style="color:#888">座位</span><span class="info-val" id="done-seat"></span></div>
+          <div class="info-row"><span style="color:#888">簽到時間</span><span class="info-val" id="done-time"></span></div>
+          <div class="info-row"><span style="color:#888">GPS 距離</span><span class="info-val" id="done-dist"></span></div>
+          <div class="info-row"><span style="color:#888">出席狀態</span><span class="info-val" id="done-status"></span></div>
+        </div>
+        <div id="done-late-alert" class="alert alert-warn" style="display:none;width:100%;text-align:left;margin-top:.75rem">⚠️ 已超過截止時間，本次記錄為遲到</div>
+        <button class="btn" onclick="stuReset()" style="margin-top:1rem">← 返回首頁</button>
+      </div>
+      <div id="stu-blocked" style="display:none" class="stu-center">
+        <div class="s-icon" style="background:#fef2f2">🚫</div>
+        <div class="s-title">無法完成簽到</div>
+        <div id="blocked-reason" class="alert alert-danger" style="text-align:left;width:100%;margin-bottom:1rem"></div>
+        <div style="font-size:13px;color:#666;line-height:1.7;text-align:left;width:100%">若確實在教室內但仍無法通過，可能是室內 GPS 訊號較弱，請向老師說明，由老師手動補登。</div>
+        <button class="btn" onclick="stuReset()" style="margin-top:1rem">← 返回</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 異常紀錄 -->
+  <div id="panel-violations" class="panel">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div class="card-title" style="margin-bottom:0">GPS 異常紀錄</div>
+        <button class="btn btn-sm" onclick="clearViolations()">清除</button>
+      </div>
+      <div id="violations-list"><div class="empty"><span class="ico">🛡️</span>目前無異常紀錄</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">老師手動補登</div>
+      <div style="font-size:13px;color:#666;margin-bottom:.75rem;line-height:1.7">對於 GPS 異常但確實在場的學生，可手動補登出席：</div>
+      <div class="row" style="margin-bottom:.5rem">
+        <div class="field"><label>學生姓名</label><select id="manual-name"><option value="">— 選擇學生 —</option></select></div>
+        <div class="field" style="max-width:110px"><label>狀態</label>
+          <select id="manual-status"><option value="on">準時到課</option><option value="late">遲到</option></select>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="manualCheckin()">✔ 手動補登</button>
+    </div>
+  </div>
+
+  <!-- 名冊匯出 -->
+  <div id="panel-roster" class="panel">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0">出席名冊</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-sm btn-green" onclick="exportCSV()">⬇️ 匯出 CSV</button>
+          <button class="btn btn-sm" onclick="copyText()">📋 複製文字</button>
+        </div>
+      </div>
+      <div id="roster-wrap"><div class="empty"><span class="ico">👥</span>尚無出席資料，請先產生 QR Code</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 全螢幕 QR -->
+<div id="fs-ov" onclick="closeFS()">
+  <canvas id="fs-canvas"></canvas>
+  <div id="fs-lbl"></div>
+  <div style="font-size:13px;color:#888">點擊任意處關閉</div>
+</div>
+
+<!-- 座位表 Modal -->
+<div class="modal-overlay" id="seat-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-title">🪑 座位表設定</div>
+      <button class="btn btn-sm" onclick="closeSeatEditor()">✕ 關閉</button>
+    </div>
+
+    <!-- 儲存狀態 -->
+    <div style="background:#f0fdf4;border:0.5px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:.9rem;font-size:13px;color:#15803d;display:flex;align-items:center;gap:8px">
+      💾 座位表會自動儲存在瀏覽器，下次開啟此頁面自動載入
+    </div>
+
+    <!-- 匯入區 -->
+    <div class="card" style="margin-bottom:.9rem">
+      <div class="card-title">匯入 CSV</div>
+      <div style="font-size:12px;color:#888;margin-bottom:.6rem;line-height:1.7">
+        CSV 格式：第一欄為座位（如 1A），第二欄為姓名，不需要標題列。<br>
+        範例：<code style="background:#f5f5f3;padding:1px 5px;border-radius:4px;font-size:11px">1A,王小明</code>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input type="file" id="csv-import" accept=".csv,.txt" style="display:none" onchange="importCSV(this)"/>
+        <button class="btn btn-sm btn-blue" onclick="document.getElementById('csv-import').click()">📂 選擇 CSV 檔案</button>
+        <button class="btn btn-sm" onclick="downloadSeatTemplate()">⬇️ 下載空白範本</button>
+        <span id="import-status" style="font-size:12px;color:#888"></span>
+      </div>
+    </div>
+
+    <!-- 手動編輯 -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:6px">
+      <div style="font-size:12px;color:#666;font-weight:500">手動編輯</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <label style="font-size:12px;color:#666">欄數</label>
+        <input type="number" id="cols-input" value="5" min="1" max="10" style="width:56px;height:28px;font-size:12px" oninput="rebuildSeatEditor()"/>
+        <label style="font-size:12px;color:#666">排數</label>
+        <input type="number" id="rows-input" value="4" min="1" max="10" style="width:56px;height:28px;font-size:12px" oninput="rebuildSeatEditor()"/>
+      </div>
+    </div>
+    <div id="seat-editor-area" style="overflow-x:auto"></div>
+    <div style="display:flex;gap:8px;margin-top:.9rem;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="saveSeatEditor()">💾 儲存座位表</button>
+      <button class="btn btn-sm" onclick="clearAllSeats()">🗑️ 清空所有姓名</button>
+      <button class="btn btn-sm" onclick="closeSeatEditor()">取消</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ===================== QR Code 產生器（純 JS，不依賴 CDN）=====================
+// 基於 QR Code 規格實作的輕量版本
+const QRGen = (function(){
+  const GF_EXP = new Uint8Array(512), GF_LOG = new Uint8Array(256);
+  (function(){let x=1;for(let i=0;i<255;i++){GF_EXP[i]=x;GF_LOG[x]=i;x<<=1;if(x&256)x^=285;}for(let i=255;i<512;i++)GF_EXP[i]=GF_EXP[i-255]})();
+  const gmul=(a,b)=>a&&b?GF_EXP[GF_LOG[a]+GF_LOG[b]]:0;
+  function rsPoly(ec){let p=[1];for(let i=0;i<ec;i++){let q=[1,GF_EXP[i]];let r=new Array(p.length+q.length-1).fill(0);for(let j=0;j<p.length;j++)for(let k=0;k<q.length;k++)r[j+k]^=gmul(p[j],q[k]);p=r;}return p;}
+  function rsEncode(data,ec){let g=rsPoly(ec);let msg=[...data,...new Array(ec).fill(0)];for(let i=0;i<data.length;i++){let c=msg[i];if(c)for(let j=0;j<g.length;j++)msg[i+j]^=gmul(g[j],c);}return msg.slice(data.length);}
+
+  // Alphanumeric chars
+  const AN='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
+
+  function encodeData(str){
+    // Try numeric first, then alphanumeric, then byte
+    const bytes=[];for(let i=0;i<str.length;i++)bytes.push(str.charCodeAt(i));
+    // Use byte mode (mode 4)
+    const bits=[];
+    function addBits(val,len){for(let i=len-1;i>=0;i--)bits.push((val>>i)&1);}
+    addBits(4,4); // mode
+    addBits(str.length,8); // char count
+    for(let i=0;i<str.length;i++)addBits(bytes[i],8);
+    // Terminator & padding
+    addBits(0,4);
+    while(bits.length%8)bits.push(0);
+    const pads=[236,17];let pi=0;
+    // capacity for version 5-L is 134 bytes data codewords
+    // We'll use version based on length
+    return bits;
+  }
+
+  // Simplified: use canvas-based approach with a working QR library fallback
+  // We'll use a minimal but complete QR implementation
+
+  const VERSIONS = [
+    null,
+    {cap:17,ec:{L:{dw:19,ec:7,bl:1},M:{dw:16,ec:10,bl:1}}},   // v1
+    {cap:32,ec:{L:{dw:34,ec:10,bl:1},M:{dw:28,ec:16,bl:1}}},   // v2
+    {cap:53,ec:{L:{dw:55,ec:15,bl:1},M:{dw:44,ec:26,bl:1}}},   // v3
+    {cap:78,ec:{L:{dw:80,ec:20,bl:2},M:{dw:64,ec:18,bl:2}}},   // v4 (2 blocks)
+    {cap:106,ec:{L:{dw:108,ec:26,bl:2},M:{dw:86,ec:24,bl:2}}}, // v5
+    {cap:134,ec:{L:{dw:136,ec:18,bl:4},M:{dw:108,ec:16,bl:4}}},// v6 -- approx
+    {cap:154,ec:{L:{dw:156,ec:20,bl:4},M:{dw:124,ec:18,bl:4}}},// v7
+    {cap:192,ec:{L:{dw:194,ec:24,bl:4},M:{dw:154,ec:22,bl:4}}},// v8
+  ];
+
+  function generate(text, size, canvas){
+    // Use a proper minimal QR implementation
+    // We implement just enough for our use case
+    drawQRFull(text, size, canvas);
+  }
+
+  // Full QR implementation using the standard algorithm
+  function drawQRFull(text, size, canvas){
+    try {
+      const mat = createQRMatrix(text);
+      const n = mat.length;
+      const ctx = canvas.getContext('2d');
+      canvas.width = size; canvas.height = size;
+      const cell = size / (n + 8); // quiet zone = 4 cells each side
+      const offset = 4 * cell;
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,size,size);
+      ctx.fillStyle = '#111';
+      for(let r=0;r<n;r++) for(let c=0;c<n;c++) {
+        if(mat[r][c]) ctx.fillRect(offset+c*cell, offset+r*cell, cell, cell);
+      }
+    } catch(e) {
+      // Fallback: draw error message
+      const ctx = canvas.getContext('2d');
+      canvas.width = size; canvas.height = size;
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,size,size);
+      ctx.fillStyle = '#888'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('QR Error', size/2, size/2);
+      console.error(e);
+    }
+  }
+
+  function createQRMatrix(text){
+    // Encode as byte mode
+    const data = [];
+    for(let i=0;i<text.length;i++) data.push(text.charCodeAt(i));
+
+    // Pick version
+    let version = 1;
+    for(let v=1;v<=8;v++){
+      if(VERSIONS[v] && data.length+3 <= VERSIONS[v].cap) { version=v; break; }
+      if(v===8) version=8;
+    }
+
+    const dim = version*4+17;
+    const M = Array.from({length:dim},()=>new Array(dim).fill(null));
+
+    // Finder patterns
+    function finder(r,c){
+      for(let dr=-1;dr<=7;dr++) for(let dc=-1;dc<=7;dc++){
+        if(r+dr<0||r+dr>=dim||c+dc<0||c+dc>=dim) continue;
+        const x=dr,y=dc;
+        const v=(x>=0&&x<=6&&y>=0&&y<=6)&&(x===0||x===6||y===0||y===6||(x>=2&&x<=4&&y>=2&&y<=4));
+        if(x>=-1&&x<=7&&y>=-1&&y<=7) M[r+dr][c+dc]=v?1:0;
+      }
+    }
+    finder(0,0); finder(0,dim-7); finder(dim-7,0);
+
+    // Timing patterns
+    for(let i=8;i<dim-8;i++){
+      if(M[6][i]===null) M[6][i]=(i%2===0)?1:0;
+      if(M[i][6]===null) M[i][6]=(i%2===0)?1:0;
+    }
+    // Dark module
+    M[dim-8][8]=1;
+
+    // Alignment patterns (version >= 2)
+    const ALIGN_POS = [null,[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42]];
+    if(version>=2 && ALIGN_POS[version]){
+      const pos=ALIGN_POS[version];
+      for(let r of pos) for(let c of pos){
+        if(M[r][c]!==null) continue;
+        for(let dr=-2;dr<=2;dr++) for(let dc=-2;dc<=2;dc++){
+          const v=(Math.abs(dr)===2||Math.abs(dc)===2)||(dr===0&&dc===0);
+          M[r+dr][c+dc]=v?1:0;
+        }
+      }
+    }
+
+    // Format info placeholders (set to 0 for now, filled later)
+    const fmtPositions = [[0,8],[1,8],[2,8],[3,8],[4,8],[5,8],[7,8],[8,8],[8,7],[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],
+      [8,dim-1],[8,dim-2],[8,dim-3],[8,dim-4],[8,dim-5],[8,dim-6],[8,dim-7],[dim-7,8],[dim-6,8],[dim-5,8],[dim-4,8],[dim-3,8],[dim-2,8],[dim-1,8]];
+    for(let [r,c] of fmtPositions) if(M[r][c]===null) M[r][c]=0;
+
+    // Data encoding
+    const bits=[];
+    function addBits(v,n){for(let i=n-1;i>=0;i--)bits.push((v>>i)&1);}
+    addBits(4,4); addBits(data.length,8);
+    for(let b of data) addBits(b,8);
+    addBits(0,4);
+    while(bits.length%8) bits.push(0);
+
+    // Data capacity for this version (L error correction, simplified)
+    const V = VERSIONS[version];
+    const dcw = V ? V.ec.L.dw : 19;
+    const ecn = V ? V.ec.L.ec : 7;
+    const pads=[236,17]; let pi=0;
+    while(bits.length<dcw*8){ addBits(pads[pi%2],8); pi++; }
+
+    // Build codewords
+    const codewords=[];
+    for(let i=0;i<bits.length;i+=8){
+      let b=0; for(let j=0;j<8;j++) b=(b<<1)|(bits[i+j]||0);
+      codewords.push(b);
+    }
+    // EC codewords
+    const dcwArr = codewords.slice(0, dcw);
+    const ecCW = rsEncode(dcwArr, ecn);
+    const allCW = [...dcwArr, ...ecCW];
+
+    // Interleave bits
+    const allBits=[];
+    for(let cw of allCW) for(let i=7;i>=0;i--) allBits.push((cw>>i)&1);
+    // Remainder bits
+    const REM=[0,0,7,7,7,0,0,0,0];
+    for(let i=0;i<(REM[version]||0);i++) allBits.push(0);
+
+    // Place data bits (zigzag)
+    let bi=0;
+    let up=true, col=dim-1;
+    while(col>=0){
+      if(col===6) col--;
+      for(let row=0;row<dim;row++){
+        const r=up?(dim-1-row):row;
+        for(let dc=0;dc<2;dc++){
+          const c=col-dc;
+          if(M[r][c]===null && bi<allBits.length){
+            M[r][c]=allBits[bi++];
+          }
+        }
+      }
+      up=!up; col-=2;
+    }
+    // Fill remaining nulls
+    for(let r=0;r<dim;r++) for(let c=0;c<dim;c++) if(M[r][c]===null) M[r][c]=0;
+
+    // Apply mask 0: (row+col)%2==0
+    for(let r=0;r<dim;r++) for(let c=0;c<dim;c++){
+      // Only mask data modules (not function patterns)
+      // For simplicity apply mask 0 everywhere except finder/timing regions
+      if(isMaskable(r,c,dim,version,ALIGN_POS)){
+        if((r+c)%2===0) M[r][c]^=1;
+      }
+    }
+
+    // Format string for mask 0, L error correction
+    // EC level L = 01, mask 0 = 000 => data = 01 000 = 8 => BCH(8) with poly x^10+x^8+x^5+x^4+x^2+x+1 = 1335
+    const fmt = getFormatString(1, 0); // L=1, mask=0
+    const fmtBits=[];for(let i=14;i>=0;i--) fmtBits.push((fmt>>i)&1);
+    // Place format bits
+    for(let i=0;i<6;i++) M[8][i]=fmtBits[i];
+    M[8][7]=fmtBits[6]; M[8][8]=fmtBits[7]; M[7][8]=fmtBits[8];
+    for(let i=0;i<6;i++) M[5-i][8]=fmtBits[9+i];
+    for(let i=0;i<8;i++) M[dim-1-i][8]=fmtBits[i];
+    for(let i=0;i<7;i++) M[8][dim-7+i]=fmtBits[8+i];
+
+    return M;
+  }
+
+  const ALIGN_POS_GLOBAL = [null,[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42]];
+  function isMaskable(r,c,dim,version,alignPos){
+    // Finder patterns regions
+    if(r<9&&c<9) return false;
+    if(r<9&&c>dim-9) return false;
+    if(r>dim-9&&c<9) return false;
+    // Timing
+    if(r===6||c===6) return false;
+    // Alignment
+    if(version>=2 && alignPos && alignPos[version]){
+      for(let ar of alignPos[version]) for(let ac of alignPos[version]){
+        if(Math.abs(r-ar)<=2 && Math.abs(c-ac)<=2) return false;
+      }
+    }
+    return true;
+  }
+
+  function getFormatString(ecLevel, mask){
+    // ecLevel: 1=L,0=M,3=Q,2=H; mask: 0-7
+    const data = (ecLevel<<3)|mask;
+    let rem = data<<10;
+    for(let i=4;i>=0;i--){
+      if(rem & (1<<(i+10))) rem ^= (0x537<<i);
+    }
+    const fmt = ((data<<10)|rem) ^ 0x5412;
+    return fmt;
+  }
+
+  return { generate };
+})();
+
+// ===================== 資料 =====================
+let FIXED_SEATS = {};
+let SEAT_COLS = 5, SEAT_ROWS = 4;
+let attendance = {}, violations = [], qrGenerated = false, cfg = {}, pendingGPSDist = null;
+let currentSize = 200;
+const LS_SEATS = 'attendance_seats_v1';
+const LS_LAYOUT = 'attendance_layout_v1';
+const LS_CFG = 'attendance_cfg_v1';
+
+// 預設座位
+const DEFAULT_SEATS = {
+  '1A':'王小明','1B':'李雅婷','1C':'陳建志','1D':'張美玲','1E':'林志豪',
+  '2A':'黃淑芬','2B':'吳家豪','2C':'蔡雅惠','2D':'楊志遠','2E':'許淑娟',
+  '3A':'鄭志明','3B':'劉雅雯','3C':'周建宏','3D':'賴淑萍','3E':'謝志強',
+  '4A':'郭雅芳','4B':'洪建勳','4C':'孫淑慧','4D':'葉志宏','4E':'馬雅麗',
+};
+
+// ===================== localStorage =====================
+function loadFromStorage(){
+  try {
+    const seats = localStorage.getItem(LS_SEATS);
+    const layout = localStorage.getItem(LS_LAYOUT);
+    const savedCfg = localStorage.getItem(LS_CFG);
+    if(seats) FIXED_SEATS = JSON.parse(seats);
+    else FIXED_SEATS = {...DEFAULT_SEATS};
+    if(layout){ const l=JSON.parse(layout); SEAT_COLS=l.cols||5; SEAT_ROWS=l.rows||4; }
+    if(savedCfg){
+      const c=JSON.parse(savedCfg);
+      if(c.course) document.getElementById('course-name').value=c.course;
+      if(c.classTime) document.getElementById('class-time').value=c.classTime;
+      if(c.lateMin) document.getElementById('late-min').value=c.lateMin;
+      if(c.lat) document.getElementById('cls-lat').value=c.lat;
+      if(c.lng) document.getElementById('cls-lng').value=c.lng;
+      if(c.radius) document.getElementById('cls-radius').value=c.radius;
+    }
+  } catch(e){ FIXED_SEATS={...DEFAULT_SEATS}; }
+}
+
+function saveSeatsToStorage(){
+  try {
+    localStorage.setItem(LS_SEATS, JSON.stringify(FIXED_SEATS));
+    localStorage.setItem(LS_LAYOUT, JSON.stringify({cols:SEAT_COLS,rows:SEAT_ROWS}));
+  } catch(e){}
+}
+
+function saveCfgToStorage(){
+  try {
+    localStorage.setItem(LS_CFG, JSON.stringify({
+      course: document.getElementById('course-name').value,
+      classTime: document.getElementById('class-time').value,
+      lateMin: document.getElementById('late-min').value,
+      lat: document.getElementById('cls-lat').value,
+      lng: document.getElementById('cls-lng').value,
+      radius: document.getElementById('cls-radius').value,
+    }));
+  } catch(e){}
+}
+
+// ===================== 工具 =====================
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400)}
+function getSeatOrder(){const k=[];for(let r=1;r<=SEAT_ROWS;r++)for(let c=0;c<SEAT_COLS;c++)k.push(r+String.fromCharCode(65+c));return k}
+function getNameToSeat(){const m={};Object.entries(FIXED_SEATS).forEach(([s,n])=>{if(n)m[n]=s});return m}
+function addMins(t,m){const[h,mm]=t.split(':').map(Number),tot=h*60+mm+m;return String(Math.floor(tot/60)%24).padStart(2,'0')+':'+String(tot%60).padStart(2,'0')}
+function haversine(a,b,c,d){const R=6371000,rad=x=>x*Math.PI/180,dlat=rad(c-a),dlng=rad(d-b),s=Math.sin(dlat/2)**2+Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(dlng/2)**2;return Math.round(R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s)))}
+function nowStr(){return new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+function switchTab(tab,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));el.classList.add('active');document.getElementById('panel-'+tab).classList.add('active');if(tab==='roster')renderRoster();if(tab==='violations')renderViolations()}
+
+// 時鐘
+function updateClock(){document.getElementById('now-time').textContent=new Date().toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+setInterval(updateClock,1000); updateClock();
+
+// ===================== 老師端 =====================
+function getMyLocation(){
+  document.getElementById('loc-status').textContent='取得中...';
+  if(!navigator.geolocation){document.getElementById('loc-status').textContent='不支援定位';return}
+  navigator.geolocation.getCurrentPosition(p=>{
+    document.getElementById('cls-lat').value=p.coords.latitude.toFixed(6);
+    document.getElementById('cls-lng').value=p.coords.longitude.toFixed(6);
+    document.getElementById('loc-status').textContent=`✓ (${p.coords.latitude.toFixed(4)}, ${p.coords.longitude.toFixed(4)})`;
+    showToast('教室座標已更新');
+  },e=>{document.getElementById('loc-status').textContent='定位失敗：'+e.message},{timeout:8000});
+}
+
+function generateQR(){
+  const course=document.getElementById('course-name').value.trim()||'課程';
+  const classTime=document.getElementById('class-time').value;
+  const lateMin=parseInt(document.getElementById('late-min').value)||15;
+  const lat=parseFloat(document.getElementById('cls-lat').value);
+  const lng=parseFloat(document.getElementById('cls-lng').value);
+  const radius=parseInt(document.getElementById('cls-radius').value)||80;
+  const today=new Date();
+  const dateStr=today.toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
+  const lateDeadline=addMins(classTime,lateMin);
+  cfg={course,classTime,lateMin,dateStr,lateDeadline,lat,lng,radius};
+  qrGenerated=true;
+  saveCfgToStorage();
+
+  document.getElementById('qr-section').style.display='block';
+  document.getElementById('qi-course').textContent=course;
+  document.getElementById('qi-date').textContent=dateStr;
+  document.getElementById('qi-time').textContent=classTime;
+  document.getElementById('qi-late').textContent=lateDeadline;
+  document.getElementById('qi-radius').textContent=`${radius}m（${lat.toFixed(4)}, ${lng.toFixed(4)}）`;
+
+  drawQR('qr-canvas', currentSize);
+  renderSeats(); updateStats(); updateManualSelect();
+  showToast('QR Code 已產生！');
+}
+
+function getQRPayload(){
+  return JSON.stringify({course:cfg.course,date:cfg.dateStr,classTime:cfg.classTime,lateDeadline:cfg.lateDeadline,lat:cfg.lat,lng:cfg.lng,radius:cfg.radius,ts:Date.now()});
+}
+
+function drawQR(canvasId, size){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  canvas.width = size; canvas.height = size;
+  QRGen.generate(getQRPayload(), size, canvas);
+}
+
+function resizeQR(v){
+  currentSize=parseInt(v);
+  document.getElementById('size-lbl').textContent=v+'px';
+  if(qrGenerated) drawQR('qr-canvas', currentSize);
+}
+
+function downloadQR(){
+  if(!qrGenerated){showToast('請先產生 QR Code');return}
+  const canvas=document.getElementById('qr-canvas');
+  const link=document.createElement('a');
+  link.download=`點名QR_${cfg.course}_${cfg.dateStr}.png`;
+  link.href=canvas.toDataURL('image/png'); link.click();
+  showToast('已下載 PNG');
+}
+
+function openFS(){
+  if(!qrGenerated){showToast('請先產生 QR Code');return}
+  document.getElementById('fs-ov').style.display='flex';
+  drawQR('fs-canvas', 420);
+  document.getElementById('fs-lbl').textContent=`${cfg.course} — ${cfg.dateStr}　截止 ${cfg.lateDeadline}`;
+}
+function closeFS(){document.getElementById('fs-ov').style.display='none'}
+
+function resetAll(){
+  if(!confirm('確定重置今日所有簽到紀錄？')) return;
+  attendance={};violations={};qrGenerated=false;cfg={};
+  document.getElementById('qr-section').style.display='none';
+  updateStats();renderSeats();renderRecords();renderViolations();
+  document.getElementById('viol-badge').style.display='none';
+  showToast('已重置');
+}
+
+// ===================== 統計 & 渲染 =====================
+function updateStats(){
+  let on=0,late=0;
+  Object.values(attendance).forEach(r=>{if(r.late)late++;else on++;});
+  const seatOrder=getSeatOrder();
+  const studentSeats=seatOrder.filter(s=>FIXED_SEATS[s]);
+  const abs=Math.max(0,studentSeats.length-on-late);
+  const vc=Array.isArray(violations)?violations.length:Object.keys(violations).length;
+  document.getElementById('s-on').textContent=on;
+  document.getElementById('s-late').textContent=late;
+  document.getElementById('s-abs').textContent=abs;
+  document.getElementById('s-viol').textContent=vc;
+  const vb=document.getElementById('viol-badge');
+  if(vc>0){vb.style.display='inline';vb.textContent=vc}else vb.style.display='none';
+}
+
+function renderRecords(){
+  const list=document.getElementById('record-list');
+  const recs=Object.values(attendance).sort((a,b)=>a.ts-b.ts);
+  if(!recs.length){list.innerHTML='<div class="empty"><span class="ico">🕐</span>等待學生簽到</div>';return}
+  list.innerHTML=recs.map(r=>`<div class="record-item">
+    <div><div style="font-weight:500">${r.name}</div><div class="record-meta">${r.seat} · GPS ${r.dist}m</div></div>
+    <div style="display:flex;align-items:center;gap:5px">
+      <span style="font-size:11px;color:#888">${r.timeStr}</span>
+      <span class="badge ${r.late?'b-late':'b-ok'}">${r.late?'遲到':'準時'}</span>
+    </div></div>`).join('');
+}
+
+function renderSeats(){
+  const grid=document.getElementById('seat-grid');
+  const seatOrder=getSeatOrder();
+  grid.style.gridTemplateColumns=`repeat(${SEAT_COLS},1fr)`;
+  grid.innerHTML=seatOrder.map(seat=>{
+    const n=FIXED_SEATS[seat]||'';
+    if(!n) return`<div class="seat seat-empty" style="opacity:.4"><div style="font-size:10px;color:#ccc">${seat}</div></div>`;
+    if(!qrGenerated) return`<div class="seat seat-empty"><div>${seat}</div><div class="seat-name">${n}</div></div>`;
+    const rec=attendance[seat];
+    const viol=Array.isArray(violations)?violations.find(v=>v.seat===seat):null;
+    if(rec) return`<div class="seat ${rec.late?'seat-late':'seat-present'}" title="${rec.name} · ${rec.timeStr}"><div>${rec.late?'⚠':'✓'} ${seat}</div><div class="seat-name">${rec.name}</div></div>`;
+    if(viol) return`<div class="seat seat-blocked" title="GPS異常"><div>! ${seat}</div><div class="seat-name">${n}</div></div>`;
+    return`<div class="seat seat-absent"><div>✗ ${seat}</div><div class="seat-name">${n}</div></div>`;
+  }).join('');
+}
+
+function renderViolations(){
+  const el=document.getElementById('violations-list');
+  const arr=Array.isArray(violations)?violations:[];
+  if(!arr.length){el.innerHTML='<div class="empty"><span class="ico">🛡️</span>目前無異常紀錄</div>';return}
+  el.innerHTML=arr.map(v=>`<div class="violation-item">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:500">${v.name||'未知學生'}${v.seat?' ('+v.seat+')':''}</div>
+      <span class="badge b-warn">${v.type}</span>
+    </div>
+    <div style="font-size:12px;color:#b45309;margin-top:3px">${v.detail} · ${v.timeStr}</div>
+  </div>`).join('');
+}
+
+// ===================== 手動補登 =====================
+function updateManualSelect(){
+  const sel=document.getElementById('manual-name');
+  const seatOrder=getSeatOrder();
+  sel.innerHTML='<option value="">— 選擇學生 —</option>'+
+    seatOrder.filter(s=>FIXED_SEATS[s]).map(seat=>{
+      const n=FIXED_SEATS[seat];const done=!!attendance[seat];
+      return`<option value="${n}" ${done?'disabled':''}>${n}（${seat}）${done?' ✓':''}</option>`;
+    }).join('');
+}
+
+function manualCheckin(){
+  const name=document.getElementById('manual-name').value;
+  const status=document.getElementById('manual-status').value;
+  if(!name){showToast('請選擇學生');return}
+  const seat=getNameToSeat()[name];
+  if(!seat){showToast('找不到對應座位');return}
+  if(attendance[seat]){showToast('此學生已有簽到紀錄');return}
+  const isLate=status==='late';
+  attendance[seat]={name,seat,timeStr:nowStr(),ts:Date.now(),late:isLate,dist:'手動'};
+  updateStats();renderSeats();renderRecords();updateManualSelect();
+  showToast(`已手動補登：${name}（${isLate?'遲到':'準時'}）`);
+}
+
+function clearViolations(){
+  violations=[];updateStats();renderViolations();showToast('已清除');
+}
+
+// ===================== 學生流程 =====================
+function setStep(n){for(let i=1;i<=4;i++){const el=document.getElementById('step'+i);el.className='step-item'+(i<n?' done':i===n?' active':'')}}
+function stuShow(id){['stu-scan','stu-gps','stu-form','stu-done','stu-blocked'].forEach(x=>document.getElementById(x).style.display=x===id?'block':'none')}
+
+function stuStep1(){
+  if(!qrGenerated){showToast('老師尚未產生今日 QR Code，請稍候');return}
+  stuShow('stu-gps');setStep(2);
+  document.getElementById('gps-btn').disabled=false;
+  document.getElementById('gps-btn').innerHTML='📍 允許取得我的位置';
+  pendingGPSDist=null;
+}
+
+function stuGetGPS(){
+  const btn=document.getElementById('gps-btn');
+  btn.innerHTML='<span class="spin">↻</span> 取得位置中...';btn.disabled=true;
+  if(!navigator.geolocation){handleGPSError('此裝置不支援 GPS 定位');return}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const dist=haversine(pos.coords.latitude,pos.coords.longitude,cfg.lat,cfg.lng);
+    if(dist<=cfg.radius)handleGPSSuccess(dist);else handleGPSFail(dist);
+  },err=>{handleGPSError(err.code===1?'你拒絕了位置存取授權':'無法取得位置，請確認 GPS 已開啟')},{timeout:12000,enableHighAccuracy:true});
+}
+
+function mockGPS(inRange){
+  if(!qrGenerated){showToast('請先在老師端產生 QR Code');return}
+  const dist=inRange?35:520;
+  if(dist<=cfg.radius)handleGPSSuccess(dist);else handleGPSFail(dist);
+}
+function mockGPSDenied(){
+  if(!qrGenerated){showToast('請先在老師端產生 QR Code');return}
+  handleGPSError('你拒絕了位置存取授權');
+}
+
+function handleGPSSuccess(dist){
+  pendingGPSDist=dist;
+  document.getElementById('sf-course').textContent=cfg.course;
+  document.getElementById('sf-date').textContent=cfg.dateStr;
+  document.getElementById('sf-time').textContent=cfg.classTime;
+  document.getElementById('gps-dist-info').textContent=`距教室 ${dist} 公尺（允許範圍：${cfg.radius} 公尺以內）`;
+  stuShow('stu-form');setStep(3);
+  document.getElementById('stu-name').value='';
+  setTimeout(()=>document.getElementById('stu-name').focus(),100);
+}
+
+function handleGPSFail(dist){
+  violations.push({type:'超出範圍',detail:`距教室 ${dist}m，允許 ${cfg.radius}m`,timeStr:nowStr(),name:null,seat:null});
+  updateStats();renderViolations();
+  stuShow('stu-blocked');setStep(2);
+  document.getElementById('blocked-reason').innerHTML=`❌ <div><strong>你不在教室範圍內</strong><div style="font-size:12px;margin-top:3px">目前距離教室約 ${dist} 公尺，超過允許的 ${cfg.radius} 公尺</div></div>`;
+}
+
+function handleGPSError(msg){
+  violations.push({type:'拒絕定位',detail:msg,timeStr:nowStr(),name:null,seat:null});
+  updateStats();renderViolations();
+  stuShow('stu-blocked');setStep(2);
+  document.getElementById('blocked-reason').innerHTML=`🚫 <div><strong>位置驗證失敗</strong><div style="font-size:12px;margin-top:3px">${msg}</div></div>`;
+}
+
+function stuSubmit(){
+  const name=document.getElementById('stu-name').value.trim();
+  if(!name){showToast('請輸入姓名');return}
+  const seat=getNameToSeat()[name];
+  if(!seat){showToast('找不到此學生，請確認姓名是否與名冊相符');return}
+  if(attendance[seat]){showToast('你已完成簽到，請勿重複送出');return}
+  const now=new Date();
+  const timeStr=now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const nowMin=now.getHours()*60+now.getMinutes();
+  const[dh,dm]=cfg.lateDeadline.split(':').map(Number);
+  const isLate=nowMin>dh*60+dm;
+  const dist=pendingGPSDist!==null?pendingGPSDist:0;
+  attendance[seat]={name,seat,timeStr,ts:now.getTime(),late:isLate,dist};
+  document.getElementById('done-name').textContent=name;
+  document.getElementById('done-seat').textContent=seat;
+  document.getElementById('done-time').textContent=timeStr;
+  document.getElementById('done-dist').textContent=`${dist} 公尺`;
+  document.getElementById('done-status').innerHTML=isLate
+    ?'<span style="color:#b91c1c;font-weight:600">遲到</span>'
+    :'<span style="color:#15803d;font-weight:600">準時到課</span>';
+  document.getElementById('done-late-alert').style.display=isLate?'flex':'none';
+  document.getElementById('done-icon').textContent=isLate?'⏰':'✅';
+  document.getElementById('done-title').textContent=isLate?'已簽到（遲到）':'簽到成功！';
+  stuShow('stu-done');setStep(4);
+  updateStats();renderRecords();renderSeats();
+}
+function stuReset(){stuShow('stu-scan');setStep(1)}
+
+// ===================== 座位表編輯 =====================
+function openSeatEditor(){
+  document.getElementById('cols-input').value=SEAT_COLS;
+  document.getElementById('rows-input').value=SEAT_ROWS;
+  rebuildSeatEditor();
+  document.getElementById('seat-modal').classList.add('open');
+}
+function closeSeatEditor(){document.getElementById('seat-modal').classList.remove('open')}
+
+function rebuildSeatEditor(){
+  const cols=parseInt(document.getElementById('cols-input').value)||5;
+  const rows=parseInt(document.getElementById('rows-input').value)||4;
+  const area=document.getElementById('seat-editor-area');
+  let html=`<div style="font-size:11px;color:#aaa;text-align:center;margin-bottom:4px">— 講台 —</div>`;
+  html+=`<div class="seat-editor-grid" style="grid-template-columns:repeat(${cols},1fr)">`;
+  for(let r=1;r<=rows;r++){
+    for(let c=0;c<cols;c++){
+      const key=r+String.fromCharCode(65+c);
+      const val=FIXED_SEATS[key]||'';
+      html+=`<div class="seat-cell"><div class="seat-cell-lbl">${key}</div><input type="text" id="seat-${key}" value="${val}" placeholder="空位"/></div>`;
+    }
+  }
+  html+='</div>';
+  area.innerHTML=html;
+}
+
+function saveSeatEditor(){
+  const cols=parseInt(document.getElementById('cols-input').value)||5;
+  const rows=parseInt(document.getElementById('rows-input').value)||4;
+  SEAT_COLS=cols;SEAT_ROWS=rows;FIXED_SEATS={};
+  for(let r=1;r<=rows;r++){
+    for(let c=0;c<cols;c++){
+      const key=r+String.fromCharCode(65+c);
+      const val=(document.getElementById('seat-'+key)?.value||'').trim();
+      if(val)FIXED_SEATS[key]=val;
+    }
+  }
+  saveSeatsToStorage();
+  closeSeatEditor();
+  renderSeats();updateManualSelect();
+  showToast('✓ 座位表已儲存，下次開啟自動載入');
+}
+
+function clearAllSeats(){
+  if(!confirm('確定清空所有姓名？'))return;
+  document.querySelectorAll('#seat-editor-area input[type=text]').forEach(i=>i.value='');
+}
+
+// ===================== 匯入 CSV =====================
+function importCSV(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const text=e.target.result;
+    const lines=text.split(/\r?\n/).filter(l=>l.trim());
+    let count=0,errors=[];
+    // Rebuild from CSV
+    const newSeats={};
+    let maxRow=0,maxCol=0;
+    for(let line of lines){
+      // Skip header if first char is not digit
+      const parts=line.split(',');
+      if(parts.length<2)continue;
+      const seat=parts[0].trim().toUpperCase();
+      const name=parts[1].trim();
+      if(!seat||!name)continue;
+      // Validate format: number + letter
+      if(!/^\d+[A-Z]$/.test(seat)){errors.push(seat);continue}
+      const row=parseInt(seat);
+      const col=seat.charCodeAt(seat.length-1)-65;
+      if(row>maxRow)maxRow=row;
+      if(col>maxCol)maxCol=col;
+      newSeats[seat]=name;count++;
+    }
+    if(count===0){showToast('找不到有效資料，請確認格式');return}
+    FIXED_SEATS=newSeats;
+    SEAT_ROWS=maxRow;SEAT_COLS=maxCol+1;
+    document.getElementById('cols-input').value=SEAT_COLS;
+    document.getElementById('rows-input').value=SEAT_ROWS;
+    rebuildSeatEditor();
+    // Fill in values
+    Object.entries(FIXED_SEATS).forEach(([seat,name])=>{
+      const el=document.getElementById('seat-'+seat);
+      if(el)el.value=name;
+    });
+    document.getElementById('import-status').textContent=`✓ 已匯入 ${count} 筆${errors.length?' ('+errors.length+' 筆格式錯誤)':''}`;
+    input.value='';
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+function downloadSeatTemplate(){
+  let rows=[];
+  for(let r=1;r<=4;r++)for(let c=0;c<5;c++)rows.push(`${r}${String.fromCharCode(65+c)},`);
+  const csv='\uFEFF座位,姓名\n'+rows.join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='座位表範本.csv';a.click();
+  URL.revokeObjectURL(url);showToast('已下載範本');
+}
+
+// ===================== 名冊 =====================
+function renderRoster(){
+  const wrap=document.getElementById('roster-wrap');
+  const seatOrder=getSeatOrder().filter(s=>FIXED_SEATS[s]);
+  if(!qrGenerated&&!Object.keys(attendance).length){
+    wrap.innerHTML='<div class="empty"><span class="ico">👥</span>尚無出席資料，請先產生 QR Code</div>';return;
+  }
+  const rows=seatOrder.map(seat=>{
+    const rec=attendance[seat];const n=FIXED_SEATS[seat];
+    if(rec)return{seat,name:rec.name,time:rec.timeStr,dist:typeof rec.dist==='number'?rec.dist+'m':rec.dist,status:rec.late?'遲到':'準時到課',late:rec.late,absent:false};
+    return{seat,name:n,time:'—',dist:'—',status:'缺席',absent:true};
+  });
+  const on=rows.filter(r=>!r.absent&&!r.late).length;
+  const late=rows.filter(r=>r.late).length;
+  const abs=rows.filter(r=>r.absent).length;
+  const vc=Array.isArray(violations)?violations.length:0;
+  wrap.innerHTML=`<div style="display:flex;gap:7px;margin-bottom:.75rem;flex-wrap:wrap">
+    <span class="chip" style="background:#f0fdf4;color:#15803d;border-color:#86efac">✅ 準時 ${on} 人</span>
+    <span class="chip" style="background:#fef2f2;color:#b91c1c;border-color:#fca5a5">⏰ 遲到 ${late} 人</span>
+    <span class="chip">❌ 缺席 ${abs} 人</span>
+    <span class="chip" style="background:#fffbeb;color:#b45309;border-color:#fcd34d">⚠️ GPS異常 ${vc} 件</span>
+    ${cfg.course?`<span class="chip">📚 ${cfg.course} ${cfg.dateStr||''}</span>`:''}
+  </div>
+  <table class="export-table">
+    <thead><tr><th>座位</th><th>姓名</th><th>簽到時間</th><th>GPS距離</th><th>狀態</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td style="color:#888">${r.seat}</td>
+      <td style="font-weight:${r.absent?400:500}">${r.name}</td>
+      <td style="font-variant-numeric:tabular-nums;color:${r.absent?'#aaa':'#1a1a1a'}">${r.time}</td>
+      <td style="color:#888">${r.dist}</td>
+      <td><span class="badge ${r.absent?'b-abs':r.late?'b-late':'b-ok'}">${r.status}</span></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function exportCSV(){
+  if(!qrGenerated&&!Object.keys(attendance).length){showToast('尚無資料');return}
+  const seatOrder=getSeatOrder().filter(s=>FIXED_SEATS[s]);
+  const h='座位,姓名,簽到時間,GPS距離,狀態';
+  const lines=seatOrder.map(seat=>{
+    const r=attendance[seat];const n=FIXED_SEATS[seat];
+    if(r)return`${seat},${r.name},${r.timeStr},${typeof r.dist==='number'?r.dist+'m':r.dist},${r.late?'遲到':'準時到課'}`;
+    return`${seat},${n},—,—,缺席`;
+  });
+  const info=`課程,${cfg.course||''},日期,${cfg.dateStr||''},上課,${cfg.classTime||''}`;
+  const csv='\uFEFF'+[info,'',h,...lines].join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`出席名冊_${cfg.course||'課程'}_${cfg.dateStr||'今日'}.csv`;
+  a.click();URL.revokeObjectURL(url);showToast('CSV 已下載');
+}
+
+function copyText(){
+  if(!qrGenerated&&!Object.keys(attendance).length){showToast('尚無資料');return}
+  const seatOrder=getSeatOrder().filter(s=>FIXED_SEATS[s]);
+  const lines=[`【出席名冊】${cfg.course||''} ${cfg.dateStr||''} 上課${cfg.classTime||''}`,'─'.repeat(40),'座位\t姓名\t\t簽到時間\tGPS\t狀態'];
+  seatOrder.forEach(seat=>{
+    const r=attendance[seat];const n=FIXED_SEATS[seat];
+    lines.push(`${seat}\t${r?r.name:n}\t\t${r?r.timeStr:'—'}\t${r?(typeof r.dist==='number'?r.dist+'m':r.dist):'—'}\t${r?(r.late?'遲到':'準時'):'缺席'}`);
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('已複製到剪貼簿')).catch(()=>showToast('請改用 CSV 匯出'));
+}
+
+// ===================== 初始化 =====================
+loadFromStorage();
+renderSeats();
+updateManualSelect();
+violations=[];
+</script>
+</body>
+</html>
