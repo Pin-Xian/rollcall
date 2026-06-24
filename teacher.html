@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>點名系統 — 老師端</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f3;min-height:100vh}
+.app{max-width:760px;margin:0 auto;padding:1rem}
+.header{background:#fff;border-radius:12px;border:.5px solid #e0e0e0;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.header-title{font-size:16px;font-weight:700}
+.header-sub{font-size:12px;color:#888;margin-top:2px}
+.tab-bar{display:flex;background:#fff;border-radius:12px;border:.5px solid #e0e0e0;margin-bottom:1rem;overflow:hidden}
+.tab{flex:1;padding:10px 6px;cursor:pointer;font-size:12px;color:#888;border-bottom:2px solid transparent;transition:all .15s;text-align:center;display:flex;align-items:center;justify-content:center;gap:3px;border-right:.5px solid #e0e0e0}
+.tab:last-child{border-right:none}
+.tab.active{color:#1a1a1a;border-bottom:2px solid #1a1a1a;font-weight:600;background:#fafafa}
+.tab:hover:not(.active){color:#1a1a1a;background:#f9f9f9}
+.panel{display:none}.panel.active{display:block}
+.card{background:#fff;border:.5px solid #e0e0e0;border-radius:12px;padding:1.1rem 1.25rem;margin-bottom:.9rem}
+.card-title{font-size:11px;color:#888;margin-bottom:.75rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+.row{display:flex;gap:8px;margin-bottom:.75rem;align-items:flex-end;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:100px}
+.field label{font-size:12px;color:#666}
+input[type=text],input[type=time],input[type=number],select{height:36px;padding:0 10px;border-radius:8px;border:.5px solid #d0d0d0;background:#fff;color:#1a1a1a;font-size:13px;font-family:inherit;width:100%}
+input:focus,select:focus{outline:none;border-color:#888;box-shadow:0 0 0 2px rgba(0,0,0,.06)}
+.btn{height:36px;padding:0 14px;border-radius:8px;border:.5px solid #d0d0d0;background:#fff;color:#1a1a1a;font-size:13px;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .12s;white-space:nowrap}
+.btn:hover{background:#f0f0ee}.btn:active{transform:scale(.98)}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}.btn-primary:hover{background:#333}
+.btn-sm{height:30px;padding:0 10px;font-size:12px}
+.btn-blue{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}.btn-blue:hover{background:#dbeafe}
+.btn-green{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}.btn-green:hover{background:#dcfce7}
+.stat-row{display:grid;gap:8px;margin-bottom:.9rem}
+.stat-card{background:#fafafa;border-radius:8px;padding:.65rem .85rem;text-align:center;border:.5px solid #ebebeb}
+.stat-num{font-size:22px;font-weight:700}
+.stat-lbl{font-size:11px;color:#888;margin-top:2px}
+.n-green{color:#15803d}.n-red{color:#b91c1c}.n-gray{color:#6b7280}.n-amber{color:#b45309}
+.record-list{display:flex;flex-direction:column;gap:5px;max-height:240px;overflow-y:auto}
+.record-item{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:#fafafa;border-radius:8px;font-size:13px;border:.5px solid #f0f0f0}
+.record-meta{font-size:11px;color:#888;margin-top:1px}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:500}
+.b-ok{background:#f0fdf4;color:#15803d}.b-late{background:#fef2f2;color:#b91c1c}.b-abs{background:#f5f5f3;color:#6b7280}
+.podium{text-align:center;font-size:11px;color:#aaa;padding:5px 0;margin-bottom:6px;border-bottom:.5px solid #ebebeb}
+.seat-grid{display:grid;gap:5px}
+.seat{border-radius:6px;border:.5px solid #e0e0e0;font-size:11px;font-weight:500;text-align:center;padding:5px 3px;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.3}
+.seat-empty{background:#fafafa;color:#bbb;border-style:dashed}
+.seat-present{background:#f0fdf4;color:#15803d;border-color:#86efac}
+.seat-late{background:#fef2f2;color:#b91c1c;border-color:#fca5a5}
+.seat-absent{background:#f5f5f3;color:#9ca3af}
+.seat-name{font-size:10px;margin-top:1px;opacity:.75;max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.info-box{background:#fafafa;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;border:.5px solid #f0f0f0}
+.info-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:.5px solid #f0f0f0}
+.info-row:last-child{border-bottom:none}
+.info-val{font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;border:.5px solid #e0e0e0;color:#888;background:#fafafa}
+.export-table{width:100%;border-collapse:collapse;font-size:13px}
+.export-table th{font-size:11px;color:#888;font-weight:500;text-align:left;padding:6px 8px;border-bottom:.5px solid #e0e0e0}
+.export-table td{padding:7px 8px;border-bottom:.5px solid #f0f0f0}
+.export-table tr:last-child td{border-bottom:none}
+.export-table tr:hover td{background:#fafafa}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8888;align-items:flex-start;justify-content:center;padding:40px 1rem;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:1.5rem;width:100%;max-width:640px;max-height:85vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.seat-editor-grid{display:grid;gap:5px;margin-bottom:.75rem}
+.seat-cell{display:flex;flex-direction:column;gap:2px}
+.seat-cell-lbl{font-size:10px;color:#aaa;text-align:center}
+.seat-cell input{text-align:center;font-size:12px;height:30px;padding:0 4px}
+#fs-ov{display:none;position:fixed;inset:0;background:#fff;z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:16px;cursor:pointer}
+#fs-lbl{font-size:18px;font-weight:700;color:#1a1a1a;text-align:center;max-width:500px;line-height:1.5}
+#qr-status{font-size:12px;color:#888;margin-top:6px;text-align:center}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:9px 18px;border-radius:100px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999;white-space:nowrap}
+#toast.show{opacity:1}
+.empty{text-align:center;padding:1.5rem;color:#aaa;font-size:13px}
+.empty .ico{font-size:28px;display:block;margin-bottom:6px}
+@media(max-width:500px){.stat-row{grid-template-columns:repeat(2,1fr)!important}.row{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div>
+      <div class="header-title">📋 點名系統 — 老師端</div>
+      <div class="header-sub">GPS 驗證 · 固定座位 · 防代簽</div>
+    </div>
+    <div id="now-time" style="font-size:12px;color:#888"></div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('teacher',this)">🏫 課程設定</div>
+    <div class="tab" onclick="switchTab('roster',this)">📄 出席名冊</div>
+  </div>
+
+  <div id="panel-teacher" class="panel active">
+    <div class="card">
+      <div class="card-title">課程設定</div>
+      <div class="row">
+        <div class="field" style="flex:2"><label>課程名稱</label><input type="text" id="course-name" value="資訊科技概論"/></div>
+        <div class="field" style="max-width:110px"><label>上課時間</label><input type="time" id="class-time" value="09:00"/></div>
+        <div class="field" style="max-width:90px"><label>遲到寬限（分）</label><input type="number" id="late-min" value="15" min="1" max="60"/></div>
+      </div>
+      <div class="row" style="margin-bottom:.5rem">
+        <div class="field"><label>教室緯度</label><input type="text" id="cls-lat" value="25.033964"/></div>
+        <div class="field"><label>教室經度</label><input type="text" id="cls-lng" value="121.564468"/></div>
+        <div class="field" style="max-width:100px"><label>允許誤差（公尺）</label><input type="number" id="cls-radius" value="80" min="20" max="500"/></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:.9rem;flex-wrap:wrap">
+        <button class="btn btn-sm btn-blue" onclick="getMyLocation()">📍 抓取目前位置</button>
+        <span id="loc-status" style="font-size:12px;color:#888">在教室現場按此自動填入座標</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="generateQR()">🔲 產生今日 QR Code</button>
+        <button class="btn btn-sm btn-blue" onclick="openSeatEditor()">🪑 座位表設定</button>
+        <button class="btn btn-sm" onclick="syncRecords()">🔄 重新整理</button>
+        <button class="btn btn-sm" onclick="resetAll()">🗑️ 重置今日</button>
+      </div>
+    </div>
+
+    <div id="qr-section" style="display:none" class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:6px">
+        <div class="card-title" style="margin-bottom:0">今日 QR Code</div>
+        <span style="background:#f0fdf4;color:#15803d;border:.5px solid #86efac;padding:4px 10px;border-radius:100px;font-size:12px;font-weight:500">📍 GPS 驗證已啟用</span>
+      </div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:1.25rem;align-items:start;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+          <!-- QR Code 顯示區 -->
+          <div id="qr-container" style="background:#fff;padding:14px;border-radius:10px;border:.5px solid #e0e0e0;min-width:200px;min-height:200px;display:flex;align-items:center;justify-content:center">
+            <div id="qr-loading" style="color:#aaa;font-size:13px;text-align:center">產生中...</div>
+          </div>
+          <div id="qr-status"></div>
+          <!-- 大小控制 -->
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#888;width:100%">
+            <span>－</span>
+            <input type="range" id="qr-size" min="150" max="400" value="220" style="flex:1;accent-color:#1a1a1a" oninput="resizeQR(this.value)">
+            <span>＋</span>
+            <span id="size-lbl" style="font-weight:500;min-width:40px;color:#1a1a1a">220px</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-sm" onclick="downloadQR()">⬇️ 下載 PNG</button>
+            <button class="btn btn-sm btn-green" onclick="openFS()">⛶ 全螢幕</button>
+          </div>
+        </div>
+        <div>
+          <div class="info-box">
+            <div class="info-row"><span style="color:#888">課程</span><span class="info-val" id="qi-course"></span></div>
+            <div class="info-row"><span style="color:#888">日期</span><span class="info-val" id="qi-date"></span></div>
+            <div class="info-row"><span style="color:#888">上課</span><span class="info-val" id="qi-time"></span></div>
+            <div class="info-row"><span style="color:#888">遲到截止</span><span class="info-val" id="qi-late"></span></div>
+            <div class="info-row"><span style="color:#888">GPS 範圍</span><span class="info-val" id="qi-radius"></span></div>
+          </div>
+          <div style="background:#eff6ff;border:.5px solid #bfdbfe;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d4ed8;line-height:1.8">
+            <div>🔗 QR Code 連結到：<br><span id="qr-url-display" style="word-break:break-all;font-size:11px;color:#888"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:.9rem">
+      <div class="card" style="margin-bottom:0">
+        <div class="card-title">即時統計</div>
+        <div class="stat-row" style="grid-template-columns:repeat(2,1fr)">
+          <div class="stat-card"><div class="stat-num n-green" id="s-on">0</div><div class="stat-lbl">準時到課</div></div>
+          <div class="stat-card"><div class="stat-num n-red" id="s-late">0</div><div class="stat-lbl">遲到</div></div>
+          <div class="stat-card"><div class="stat-num n-gray" id="s-abs">0</div><div class="stat-lbl">缺席</div></div>
+          <div class="stat-card"><div class="stat-num n-amber" id="s-total">0</div><div class="stat-lbl">總人數</div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">
+          <div class="card-title" style="margin-bottom:0">簽到紀錄</div>
+          <button class="btn btn-sm" onclick="syncRecords()" style="font-size:11px">🔄</button>
+        </div>
+        <div class="record-list" id="record-list">
+          <div class="empty"><span class="ico">🕐</span>等待學生簽到</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:6px">
+        <div class="card-title" style="margin-bottom:0">即時座位表</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <span class="chip" style="background:#f0fdf4;color:#15803d;border-color:#86efac">● 準時</span>
+          <span class="chip" style="background:#fef2f2;color:#b91c1c;border-color:#fca5a5">● 遲到</span>
+          <span class="chip">○ 缺席</span>
+        </div>
+      </div>
+      <div class="podium">— 講台 —</div>
+      <div class="seat-grid" id="seat-grid"></div>
+    </div>
+  </div>
+
+  <div id="panel-roster" class="panel">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0">出席名冊</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-sm btn-green" onclick="exportCSV()">⬇️ 匯出 CSV</button>
+          <button class="btn btn-sm" onclick="copyText()">📋 複製文字</button>
+        </div>
+      </div>
+      <div id="roster-wrap"><div class="empty"><span class="ico">👥</span>尚無出席資料</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">手動補登</div>
+      <div class="row" style="margin-bottom:.5rem">
+        <div class="field"><label>學生姓名</label><select id="manual-name"><option value="">— 選擇學生 —</option></select></div>
+        <div class="field" style="max-width:110px"><label>狀態</label>
+          <select id="manual-status"><option value="on">準時到課</option><option value="late">遲到</option></select>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="manualCheckin()">✔ 手動補登</button>
+    </div>
+  </div>
+</div>
+
+<div id="fs-ov" onclick="closeFS()">
+  <div id="fs-qr-container" style="background:#fff;padding:20px;border-radius:12px"></div>
+  <div id="fs-lbl"></div>
+  <div style="font-size:13px;color:#999">點擊任意處關閉</div>
+</div>
+
+<div class="modal-overlay" id="seat-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="font-size:15px;font-weight:700">🪑 座位表設定</div>
+      <button class="btn btn-sm" onclick="closeSeatEditor()">✕ 關閉</button>
+    </div>
+    <div style="background:#f0fdf4;border:.5px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:.9rem;font-size:13px;color:#15803d">
+      💾 座位表自動儲存在瀏覽器，下次開啟自動載入
+    </div>
+    <div class="card" style="margin-bottom:.9rem">
+      <div class="card-title">匯入 CSV</div>
+      <div style="font-size:12px;color:#888;margin-bottom:.6rem;line-height:1.7">格式：每行「座位,姓名」，例如 <code style="background:#f5f5f3;padding:1px 5px;border-radius:4px">1A,王小明</code></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input type="file" id="csv-import" accept=".csv,.txt" style="display:none" onchange="importCSV(this)"/>
+        <button class="btn btn-sm btn-blue" onclick="document.getElementById('csv-import').click()">📂 選擇 CSV 檔</button>
+        <button class="btn btn-sm" onclick="downloadSeatTemplate()">⬇️ 下載空白範本</button>
+        <span id="import-status" style="font-size:12px;color:#888"></span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:6px">
+      <div style="font-size:12px;color:#666;font-weight:500">手動編輯座位</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <label style="font-size:12px;color:#666">欄數</label>
+        <input type="number" id="cols-input" value="5" min="1" max="10" style="width:56px;height:28px;font-size:12px" oninput="rebuildSeatEditor()"/>
+        <label style="font-size:12px;color:#666">排數</label>
+        <input type="number" id="rows-input" value="4" min="1" max="10" style="width:56px;height:28px;font-size:12px" oninput="rebuildSeatEditor()"/>
+      </div>
+    </div>
+    <div id="seat-editor-area" style="overflow-x:auto"></div>
+    <div style="display:flex;gap:8px;margin-top:.9rem;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="saveSeatEditor()">💾 儲存座位表</button>
+      <button class="btn btn-sm" onclick="clearAllSeats()">🗑️ 清空姓名</button>
+      <button class="btn btn-sm" onclick="closeSeatEditor()">取消</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- 載入多個 CDN fallback，確保至少一個能用 -->
+<script>
+// 動態載入 QR Code 函式庫，多個 CDN 備援
+(function(){
+  const CDNS = [
+    'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+    'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',
+    'https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js'
+  ];
+  let loaded = false;
+  function tryLoad(idx) {
+    if (idx >= CDNS.length) {
+      document.getElementById('qr-status').textContent = '⚠️ QR Code 函式庫載入失敗，請檢查網路連線';
+      window._qrLibLoaded = false;
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = CDNS[idx];
+    s.onload = function() {
+      if (!loaded && typeof QRCode !== 'undefined') {
+        loaded = true;
+        window._qrLibLoaded = true;
+        console.log('QR lib loaded from:', CDNS[idx]);
+        if (window._pendingQR) window._pendingQR();
+      }
+    };
+    s.onerror = function() { tryLoad(idx + 1); };
+    document.head.appendChild(s);
+  }
+  tryLoad(0);
+})();
+</script>
+
+<script>
+const STUDENT_URL = 'https://pin-xian.github.io/rollcall/student.html';
+const LS_SEATS   = 'attendance_seats_v1';
+const LS_LAYOUT  = 'attendance_layout_v1';
+const LS_CFG     = 'attendance_cfg_v1';
+
+let FIXED_SEATS = {};
+let SEAT_COLS = 5, SEAT_ROWS = 4;
+let violations = [], qrGenerated = false, cfg = {}, currentToken = '';
+let currentQRSize = 220;
+let qrInstanceMain = null, qrInstanceFS = null;
+
+const DEFAULT_SEATS = {
+  '1A':'王小明','1B':'李雅婷','1C':'陳建志','1D':'張美玲','1E':'林志豪',
+  '2A':'黃淑芬','2B':'吳家豪','2C':'蔡雅惠','2D':'楊志遠','2E':'許淑娟',
+  '3A':'鄭志明','3B':'劉雅雯','3C':'周建宏','3D':'賴淑萍','3E':'謝志強',
+  '4A':'郭雅芳','4B':'洪建勳','4C':'孫淑慧','4D':'葉志宏','4E':'馬雅麗',
+};
+
+// ── localStorage ──
+function loadStorage() {
+  try {
+    const s = localStorage.getItem(LS_SEATS);
+    const l = localStorage.getItem(LS_LAYOUT);
+    const c = localStorage.getItem(LS_CFG);
+    FIXED_SEATS = s ? JSON.parse(s) : {...DEFAULT_SEATS};
+    if (l) { const lo = JSON.parse(l); SEAT_COLS = lo.cols||5; SEAT_ROWS = lo.rows||4; }
+    if (c) {
+      const co = JSON.parse(c);
+      ['course-name','class-time','late-min','cls-lat','cls-lng','cls-radius'].forEach(id => {
+        const key = id.replace(/-([a-z])/g,(_,m)=>m.toUpperCase()).replace('cls','cls').replace('ClassName','course').replace('classTime','classTime');
+      });
+      if (co.course)    document.getElementById('course-name').value = co.course;
+      if (co.classTime) document.getElementById('class-time').value  = co.classTime;
+      if (co.lateMin)   document.getElementById('late-min').value    = co.lateMin;
+      if (co.lat)       document.getElementById('cls-lat').value     = co.lat;
+      if (co.lng)       document.getElementById('cls-lng').value     = co.lng;
+      if (co.radius)    document.getElementById('cls-radius').value  = co.radius;
+    }
+  } catch(e) { FIXED_SEATS = {...DEFAULT_SEATS}; }
+}
+function saveSeats() {
+  try {
+    localStorage.setItem(LS_SEATS,  JSON.stringify(FIXED_SEATS));
+    localStorage.setItem(LS_LAYOUT, JSON.stringify({cols:SEAT_COLS,rows:SEAT_ROWS}));
+  } catch(e) {}
+}
+function saveCfg() {
+  try {
+    localStorage.setItem(LS_CFG, JSON.stringify({
+      course:    document.getElementById('course-name').value,
+      classTime: document.getElementById('class-time').value,
+      lateMin:   document.getElementById('late-min').value,
+      lat:       document.getElementById('cls-lat').value,
+      lng:       document.getElementById('cls-lng').value,
+      radius:    document.getElementById('cls-radius').value,
+    }));
+  } catch(e) {}
+}
+function getAttendance() {
+  if (!currentToken) return {};
+  try { return JSON.parse(localStorage.getItem('record_'+currentToken)||'{}'); } catch(e) { return {}; }
+}
+
+// ── 工具 ──
+function showToast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+  if (tab === 'roster') renderRoster();
+}
+function getSeatOrder() {
+  const k = [];
+  for (let r = 1; r <= SEAT_ROWS; r++)
+    for (let c = 0; c < SEAT_COLS; c++)
+      k.push(r + String.fromCharCode(65+c));
+  return k;
+}
+function addMins(t, m) {
+  const [h, mm] = t.split(':').map(Number), tot = h*60+mm+m;
+  return String(Math.floor(tot/60)%24).padStart(2,'0') + ':' + String(tot%60).padStart(2,'0');
+}
+function nowStr() {
+  return new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(()=>{
+  document.getElementById('now-time').textContent =
+    new Date().toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}, 1000);
+
+// ── QR Code ──
+function getQRUrl() {
+  // 用短參數名縮短 URL
+  const p = new URLSearchParams({
+    c:  cfg.course,
+    d:  cfg.dateStr,
+    t:  cfg.classTime,
+    dl: cfg.lateDeadline,
+    la: String(cfg.lat),
+    ln: String(cfg.lng),
+    r:  String(cfg.radius),
+    tk: currentToken
+  });
+  return STUDENT_URL + '?' + p.toString();
+}
+
+function makeQR(containerId, size, url) {
+  const container = document.getElementById(containerId);
+  if (!container) return null;
+  container.innerHTML = '';
+  // qrcodejs API: new QRCode(element, options)
+  return new QRCode(container, {
+    text:           url,
+    width:          size,
+    height:         size,
+    colorDark:      '#111111',
+    colorLight:     '#ffffff',
+    correctLevel:   QRCode.CorrectLevel.M
+  });
+}
+
+function buildQR(size) {
+  if (typeof QRCode === 'undefined') {
+    // 函式庫還沒載入，等待
+    window._pendingQR = () => buildQR(size);
+    document.getElementById('qr-loading').textContent = '函式庫載入中...';
+    return;
+  }
+  const url = getQRUrl();
+  document.getElementById('qr-url-display').textContent = url;
+  document.getElementById('qr-loading').style.display = 'none';
+
+  // 清掉舊的
+  qrInstanceMain = makeQR('qr-container', size, url);
+  document.getElementById('qr-status').textContent = `✅ QR Code 已產生（${url.length} 字元）`;
+}
+
+function resizeQR(v) {
+  currentQRSize = parseInt(v);
+  document.getElementById('size-lbl').textContent = v + 'px';
+  if (qrGenerated) buildQR(currentQRSize);
+}
+
+function downloadQR() {
+  if (!qrGenerated) { showToast('請先產生 QR Code'); return; }
+  const canvas = document.querySelector('#qr-container canvas');
+  if (!canvas) { showToast('QR Code 尚未產生完成'); return; }
+  const link = document.createElement('a');
+  link.download = `點名QR_${cfg.course}_${cfg.dateStr}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('已下載 PNG');
+}
+
+function openFS() {
+  if (!qrGenerated) { showToast('請先產生 QR Code'); return; }
+  document.getElementById('fs-ov').style.display = 'flex';
+  makeQR('fs-qr-container', 440, getQRUrl());
+  document.getElementById('fs-lbl').textContent = `${cfg.course}　${cfg.dateStr}　截止 ${cfg.lateDeadline}`;
+}
+function closeFS() { document.getElementById('fs-ov').style.display = 'none'; }
+
+// ── 課程 & 產生 ──
+function getMyLocation() {
+  document.getElementById('loc-status').textContent = '取得中...';
+  if (!navigator.geolocation) { document.getElementById('loc-status').textContent = '不支援定位'; return; }
+  navigator.geolocation.getCurrentPosition(p => {
+    document.getElementById('cls-lat').value = p.coords.latitude.toFixed(6);
+    document.getElementById('cls-lng').value = p.coords.longitude.toFixed(6);
+    document.getElementById('loc-status').textContent = `✓ (${p.coords.latitude.toFixed(4)}, ${p.coords.longitude.toFixed(4)})`;
+    showToast('教室座標已更新');
+  }, e => {
+    document.getElementById('loc-status').textContent = '定位失敗：' + e.message;
+  }, {timeout:8000});
+}
+
+function generateQR() {
+  const course    = document.getElementById('course-name').value.trim() || '課程';
+  const classTime = document.getElementById('class-time').value;
+  const lateMin   = parseInt(document.getElementById('late-min').value) || 15;
+  const lat       = parseFloat(document.getElementById('cls-lat').value);
+  const lng       = parseFloat(document.getElementById('cls-lng').value);
+  const radius    = parseInt(document.getElementById('cls-radius').value) || 80;
+  const today     = new Date();
+  const dateStr   = today.toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
+  const lateDeadline = addMins(classTime, lateMin);
+
+  currentToken = 'tk' + Date.now();
+  cfg = {course, classTime, lateMin, dateStr, lateDeadline, lat, lng, radius, token: currentToken};
+  qrGenerated = true;
+  saveCfg();
+
+  document.getElementById('qr-section').style.display = 'block';
+  document.getElementById('qi-course').textContent  = course;
+  document.getElementById('qi-date').textContent    = dateStr;
+  document.getElementById('qi-time').textContent    = classTime;
+  document.getElementById('qi-late').textContent    = lateDeadline;
+  document.getElementById('qi-radius').textContent  = `${radius}m (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+
+  buildQR(currentQRSize);
+  renderSeats(); updateStats(); updateManualSelect();
+  showToast('QR Code 已產生！');
+
+  if (window._syncInterval) clearInterval(window._syncInterval);
+  window._syncInterval = setInterval(syncRecords, 8000);
+}
+
+function syncRecords() {
+  if (!qrGenerated) return;
+  renderSeats(); updateStats();
+}
+
+function resetAll() {
+  if (!confirm('確定重置今日所有簽到紀錄？')) return;
+  if (currentToken) localStorage.removeItem('record_'+currentToken);
+  violations = []; qrGenerated = false; cfg = {}; currentToken = '';
+  if (window._syncInterval) { clearInterval(window._syncInterval); window._syncInterval = null; }
+  document.getElementById('qr-section').style.display = 'none';
+  document.getElementById('record-list').innerHTML = '<div class="empty"><span class="ico">🕐</span>等待學生簽到</div>';
+  updateStats(); renderSeats();
+  showToast('已重置');
+}
+
+// ── 渲染 ──
+function updateStats() {
+  const att = getAttendance();
+  let on = 0, late = 0;
+  Object.values(att).forEach(r => { if (r.late) late++; else on++; });
+  const total = getSeatOrder().filter(s => FIXED_SEATS[s]).length;
+  document.getElementById('s-on').textContent    = on;
+  document.getElementById('s-late').textContent  = late;
+  document.getElementById('s-abs').textContent   = Math.max(0, total-on-late);
+  document.getElementById('s-total').textContent = total;
+}
+
+function renderRecords() {
+  const att  = getAttendance();
+  const list = document.getElementById('record-list');
+  const recs = Object.values(att).sort((a,b) => a.ts-b.ts);
+  if (!recs.length) {
+    list.innerHTML = '<div class="empty"><span class="ico">🕐</span>等待學生簽到</div>';
+    return;
+  }
+  list.innerHTML = recs.map(r => `
+    <div class="record-item">
+      <div>
+        <div style="font-weight:600">${r.name}</div>
+        <div class="record-meta">${r.seat} · GPS ${r.dist}m</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px">
+        <span style="font-size:11px;color:#888">${r.timeStr}</span>
+        <span class="badge ${r.late?'b-late':'b-ok'}">${r.late?'遲到':'準時'}</span>
+      </div>
+    </div>`).join('');
+}
+
+function renderSeats() {
+  const att  = getAttendance();
+  const grid = document.getElementById('seat-grid');
+  const seatOrder = getSeatOrder();
+  grid.style.gridTemplateColumns = `repeat(${SEAT_COLS},1fr)`;
+  grid.innerHTML = seatOrder.map(seat => {
+    const n = FIXED_SEATS[seat] || '';
+    if (!n) return `<div class="seat seat-empty" style="opacity:.3"><div style="font-size:10px;color:#ccc">${seat}</div></div>`;
+    if (!qrGenerated) return `<div class="seat seat-empty"><div>${seat}</div><div class="seat-name">${n}</div></div>`;
+    const rec = att[seat];
+    if (rec) return `<div class="seat ${rec.late?'seat-late':'seat-present'}" title="${rec.name}·${rec.timeStr}"><div>${rec.late?'⚠':'✓'} ${seat}</div><div class="seat-name">${rec.name}</div></div>`;
+    return `<div class="seat seat-absent"><div>✗ ${seat}</div><div class="seat-name">${n}</div></div>`;
+  }).join('');
+  renderRecords();
+}
+
+// ── 手動補登 ──
+function updateManualSelect() {
+  const att = getAttendance();
+  const sel = document.getElementById('manual-name');
+  sel.innerHTML = '<option value="">— 選擇學生 —</option>' +
+    getSeatOrder().filter(s => FIXED_SEATS[s]).map(seat => {
+      const n = FIXED_SEATS[seat], done = !!att[seat];
+      return `<option value="${seat}" ${done?'disabled':''}>${n}（${seat}）${done?' ✓':''}</option>`;
+    }).join('');
+}
+function manualCheckin() {
+  const seat   = document.getElementById('manual-name').value;
+  const status = document.getElementById('manual-status').value;
+  if (!seat) { showToast('請選擇學生'); return; }
+  const att = getAttendance();
+  if (att[seat]) { showToast('此學生已有簽到紀錄'); return; }
+  const name   = FIXED_SEATS[seat];
+  const isLate = status === 'late';
+  att[seat] = {name, seat, timeStr:nowStr(), ts:Date.now(), late:isLate, dist:'手動'};
+  localStorage.setItem('record_'+currentToken, JSON.stringify(att));
+  updateStats(); renderSeats(); updateManualSelect();
+  showToast(`已手動補登：${name}（${isLate?'遲到':'準時'}）`);
+}
+
+// ── 名冊 ──
+function renderRoster() {
+  const att       = getAttendance();
+  const wrap      = document.getElementById('roster-wrap');
+  const seatOrder = getSeatOrder().filter(s => FIXED_SEATS[s]);
+  if (!qrGenerated && !Object.keys(att).length) {
+    wrap.innerHTML = '<div class="empty"><span class="ico">👥</span>尚無出席資料，請先產生 QR Code</div>';
+    return;
+  }
+  const rows = seatOrder.map(seat => {
+    const rec = att[seat], n = FIXED_SEATS[seat];
+    if (rec) return {seat, name:rec.name, time:rec.timeStr, dist:typeof rec.dist==='number'?rec.dist+'m':rec.dist, status:rec.late?'遲到':'準時到課', late:rec.late, absent:false};
+    return {seat, name:n, time:'—', dist:'—', status:'缺席', absent:true};
+  });
+  const on   = rows.filter(r => !r.absent && !r.late).length;
+  const late = rows.filter(r => r.late).length;
+  const abs  = rows.filter(r => r.absent).length;
+  wrap.innerHTML = `
+    <div style="display:flex;gap:7px;margin-bottom:.75rem;flex-wrap:wrap">
+      <span class="chip" style="background:#f0fdf4;color:#15803d;border-color:#86efac">✅ 準時 ${on} 人</span>
+      <span class="chip" style="background:#fef2f2;color:#b91c1c;border-color:#fca5a5">⏰ 遲到 ${late} 人</span>
+      <span class="chip">❌ 缺席 ${abs} 人</span>
+      ${cfg.course ? `<span class="chip">📚 ${cfg.course} ${cfg.dateStr||''}</span>` : ''}
+    </div>
+    <table class="export-table">
+      <thead><tr><th>座位</th><th>姓名</th><th>簽到時間</th><th>GPS距離</th><th>狀態</th></tr></thead>
+      <tbody>${rows.map(r => `<tr>
+        <td style="color:#888">${r.seat}</td>
+        <td style="font-weight:${r.absent?400:600}">${r.name}</td>
+        <td style="font-variant-numeric:tabular-nums;color:${r.absent?'#aaa':'#1a1a1a'}">${r.time}</td>
+        <td style="color:#888">${r.dist}</td>
+        <td><span class="badge ${r.absent?'b-abs':r.late?'b-late':'b-ok'}">${r.status}</span></td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  updateManualSelect();
+}
+function exportCSV() {
+  const att = getAttendance();
+  if (!qrGenerated && !Object.keys(att).length) { showToast('尚無資料'); return; }
+  const seatOrder = getSeatOrder().filter(s => FIXED_SEATS[s]);
+  const lines = seatOrder.map(seat => {
+    const r = att[seat], n = FIXED_SEATS[seat];
+    if (r) return `${seat},${r.name},${r.timeStr},${typeof r.dist==='number'?r.dist+'m':r.dist},${r.late?'遲到':'準時到課'}`;
+    return `${seat},${n},—,—,缺席`;
+  });
+  const csv = '\uFEFF' + [`課程,${cfg.course||''},日期,${cfg.dateStr||''},上課,${cfg.classTime||''}`, '', '座位,姓名,簽到時間,GPS距離,狀態', ...lines].join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `出席名冊_${cfg.course||'課程'}_${cfg.dateStr||'今日'}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('CSV 已下載');
+}
+function copyText() {
+  const att = getAttendance();
+  if (!qrGenerated && !Object.keys(att).length) { showToast('尚無資料'); return; }
+  const lines = [`【出席名冊】${cfg.course||''} ${cfg.dateStr||''} 上課${cfg.classTime||''}`, '─'.repeat(36)];
+  getSeatOrder().filter(s => FIXED_SEATS[s]).forEach(seat => {
+    const r = att[seat], n = FIXED_SEATS[seat];
+    lines.push(`${seat}\t${r?r.name:n}\t${r?r.timeStr:'—'}\t${r?(typeof r.dist==='number'?r.dist+'m':r.dist):'—'}\t${r?(r.late?'遲到':'準時'):'缺席'}`);
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(() => showToast('已複製')).catch(() => showToast('請改用 CSV'));
+}
+
+// ── 座位表 ──
+function openSeatEditor() {
+  document.getElementById('cols-input').value = SEAT_COLS;
+  document.getElementById('rows-input').value = SEAT_ROWS;
+  rebuildSeatEditor();
+  document.getElementById('seat-modal').classList.add('open');
+}
+function closeSeatEditor() { document.getElementById('seat-modal').classList.remove('open'); }
+function rebuildSeatEditor() {
+  const cols = parseInt(document.getElementById('cols-input').value)||5;
+  const rows = parseInt(document.getElementById('rows-input').value)||4;
+  let html = `<div style="font-size:11px;color:#aaa;text-align:center;margin-bottom:6px">— 講台 —</div>`;
+  html += `<div class="seat-editor-grid" style="grid-template-columns:repeat(${cols},1fr)">`;
+  for (let r = 1; r <= rows; r++)
+    for (let c = 0; c < cols; c++) {
+      const key = r + String.fromCharCode(65+c);
+      html += `<div class="seat-cell"><div class="seat-cell-lbl">${key}</div><input type="text" id="seat-${key}" value="${FIXED_SEATS[key]||''}" placeholder="空位"/></div>`;
+    }
+  html += '</div>';
+  document.getElementById('seat-editor-area').innerHTML = html;
+}
+function saveSeatEditor() {
+  const cols = parseInt(document.getElementById('cols-input').value)||5;
+  const rows = parseInt(document.getElementById('rows-input').value)||4;
+  SEAT_COLS = cols; SEAT_ROWS = rows; FIXED_SEATS = {};
+  for (let r = 1; r <= rows; r++)
+    for (let c = 0; c < cols; c++) {
+      const key = r + String.fromCharCode(65+c);
+      const val = (document.getElementById('seat-'+key)?.value||'').trim();
+      if (val) FIXED_SEATS[key] = val;
+    }
+  saveSeats(); closeSeatEditor(); renderSeats(); updateManualSelect();
+  showToast('✓ 座位表已儲存');
+}
+function clearAllSeats() {
+  if (!confirm('確定清空？')) return;
+  document.querySelectorAll('#seat-editor-area input').forEach(i => i.value='');
+}
+function importCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split(/\r?\n/).filter(l => l.trim());
+    const newSeats = {}; let count = 0, maxRow = 0, maxCol = 0;
+    for (const line of lines) {
+      const parts = line.split(',');
+      if (parts.length < 2) continue;
+      const seat = parts[0].trim().toUpperCase();
+      const name = parts[1].trim();
+      if (!seat || !name || !/^\d+[A-Z]$/.test(seat)) continue;
+      const row = parseInt(seat), col = seat.charCodeAt(seat.length-1)-65;
+      if (row > maxRow) maxRow = row;
+      if (col > maxCol) maxCol = col;
+      newSeats[seat] = name; count++;
+    }
+    if (!count) { showToast('找不到有效資料'); return; }
+    FIXED_SEATS = newSeats; SEAT_ROWS = maxRow; SEAT_COLS = maxCol+1;
+    document.getElementById('cols-input').value = SEAT_COLS;
+    document.getElementById('rows-input').value = SEAT_ROWS;
+    rebuildSeatEditor();
+    Object.entries(FIXED_SEATS).forEach(([s,n]) => { const el = document.getElementById('seat-'+s); if (el) el.value = n; });
+    document.getElementById('import-status').textContent = `✓ 已匯入 ${count} 筆`;
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+function downloadSeatTemplate() {
+  const rows = [];
+  for (let r = 1; r <= 4; r++)
+    for (let c = 0; c < 5; c++)
+      rows.push(`${r}${String.fromCharCode(65+c)},`);
+  const csv = '\uFEFF座位,姓名\n' + rows.join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = '座位表範本.csv'; a.click();
+  URL.revokeObjectURL(url); showToast('已下載範本');
+}
+
+// ── 初始化 ──
+loadStorage();
+renderSeats();
+updateManualSelect();
+</script>
+</body>
+</html>
