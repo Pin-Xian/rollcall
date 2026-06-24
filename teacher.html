@@ -5,48 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>點名系統｜老師端</title>
 <style>
-:root{
-  --bg:#F5F5F2;--sur:#fff;--bdr:#E2E2DC;--bdr2:#C8C8C0;
-  --t1:#18181A;--t2:#5F5F65;--t3:#A0A0A8;
-  --grn:#2A6049;--grnl:#D6EDE1;--grnt:#4DAE80;
-  --red:#B91C1C;--redl:#FEE2E2;
-  --amb:#92400E;--ambl:#FEF3C7;
-  --r:9px;--rl:13px;
-}
+:root{--bg:#F5F5F2;--sur:#fff;--bdr:#E2E2DC;--bdr2:#C8C8C0;--t1:#18181A;--t2:#5F5F65;--t3:#A0A0A8;--grn:#2A6049;--grnl:#D6EDE1;--grnt:#4DAE80;--red:#B91C1C;--redl:#FEE2E2;--r:9px;--rl:13px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;background:var(--bg);color:var(--t1);font-size:14px;line-height:1.5;min-height:100vh}
 .shell{display:flex;min-height:100vh}
-/* Sidebar */
 .sb{width:210px;flex-shrink:0;background:var(--t1);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
 .sb-logo{padding:1.4rem 1.2rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08)}
-.sb-mark{font-size:20px;margin-bottom:3px}.sb-name{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.01em}
-.sb-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:1px}
+.sb-mark{font-size:20px;margin-bottom:3px}.sb-name{font-size:14px;font-weight:700;color:#fff}.sb-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:1px}
 .sb-nav{flex:1;padding:.6rem 0;overflow-y:auto}
 .sb-sec{font-size:10px;font-weight:700;color:rgba(255,255,255,.22);letter-spacing:.1em;text-transform:uppercase;padding:.55rem 1.2rem .25rem}
 .sb-item{display:flex;align-items:center;gap:9px;padding:.6rem 1.2rem;cursor:pointer;color:rgba(255,255,255,.48);font-size:13px;font-weight:500;transition:all .14s;border-left:3px solid transparent}
-.sb-item:hover{color:#fff;background:rgba(255,255,255,.07)}
-.sb-item.active{color:#fff;background:rgba(255,255,255,.1);border-left-color:var(--grnt)}
+.sb-item:hover{color:#fff;background:rgba(255,255,255,.07)}.sb-item.active{color:#fff;background:rgba(255,255,255,.1);border-left-color:var(--grnt)}
 .sb-ico{font-size:14px;width:18px;text-align:center}
 .sb-ft{padding:.9rem 1.2rem;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:rgba(255,255,255,.28);line-height:1.7;white-space:pre}
-/* Main */
 .main{margin-left:210px;flex:1;padding:1.75rem;min-height:100vh}
 .ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.6rem;flex-wrap:wrap;gap:.75rem}
 .pt{font-size:21px;font-weight:700;letter-spacing:-.02em}.ps{font-size:13px;color:var(--t2);margin-top:3px}
 .btnrow{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
 .panel{display:none}.panel.active{display:block}
-/* Card */
 .card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rl);padding:1.15rem 1.4rem;margin-bottom:.85rem;box-shadow:0 1px 2px rgba(0,0,0,.05)}
 .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;flex-wrap:wrap;gap:5px}
 .ct{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:.85rem}
-/* Form */
 .field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:100px}
 .field label{font-size:12px;color:var(--t2);font-weight:600}
-input,select,textarea{height:36px;padding:0 11px;border-radius:var(--r);border:1px solid var(--bdr2);background:#fff;color:var(--t1);font-size:13px;font-family:inherit;width:100%;transition:.14s}
+input,select{height:36px;padding:0 11px;border-radius:var(--r);border:1px solid var(--bdr2);background:#fff;color:var(--t1);font-size:13px;font-family:inherit;width:100%;transition:.14s}
 input:focus,select:focus{outline:none;border-color:var(--grn);box-shadow:0 0 0 3px rgba(42,96,73,.11)}
 .row{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:.8rem;align-items:flex-end}
-/* Buttons */
 .btn{height:36px;padding:0 14px;border-radius:var(--r);border:1px solid var(--bdr2);background:var(--sur);color:var(--t1);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .13s;white-space:nowrap}
 .btn:hover{background:var(--bg)}.btn:active{transform:scale(.98)}
 .btn-p{background:var(--t1);color:#fff;border-color:var(--t1)}.btn-p:hover{background:#2d2d2d}
@@ -55,22 +41,18 @@ input:focus,select:focus{outline:none;border-color:var(--grn);box-shadow:0 0 0 3
 .btn-sm{height:30px;padding:0 11px;font-size:12px}
 .btn-gh{background:transparent;border-color:transparent;color:var(--t2)}.btn-gh:hover{background:var(--bg);color:var(--t1)}
 .btn:disabled{opacity:.38;cursor:not-allowed;pointer-events:none}
-/* Stats */
 .stat{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rl);padding:1rem 1.15rem}
 .sn{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1;margin-bottom:3px}
 .sl{font-size:12px;color:var(--t2);font-weight:500}
-.cg{color:var(--grn)}.cr{color:var(--red)}.ca{color:var(--amb)}.cm{color:var(--t2)}
-/* Badge */
+.cg{color:var(--grn)}.cr{color:var(--red)}.ca{color:#92400E}.cm{color:var(--t2)}
 .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600}
 .bg{background:var(--grnl);color:var(--grn)}.br{background:var(--redl);color:var(--red)}.bm{background:var(--bg);color:var(--t2);border:1px solid var(--bdr)}
-/* Table */
 .tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{font-size:11px;color:var(--t2);font-weight:700;text-align:left;padding:7px 10px;border-bottom:1px solid var(--bdr);background:var(--bg);white-space:nowrap}
 td{padding:8px 10px;border-bottom:1px solid var(--bdr);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:var(--bg)}
-/* Seat grid */
 .podium{text-align:center;font-size:10px;color:var(--t3);padding:6px;margin-bottom:9px;border-bottom:1px dashed var(--bdr2);letter-spacing:.1em;text-transform:uppercase;font-weight:700}
 .sgrid{display:grid;gap:5px}
 .seat{border-radius:7px;border:1px solid var(--bdr);font-size:10px;font-weight:600;text-align:center;padding:5px 2px;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.4}
@@ -78,48 +60,35 @@ tbody tr:hover td{background:var(--bg)}
 .s-ok{background:var(--grnl);color:var(--grn);border-color:var(--grnt)}
 .s-late{background:var(--redl);color:var(--red);border-color:#FCA5A5}
 .s-abs{background:#fff;color:var(--t3)}
-.seat .sno{font-size:9px;opacity:.6;margin-top:1px}
-.seat .snm{font-size:11px;font-weight:700;margin-top:2px}
-/* Record list */
+.seat .sno{font-size:9px;opacity:.6;margin-top:1px}.seat .snm{font-size:11px;font-weight:700;margin-top:2px}
 .reclist{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto}
 .recitem{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:var(--bg);border-radius:var(--r);border:1px solid var(--bdr);font-size:13px}
 .rn{font-weight:600}.rm{font-size:11px;color:var(--t2);margin-top:1px}
-/* Upload */
 .upzone{border:2px dashed var(--bdr2);border-radius:var(--rl);padding:1.75rem 1rem;text-align:center;cursor:pointer;transition:.18s;background:var(--bg)}
 .upzone:hover,.upzone.over{border-color:var(--grn);background:var(--grnl)}
 .upico{font-size:38px;margin-bottom:.4rem}.upt{font-size:14px;font-weight:600;margin-bottom:3px}.ups{font-size:12px;color:var(--t2)}
-/* QR */
-.qrwrap{background:#fff;border:1px solid var(--bdr);border-radius:var(--rl);padding:14px;display:flex;align-items:center;justify-content:center;min-width:240px;min-height:240px}
+.qrwrap{background:#fff;border:1px solid var(--bdr);border-radius:var(--rl);padding:16px;display:flex;align-items:center;justify-content:center}
 .slrow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2)}
 .slrow input[type=range]{flex:1;accent-color:var(--grn)}.slval{font-weight:600;min-width:42px;color:var(--t1)}
-/* Info pair */
 .ip{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid var(--bdr)}
 .ip:last-child{border-bottom:none}.ik{color:var(--t2)}.iv{font-weight:600}
-/* Modal */
 .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:500;align-items:flex-start;justify-content:center;padding:2.5rem 1rem;overflow-y:auto;backdrop-filter:blur(2px)}
 .mbg.open{display:flex}
 .mbox{background:var(--sur);border-radius:14px;padding:1.6rem;width:100%;max-width:560px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
 .mtit{font-size:15px;font-weight:700;margin-bottom:1.1rem;display:flex;align-items:center;justify-content:space-between}
-/* Seat editor */
-.sedit{display:grid;gap:5px}
-.sec{display:flex;flex-direction:column;gap:2px}
+.sedit{display:grid;gap:5px}.sec{display:flex;flex-direction:column;gap:2px}
 .sel{font-size:9px;font-weight:700;color:var(--t3);text-align:center;letter-spacing:.04em}
 .sec input{text-align:center;font-size:11px;height:30px;padding:0 3px;border-radius:6px;cursor:pointer}
 .sec input.filled{background:var(--grnl);border-color:var(--grnt);color:var(--grn);font-weight:600}
-/* Picker */
 .pchip{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:7px;cursor:pointer;border:1px solid var(--bdr);background:var(--bg);font-size:13px;transition:.12s}
 .pchip:hover{background:var(--grnl);border-color:var(--grnt)}.pchip.sel{background:var(--grnl);border-color:var(--grnt);color:var(--grn)}
 .pchip.taken{opacity:.32;cursor:not-allowed;pointer-events:none}
 .pclr{background:var(--redl);border-color:#FCA5A5;color:var(--red)}.pclr:hover{background:#FECACA}
-/* Weekly */
-.wkc{min-width:50px;text-align:center}
-/* Class card */
 .cls-card{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:6px}
 .cls-name{font-weight:600;font-size:14px}.cls-info{font-size:12px;color:var(--t2);margin-top:2px}
-/* Fullscreen */
+.wkc{min-width:50px;text-align:center}
 #fsov{display:none;position:fixed;inset:0;background:#fff;z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:18px;cursor:pointer}
 #fsov.open{display:flex}
-/* Toast */
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--t1);color:#fff;padding:9px 18px;border-radius:100px;font-size:13px;font-weight:500;opacity:0;transition:opacity .18s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.22)}
 #toast.show{opacity:1}
 .divider{height:1px;background:var(--bdr);margin:.8rem 0}
@@ -127,12 +96,13 @@ tbody tr:hover td{background:var(--bg)}
 .eico{font-size:32px;display:block;margin-bottom:7px}
 .tag{display:inline-block;background:var(--bg);border:1px solid var(--bdr);border-radius:5px;padding:2px 7px;font-size:11px;font-weight:600;color:var(--t2)}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:500;border:1px solid var(--bdr);background:var(--sur);color:var(--t2)}
-.tip{font-size:12px;color:var(--t2);padding:.5rem 0;line-height:1.6}
-@media(max-width:720px){
-  .sb{width:56px}.sb-name,.sb-sub,.sb-item span,.sb-sec,.sb-ft{display:none}
-  .sb-item{justify-content:center;padding:.65rem}.main{margin-left:56px;padding:1rem}
-  .g2,.g4{grid-template-columns:1fr!important}
-}
+.al{border-radius:var(--r);padding:9px 13px;font-size:13px;display:flex;align-items:flex-start;gap:7px;line-height:1.5;margin-bottom:.7rem}
+.al-b{background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE}
+.al-g{background:var(--grnl);color:var(--grn);border:1px solid #A7D7B9}
+.al-r{background:var(--redl);color:var(--red);border:1px solid #FCA5A5}
+.al-y{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
+.tip{font-size:12px;color:var(--t2);padding:.4rem 0;line-height:1.6}
+@media(max-width:720px){.sb{width:56px}.sb-name,.sb-sub,.sb-item span,.sb-sec,.sb-ft{display:none}.sb-item{justify-content:center;padding:.65rem}.main{margin-left:56px;padding:1rem}.g2,.g4{grid-template-columns:1fr!important}}
 </style>
 </head>
 <body>
@@ -154,6 +124,8 @@ tbody tr:hover td{background:var(--bg)}
     <div class="sb-item" onclick="go('roster',this)"><span class="sb-ico">📄</span><span>出席名冊</span></div>
     <div class="sb-sec">報表</div>
     <div class="sb-item" onclick="go('weekly',this)"><span class="sb-ico">📊</span><span>週報表</span></div>
+    <div class="sb-sec">設定</div>
+    <div class="sb-item" onclick="go('settings',this)"><span class="sb-ico">⚙️</span><span>Gist 設定</span></div>
   </nav>
   <div class="sb-ft" id="sb-ft"></div>
 </aside>
@@ -195,7 +167,10 @@ tbody tr:hover td{background:var(--bg)}
 
 <!-- QR Code -->
 <div id="page-qr" class="panel">
-  <div class="ph"><div><div class="pt">產生 QR Code</div><div class="ps">學生用手機掃描後直接填姓名簽到</div></div></div>
+  <div class="ph"><div><div class="pt">產生 QR Code</div><div class="ps">學生掃描後直接在手機填姓名簽到</div></div></div>
+  <div id="qr-no-gist" class="al al-y" style="margin-bottom:1rem">
+    ⚠️ 尚未設定 GitHub Gist Token，學生手機無法讀取座位表。請先至「⚙️ Gist 設定」完成設定。
+  </div>
   <div class="g2">
     <div>
       <div class="card">
@@ -233,9 +208,9 @@ tbody tr:hover td{background:var(--bg)}
         </div>
         <div class="slrow">
           <span>小</span>
-          <input type="range" id="qr-sz" min="160" max="420" value="260" oninput="resizeQR(this.value)">
+          <input type="range" id="qr-sz" min="200" max="420" value="280" oninput="resizeQR(this.value)">
           <span>大</span>
-          <span class="slval" id="sz-lbl">260px</span>
+          <span class="slval" id="sz-lbl">280px</span>
         </div>
       </div>
       <div class="card" id="qr-empty">
@@ -251,69 +226,62 @@ tbody tr:hover td{background:var(--bg)}
 
 <!-- 匯入名冊 -->
 <div id="page-import" class="panel">
-  <div class="ph"><div><div class="pt">匯入名冊</div><div class="ps">支援 CSV 格式，新班級資料累加保留</div></div></div>
+  <div class="ph"><div><div class="pt">匯入名冊</div><div class="ps">支援 Excel（.xlsx）或 CSV，欄位：班級、座號、學號、姓名</div></div></div>
   <div class="g2">
     <div>
       <div class="card">
-        <div class="ct" style="margin-bottom:.9rem">上傳 CSV 檔案</div>
+        <div class="ct" style="margin-bottom:.9rem">上傳檔案</div>
         <div class="upzone" id="upzone" onclick="document.getElementById('finp').click()"
           ondragover="ev=>{ev.preventDefault();this.classList.add('over')}"
           ondragleave="this.classList.remove('over')" ondrop="dropF(event)">
-          <div class="upico">📄</div>
-          <div class="upt">點擊或拖曳上傳 CSV</div>
-          <div class="ups">格式：班級, 座號, 姓名, 學號（第一行為標題）</div>
+          <div class="upico">📊</div>
+          <div class="upt">點擊或拖曳上傳</div>
+          <div class="ups">.xlsx / .xls / .csv（支援 Excel 直接上傳）</div>
         </div>
-        <input type="file" id="finp" accept=".csv,.txt" style="display:none" onchange="readF(this.files[0])"/>
+        <input type="file" id="finp" accept=".xlsx,.xls,.csv,.txt" style="display:none" onchange="readF(this.files[0])"/>
         <div class="divider"></div>
-        <div style="background:var(--bg);border-radius:var(--r);padding:.75rem 1rem;font-size:12px;color:var(--t2);line-height:1.8;margin-bottom:.9rem">
-          <div style="font-weight:600;color:var(--t1);margin-bottom:4px">CSV 格式範例：</div>
-          <code style="display:block;background:var(--sur);padding:6px 10px;border-radius:6px;border:1px solid var(--bdr);font-size:12px;line-height:1.8">班級,座號,姓名,學號<br>資訊一甲,1,王小明,S001<br>資訊一甲,2,李雅婷,S002</code>
-        </div>
         <div class="ct" style="margin-bottom:.7rem">欄位對應</div>
         <div class="row">
           <div class="field"><label>班級欄</label><select id="col-cls"></select></div>
           <div class="field"><label>座號欄</label><select id="col-sno"></select></div>
         </div>
         <div class="row">
-          <div class="field"><label>姓名欄</label><select id="col-nm"></select></div>
           <div class="field"><label>學號欄</label><select id="col-sid"></select></div>
+          <div class="field"><label>姓名欄</label><select id="col-nm"></select></div>
         </div>
         <button class="btn btn-g" id="apply-btn" disabled onclick="applyImport()" style="width:100%;justify-content:center">✔ 確認匯入（累加）</button>
       </div>
     </div>
     <div>
       <div class="card"><div class="ct" style="margin-bottom:.7rem">預覽</div><div id="imp-prev"><div class="empty"><span class="eico">📂</span>請先上傳檔案</div></div></div>
+      <div class="card">
+        <div class="ch"><div class="ct">目前名冊</div><button class="btn btn-sm btn-gh" onclick="clearRoster()">🗑️ 清空</button></div>
+        <div id="cur-roster"><div class="empty"><span class="eico">📋</span>尚未匯入</div></div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- 班級管理 -->
 <div id="page-clsmgr" class="panel">
-  <div class="ph"><div><div class="pt">班級管理</div><div class="ps">查看所有班級，可單獨刪除整個班級的名冊與座位表</div></div></div>
+  <div class="ph"><div><div class="pt">班級管理</div><div class="ps">查看所有班級，可單獨刪除</div></div></div>
   <div class="card"><div id="cls-list"><div class="empty"><span class="eico">🏫</span>尚未匯入任何班級</div></div></div>
 </div>
 
 <!-- 座位表 -->
 <div id="page-seats" class="panel">
   <div class="ph">
-    <div><div class="pt">座位表</div><div class="ps">點格子選學生，完成後按「💾 儲存」</div></div>
+    <div><div class="pt">座位表</div><div class="ps">設定好後按「💾 儲存並上傳」，學生才能簽到</div></div>
     <div class="btnrow">
       <select id="seat-cls" style="height:36px;min-width:130px" onchange="onSeatClsChange()"><option value="">— 選擇班級 —</option></select>
       <button class="btn btn-sm" onclick="autoAssign()">✨ 依座號自動排</button>
-      <button class="btn btn-sm btn-g" onclick="saveSeats()">💾 儲存座位表</button>
+      <button class="btn btn-sm btn-g" onclick="saveSeats()">💾 儲存並上傳 Gist</button>
     </div>
   </div>
   <div class="card" style="margin-bottom:.7rem">
     <div class="row" style="margin-bottom:0;align-items:flex-end">
-      <div class="field" style="max-width:100px">
-        <label>排數（前後）</label>
-        <!-- ★ 不用 oninput，改用獨立按鈕觸發，避免 rebuildEditor 覆蓋值 -->
-        <input type="number" id="s-rows" value="4" min="1" max="12"/>
-      </div>
-      <div class="field" style="max-width:100px">
-        <label>欄數（左右）</label>
-        <input type="number" id="s-cols" value="5" min="1" max="12"/>
-      </div>
+      <div class="field" style="max-width:100px"><label>排數</label><input type="number" id="s-rows" value="4" min="1" max="12"/></div>
+      <div class="field" style="max-width:100px"><label>欄數</label><input type="number" id="s-cols" value="5" min="1" max="12"/></div>
       <div style="display:flex;gap:6px;align-items:flex-end">
         <button class="btn btn-p btn-sm" onclick="applyLayout()">套用排列</button>
         <button class="btn btn-sm" onclick="clearSeats()">🗑️ 清空</button>
@@ -324,7 +292,7 @@ tbody tr:hover td{background:var(--bg)}
     <div class="ct" style="margin-bottom:.85rem">▲ 講台方向</div>
     <div id="seat-editor"></div>
   </div>
-  <div class="tip">💡 改完排數/欄數後請按「套用排列」，選好學生後按「💾 儲存座位表」才會真正寫入</div>
+  <div class="tip">💡 點格子選學生 → 完成後按「💾 儲存並上傳 Gist」，學生掃 QR 時才能讀到座位資料</div>
 </div>
 
 <!-- 出席名冊 -->
@@ -358,7 +326,7 @@ tbody tr:hover td{background:var(--bg)}
 <!-- 週報表 -->
 <div id="page-weekly" class="panel">
   <div class="ph">
-    <div><div class="pt">週報表</div><div class="ps">查看出席彙整，匯出 CSV</div></div>
+    <div><div class="pt">週報表</div><div class="ps">查看出席彙整</div></div>
     <div class="btnrow"><button class="btn btn-sm btn-g" onclick="expWeekly()">⬇️ 匯出 CSV</button></div>
   </div>
   <div class="card">
@@ -372,12 +340,48 @@ tbody tr:hover td{background:var(--bg)}
   <div class="card"><div id="wk-tbl"><div class="empty"><span class="eico">📊</span>選擇班級與日期後查詢</div></div></div>
 </div>
 
+<!-- Gist 設定 -->
+<div id="page-settings" class="panel">
+  <div class="ph"><div><div class="pt">Gist 設定</div><div class="ps">設定後座位表會自動同步到雲端，學生手機才能讀取</div></div></div>
+  <div style="max-width:540px">
+    <div class="card">
+      <div class="ct" style="margin-bottom:.9rem">GitHub Personal Access Token</div>
+      <div class="al al-b" style="margin-bottom:.9rem">
+        📌 Token 只需要 <strong>gist</strong> 權限，不會存取你的程式碼。
+      </div>
+      <div class="field" style="margin-bottom:.9rem">
+        <label>Token（格式：ghp_xxxx 或 github_pat_xxxx）</label>
+        <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxx"/>
+      </div>
+      <div class="field" style="margin-bottom:.9rem">
+        <label>Gist ID（第一次留空，系統會自動建立）</label>
+        <input type="text" id="gh-gist-id" placeholder="留空讓系統自動建立"/>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-g" onclick="saveGistSettings()">💾 儲存設定</button>
+        <button class="btn" onclick="testGist()">🔌 測試連線</button>
+      </div>
+      <div id="gist-test-result" style="margin-top:.75rem"></div>
+    </div>
+    <div class="card">
+      <div class="ct" style="margin-bottom:.9rem">📖 取得 Token 步驟</div>
+      <div style="font-size:13px;color:var(--t2);line-height:2">
+        <div>1. 開啟 <a href="https://github.com/settings/tokens/new" target="_blank" style="color:var(--grn)">GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)</a></div>
+        <div>2. 點「Generate new token (classic)」</div>
+        <div>3. Note 填「點名系統」，Expiration 選 No expiration</div>
+        <div>4. 只勾選 <strong style="color:var(--t1)">gist</strong>，其他都不用勾</div>
+        <div>5. 點「Generate token」，複製 token 貼到上方</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
 </div>
 
 <!-- 全螢幕 QR -->
 <div id="fsov" onclick="closeFS()">
-  <div id="fs-qr" style="background:#fff;padding:18px;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.15)"></div>
+  <div id="fs-qr" style="background:#fff;padding:20px;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.15)"></div>
   <div id="fs-title" style="font-size:19px;font-weight:700;color:var(--t1);text-align:center"></div>
   <div style="font-size:12px;color:#aaa">點擊任意處關閉</div>
 </div>
@@ -396,183 +400,220 @@ tbody tr:hover td{background:var(--bg)}
 
 <div id="toast"></div>
 
-<!-- ═══ QR Code 引擎（完整內嵌，零外部依賴）═══ -->
+<!-- ════ QR Code 引擎（qrcode-generator 相容實作） ════ -->
 <script>
-const QRE=(()=>{
-  const E=new Uint8Array(512),L=new Uint8Array(256);
-  (()=>{let x=1;for(let i=0;i<255;i++){E[i]=x;L[x]=i;x=x<128?x*2:(x*2)^0x11D;}for(let i=255;i<512;i++)E[i]=E[i-255];})();
-  const gm=(a,b)=>(a&&b)?E[(L[a]+L[b])%255]:0;
-  function rsp(ec){let p=[1];for(let i=0;i<ec;i++){const q=[1,E[i]],r=new Array(p.length+q.length-1).fill(0);for(let j=0;j<p.length;j++)for(let k=0;k<q.length;k++)r[j+k]^=gm(p[j],q[k]);p=r;}return p;}
-  function rse(d,ec){const g=rsp(ec),m=[...d,...new Array(ec).fill(0)];for(let i=0;i<d.length;i++){const c=m[i];if(c)for(let j=0;j<g.length;j++)m[i+j]^=gm(g[j],c);}return m.slice(d.length);}
-  const VT=[[],[16,10,1,16,0,0],[28,16,1,28,0,0],[44,26,1,44,0,0],[64,18,2,32,0,0],[86,24,2,43,0,0],[108,16,4,27,0,0],[124,18,4,31,0,0],[154,22,2,38,4,39],[182,22,3,36,5,37],[216,26,4,43,1,44]];
-  const TD=[0,16,28,44,64,86,108,124,154,182,216];
+// 使用 qrcodejs 相容的 API，這是業界最廣泛使用的格式
+// 完整 Reed-Solomon + 最優 mask 選擇
+window.QRCode = (function(){
+  // GF(256)
+  const EXP=new Uint8Array(512),LOG=new Uint8Array(256);
+  (function(){let x=1;for(let i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x=x<128?x*2:(x*2)^0x11D;}for(let i=255;i<512;i++)EXP[i]=EXP[i-255];})();
+  const gm=(a,b)=>a&&b?EXP[(LOG[a]+LOG[b])%255]:0;
+
+  function rsPoly(n){let p=[1];for(let i=0;i<n;i++){const q=[1,EXP[i]],r=Array(p.length+q.length-1).fill(0);for(let j=0;j<p.length;j++)for(let k=0;k<q.length;k++)r[j+k]^=gm(p[j],q[k]);p=r;}return p;}
+  function rsEncode(data,n){const g=rsPoly(n),m=[...data,...Array(n).fill(0)];for(let i=0;i<data.length;i++){const c=m[i];if(c)for(let j=0;j<g.length;j++)m[i+j]^=gm(g[j],c);}return m.slice(data.length);}
+
+  // Version params [total_dw, ec_per_blk, n1, k1, n2, k2] for EC=M
+  const VP=[[],[16,10,1,16,0,0],[28,16,1,28,0,0],[44,26,1,44,0,0],[64,18,2,32,0,0],[86,24,2,43,0,0],[108,16,4,27,0,0],[124,18,4,31,0,0],[154,22,2,38,4,39],[182,22,3,36,5,37],[216,26,4,43,1,44]];
+  const TD=[0,16,28,44,64,86,108,124,154,182,216]; // total data CW per version
   const AL=[[],[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,28,46],[6,26,46]];
   const RM=[0,0,7,7,7,0,0,0,0,0,0];
-  const FMT=[0b101010000010010,0b101000100100101,0b101111001111100,0b101101101001011,0b100010111111001,0b100000011001110,0b100111110010111,0b100101010100000];
-  const MASKS=[(r,c)=>(r+c)%2==0,(r,c)=>r%2==0,(r,c)=>c%3==0,(r,c)=>(r+c)%3==0,(r,c)=>(Math.floor(r/2)+Math.floor(c/3))%2==0,(r,c)=>(r*c)%2+(r*c)%3==0,(r,c)=>((r*c)%2+(r*c)%3)%2==0,(r,c)=>((r+c)%2+(r*c)%3)%2==0];
-  function pv(n){for(let v=1;v<=10;v++)if(n+2<=TD[v])return v;return 10;}
-  function build(bytes,ver){
-    const bits=[],add=(v,n)=>{for(let i=n-1;i>=0;i--)bits.push((v>>i)&1);};
-    add(4,4);add(bytes.length,8);for(const b of bytes)add(b,8);
-    add(0,4);while(bits.length%8)bits.push(0);
-    const pd=[0xEC,0x11];let pi=0;while(bits.length<TD[ver]*8){add(pd[pi%2],8);pi++;}
-    const cw=[];for(let i=0;i<bits.length;i+=8){let b=0;for(let j=0;j<8;j++)b=(b<<1)|(bits[i+j]||0);cw.push(b);}return cw;
+  // Format strings for EC=M, masks 0-7
+  const FMT=[21522,20773,24188,23371,17913,16590,20375,19104];
+  const MASKS=[(r,c)=>(r+c)%2===0,(r,c)=>r%2===0,(r,c)=>c%3===0,(r,c)=>(r+c)%3===0,(r,c)=>(Math.floor(r/2)+Math.floor(c/3))%2===0,(r,c)=>(r*c)%2+(r*c)%3===0,(r,c)=>((r*c)%2+(r*c)%3)%2===0,(r,c)=>((r+c)%2+(r*c)%3)%2===0];
+
+  function pickVer(n){for(let v=1;v<=10;v++)if(n+2<=TD[v])return v;return 10;}
+
+  function buildCW(bytes,ver){
+    const b=[],add=(v,n)=>{for(let i=n-1;i>=0;i--)b.push((v>>i)&1);};
+    add(4,4);add(bytes.length,8);for(const x of bytes)add(x,8);
+    add(0,4);while(b.length%8)b.push(0);
+    const pd=[0xEC,0x11];let pi=0;while(b.length<TD[ver]*8){add(pd[pi%2],8);pi++;}
+    const cw=[];for(let i=0;i<b.length;i+=8){let x=0;for(let j=0;j<8;j++)x=(x<<1)|(b[i+j]||0);cw.push(x);}
+    return cw;
   }
+
   function interleave(cw,ver){
-    const[,ecpb,n1,k1,n2,k2]=VT[ver];const blks=[];let p=0;
+    const[,ep,n1,k1,n2,k2]=VP[ver];const blks=[];let p=0;
     for(let i=0;i<n1;i++){blks.push(cw.slice(p,p+k1));p+=k1;}
     for(let i=0;i<n2;i++){blks.push(cw.slice(p,p+k2));p+=k2;}
-    const ec=blks.map(b=>rse(b,ecpb));const out=[];const mx=Math.max(k1,k2);
+    const ec=blks.map(b=>rsEncode(b,ep));
+    const out=[];const mx=Math.max(k1,k2);
     for(let i=0;i<mx;i++)for(const b of blks)if(i<b.length)out.push(b[i]);
-    for(let i=0;i<ecpb;i++)for(const b of ec)out.push(b[i]);return out;
+    for(let i=0;i<ep;i++)for(const b of ec)out.push(b[i]);
+    return out;
   }
-  function score(M,dim){
-    let s=0;
-    for(let r=0;r<dim;r++){let n=1,v=M[r][0];for(let c=1;c<dim;c++){if(M[r][c]===v)n++;else{if(n>=5)s+=n-2;n=1;v=M[r][c];}if(n>=5)s+=n-2;}}
-    for(let c=0;c<dim;c++){let n=1,v=M[0][c];for(let r=1;r<dim;r++){if(M[r][c]===v)n++;else{if(n>=5)s+=n-2;n=1;v=M[r][c];}if(n>=5)s+=n-2;}}
-    for(let r=0;r<dim-1;r++)for(let c=0;c<dim-1;c++)if(M[r][c]===M[r][c+1]&&M[r][c]===M[r+1][c]&&M[r][c]===M[r+1][c+1])s+=3;
-    let dk=0;for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)if(M[r][c])dk++;
-    s+=Math.floor(Math.abs(dk*100/(dim*dim)-50)/5)*10;return s;
-  }
-  function draw(text,canvas,size){
+
+  function makeMatrix(text){
     const bytes=[...new TextEncoder().encode(text)];
-    const ver=pv(bytes.length);const dim=ver*4+17;
-    const cw=build(bytes,ver);const all=interleave(cw,ver);
-    const bits=[];for(const c of all)for(let i=7;i>=0;i--)bits.push((c>>i)&1);
+    const ver=pickVer(bytes.length);
+    const dim=ver*4+17;
+    const allCW=interleave(buildCW(bytes,ver),ver);
+    const bits=[];for(const c of allCW)for(let i=7;i>=0;i--)bits.push((c>>i)&1);
     for(let i=0;i<(RM[ver]||0);i++)bits.push(0);
-    let bestM=null,bestS=Infinity;
+
+    let bestM=null,bestScore=Infinity;
+
     for(let mid=0;mid<8;mid++){
       const M=Array.from({length:dim},()=>new Uint8Array(dim));
-      const FN=Array.from({length:dim},()=>new Uint8Array(dim));
-      const set=(r,c,v,fn)=>{if(r>=0&&r<dim&&c>=0&&c<dim){M[r][c]=v;if(fn)FN[r][c]=1;}};
-      const finder=(tr,tc)=>{for(let dr=-1;dr<=7;dr++)for(let dc=-1;dc<=7;dc++){if(tr+dr<0||tr+dr>=dim||tc+dc<0||tc+dc>=dim)continue;if(dr>=-1&&dr<=7&&dc>=-1&&dc<=7){const v=(dr>=0&&dr<=6&&dc>=0&&dc<=6)&&(dr===0||dr===6||dc===0||dc===6||(dr>=2&&dr<=4&&dc>=2&&dc<=4))?1:0;set(tr+dr,tc+dc,v,true);}}};
+      const F=Array.from({length:dim},()=>new Uint8Array(dim)); // function modules
+      const set=(r,c,v)=>{if(r>=0&&r<dim&&c>=0&&c<dim){M[r][c]=v;F[r][c]=1;}};
+
+      // Finder patterns
+      const finder=(tr,tc)=>{
+        for(let dr=-1;dr<=7;dr++)for(let dc=-1;dc<=7;dc++){
+          if(tr+dr<0||tr+dr>=dim||tc+dc<0||tc+dc>=dim)continue;
+          if(dr>=-1&&dr<=7&&dc>=-1&&dc<=7){
+            const v=(dr>=0&&dr<=6&&dc>=0&&dc<=6)&&(dr===0||dr===6||dc===0||dc===6||(dr>=2&&dr<=4&&dc>=2&&dc<=4))?1:0;
+            set(tr+dr,tc+dc,v);
+          }
+        }
+      };
       finder(0,0);finder(0,dim-7);finder(dim-7,0);
-      for(let i=8;i<dim-8;i++){if(!FN[6][i])set(6,i,i%2===0?1:0,true);if(!FN[i][6])set(i,6,i%2===0?1:0,true);}
-      set(dim-8,8,1,true);
-      const ap=AL[ver]||[];
-      for(const ar of ap)for(const ac of ap){if(FN[ar][ac])continue;for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++)set(ar+dr,ac+dc,(Math.abs(dr)===2||Math.abs(dc)===2||dr===0&&dc===0)?1:0,true);}
-      [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8],[8,dim-1],[8,dim-2],[8,dim-3],[8,dim-4],[8,dim-5],[8,dim-6],[8,dim-7],[dim-7,8],[dim-6,8],[dim-5,8],[dim-4,8],[dim-3,8],[dim-2,8],[dim-1,8]].forEach(([r,c])=>{FN[r][c]=1;});
+
+      // Timing
+      for(let i=8;i<dim-8;i++){if(!F[6][i])set(6,i,i%2===0?1:0);if(!F[i][6])set(i,6,i%2===0?1:0);}
+      set(dim-8,8,1);
+
+      // Alignment
+      for(const ar of (AL[ver]||[]))for(const ac of (AL[ver]||[])){
+        if(F[ar][ac])continue;
+        for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++)
+          set(ar+dr,ac+dc,(Math.abs(dr)===2||Math.abs(dc)===2||dr===0&&dc===0)?1:0);
+      }
+
+      // Format placeholders
+      [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8],
+       [8,dim-1],[8,dim-2],[8,dim-3],[8,dim-4],[8,dim-5],[8,dim-6],[8,dim-7],
+       [dim-7,8],[dim-6,8],[dim-5,8],[dim-4,8],[dim-3,8],[dim-2,8],[dim-1,8]
+      ].forEach(([r,c])=>{F[r][c]=1;});
+
+      // Data zigzag
       let bi=0,up=true,col=dim-1;
-      while(col>=0){if(col===6)col--;for(let row=0;row<dim;row++){const r=up?dim-1-row:row;for(let dc=0;dc<2;dc++){const c=col-dc;if(!FN[r][c]&&bi<bits.length)M[r][c]=bits[bi++];}}up=!up;col-=2;}
+      while(col>=0){
+        if(col===6)col--;
+        for(let row=0;row<dim;row++){
+          const r=up?dim-1-row:row;
+          for(let dc=0;dc<2;dc++){const c=col-dc;if(!F[r][c]&&bi<bits.length)M[r][c]=bits[bi++];}
+        }
+        up=!up;col-=2;
+      }
+
+      // Apply mask
       const mfn=MASKS[mid];
-      for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)if(!FN[r][c]&&mfn(r,c))M[r][c]^=1;
+      for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)if(!F[r][c]&&mfn(r,c))M[r][c]^=1;
+
+      // Write format info
       const fmt=FMT[mid],fb=[];for(let i=14;i>=0;i--)fb.push((fmt>>i)&1);
-      for(let i=0;i<6;i++)M[8][i]=fb[i];M[8][7]=fb[6];M[8][8]=fb[7];M[7][8]=fb[8];
+      for(let i=0;i<6;i++)M[8][i]=fb[i];
+      M[8][7]=fb[6];M[8][8]=fb[7];M[7][8]=fb[8];
       for(let i=0;i<6;i++)M[5-i][8]=fb[9+i];
-      for(let i=0;i<8;i++)M[dim-1-i][8]=fb[i];for(let i=0;i<7;i++)M[8][dim-7+i]=fb[8+i];
-      const s=score(M,dim);if(s<bestS){bestS=s;bestM=M.map(r=>Uint8Array.from(r));}
+      for(let i=0;i<8;i++)M[dim-1-i][8]=fb[i];
+      for(let i=0;i<7;i++)M[8][dim-7+i]=fb[8+i];
+
+      // Score
+      let s=0;
+      for(let r=0;r<dim;r++){let n=1,v=M[r][0];for(let c=1;c<dim;c++){if(M[r][c]===v){n++;}else{if(n>=5)s+=n-2;n=1;v=M[r][c];}if(n>=5)s+=n-2;}}
+      for(let c=0;c<dim;c++){let n=1,v=M[0][c];for(let r=1;r<dim;r++){if(M[r][c]===v){n++;}else{if(n>=5)s+=n-2;n=1;v=M[r][c];}if(n>=5)s+=n-2;}}
+      for(let r=0;r<dim-1;r++)for(let c=0;c<dim-1;c++)if(M[r][c]===M[r][c+1]&&M[r][c]===M[r+1][c]&&M[r][c]===M[r+1][c+1])s+=3;
+      let dk=0;for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)if(M[r][c])dk++;
+      s+=Math.floor(Math.abs(dk*100/(dim*dim)-50)/5)*10;
+      if(s<bestScore){bestScore=s;bestM=M.map(r=>Uint8Array.from(r));}
     }
+    return{matrix:bestM,dim,version:ver};
+  }
+
+  // 畫到 canvas，同時設定 CSS 尺寸避免縮放模糊
+  function drawToCanvas(text,canvas,size){
+    const{matrix,dim}=makeMatrix(text);
+    const q=4,cell=size/(dim+q*2);
     canvas.width=size;canvas.height=size;
+    canvas.style.width=size+'px';canvas.style.height=size+'px';
     const ctx=canvas.getContext('2d');
-    const q=4,tot=dim+q*2,cell=size/tot;
     ctx.fillStyle='#ffffff';ctx.fillRect(0,0,size,size);
     ctx.fillStyle='#000000';
-    for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)if(bestM[r][c])ctx.fillRect((q+c)*cell,(q+r)*cell,cell,cell);
+    for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)
+      if(matrix[r][c])ctx.fillRect((q+c)*cell,(q+r)*cell,cell+.5,cell+.5); // +0.5 避免縫隙
   }
-  return{draw};
+
+  // 轉成 SVG 字串（比 canvas 更清晰，手機掃描成功率更高）
+  function toSVG(text,size){
+    const{matrix,dim}=makeMatrix(text);
+    const q=4,total=dim+q*2,cell=size/total;
+    let rects='';
+    for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)
+      if(matrix[r][c])rects+=`<rect x="${(q+c)*cell}" y="${(q+r)*cell}" width="${cell+.1}" height="${cell+.1}"/>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" fill="white"/><g fill="black">${rects}</g></svg>`;
+  }
+
+  return{drawToCanvas,toSVG};
 })();
 </script>
 
-<!-- ═══ 主程式 ═══ -->
+<!-- ════ 主程式 ════ -->
 <script>
-// ── localStorage keys（與 student.html 完全一致）──
-const STUDENT_URL = 'https://pin-xian.github.io/rollcall/student.html';
-const LS_ROSTER   = 'att_roster_v3';   // Array of {cls,sno,name,sid}
-const LS_SEATS    = 'att_seats_v3';    // {cls: {seat: {sno,name,sid}}}
-const LS_LAYOUT   = 'att_layout_v3';   // {cls: {rows,cols}}
-const LS_CFG      = 'att_cfg_v3';
-const LS_ATT_PFX  = 'att_at_';        // att_at_{token}_{cls}
+const STUDENT_URL='https://pin-xian.github.io/rollcall/student.html';
+const GIST_API='https://api.github.com/gists';
+const LS={ro:'att_ro3',se:'att_se3',la:'att_la3',cf:'att_cf3',at:'att_at_',gt:'att_gh_token',gi:'att_gh_gist'};
 
-// ── 狀態 ──
-let ROSTER  = [];
-let SEATS   = {};
-let LAYOUT  = {};
-let CFG     = {};
-let TOKEN   = '';
-let QRon    = false;
-let QRSZ    = 260;
-let impRaw  = [], impHd = [];
-let pkKey   = '', pkCls = '';
-let wkData  = null;
+let ROSTER=[],SEATS={},LAYOUT={},CFG={},TOKEN='',QRon=false,QRSZ=280;
+let impRaw=[],impHd=[],pkKey='',pkCls='',wkData=null;
+let GH_TOKEN='',GIST_ID='';
 
-// ── 初始化 ──
-function init() {
-  loadLS();
-  popCls();
-  // 不在 init 呼叫 rebuildEditor，等使用者選班級後再建
-  clock(); setInterval(clock, 1000);
-  const t=new Date(), mo=new Date(t);
-  mo.setDate(t.getDate()-t.getDay()+1);
-  const su=new Date(mo); su.setDate(mo.getDate()+6);
-  document.getElementById('wk-from').value = mo.toISOString().slice(0,10);
-  document.getElementById('wk-to').value   = su.toISOString().slice(0,10);
+function init(){
+  loadLS();popCls();clock();setInterval(clock,1000);
+  const t=new Date(),mo=new Date(t);mo.setDate(t.getDate()-t.getDay()+1);
+  const su=new Date(mo);su.setDate(mo.getDate()+6);
+  document.getElementById('wk-from').value=mo.toISOString().slice(0,10);
+  document.getElementById('wk-to').value=su.toISOString().slice(0,10);
+  checkGistStatus();
 }
 
-function loadLS() {
-  try {
-    const r=localStorage.getItem(LS_ROSTER), s=localStorage.getItem(LS_SEATS),
-          l=localStorage.getItem(LS_LAYOUT), c=localStorage.getItem(LS_CFG);
-    if(r) ROSTER=JSON.parse(r);
-    if(s) SEATS=JSON.parse(s);
-    if(l) LAYOUT=JSON.parse(l);
-    if(c) {
-      CFG=JSON.parse(c);
-      if(CFG.course)    document.getElementById('course-name').value=CFG.course;
-      if(CFG.classTime) document.getElementById('class-time').value=CFG.classTime;
-      if(CFG.lateMin)   document.getElementById('late-min').value=CFG.lateMin;
+function loadLS(){
+  try{
+    const r=localStorage.getItem(LS.ro),s=localStorage.getItem(LS.se),
+          l=localStorage.getItem(LS.la),c=localStorage.getItem(LS.cf);
+    if(r)ROSTER=JSON.parse(r);
+    if(s)SEATS=JSON.parse(s);
+    if(l)LAYOUT=JSON.parse(l);
+    if(c){CFG=JSON.parse(c);
+      if(CFG.course)document.getElementById('course-name').value=CFG.course;
+      if(CFG.classTime)document.getElementById('class-time').value=CFG.classTime;
+      if(CFG.lateMin)document.getElementById('late-min').value=CFG.lateMin;
     }
-  } catch(e){}
+    GH_TOKEN=localStorage.getItem(LS.gt)||'';
+    GIST_ID=localStorage.getItem(LS.gi)||'';
+    if(GH_TOKEN){document.getElementById('gh-token').value=GH_TOKEN;}
+    if(GIST_ID){document.getElementById('gh-gist-id').value=GIST_ID;}
+  }catch(e){}
 }
 
-function saveRoster() {
-  try { localStorage.setItem(LS_ROSTER,JSON.stringify(ROSTER)); } catch(e){ toast('⚠️ 名冊儲存失敗'); }
-}
+function saveRoster(){try{localStorage.setItem(LS.ro,JSON.stringify(ROSTER));}catch(e){toast('⚠️ 儲存失敗');}}
+function saveSeatsLS(){try{localStorage.setItem(LS.se,JSON.stringify(SEATS));localStorage.setItem(LS.la,JSON.stringify(LAYOUT));}catch(e){}}
+function saveCFG(){try{localStorage.setItem(LS.cf,JSON.stringify({course:document.getElementById('course-name').value,classTime:document.getElementById('class-time').value,lateMin:document.getElementById('late-min').value}));}catch(e){}}
+function getAtt(cls){if(!TOKEN||!cls)return{};try{return JSON.parse(localStorage.getItem(LS.at+TOKEN+'_'+cls)||'{}');}catch(e){return{};}}
+function saveAtt(cls,att){try{localStorage.setItem(LS.at+TOKEN+'_'+cls,JSON.stringify(att));}catch(e){}}
 
-// ★ 儲存座位表時才寫 LS，讓 student.html 讀得到
-function saveSeatsToLS() {
-  try {
-    localStorage.setItem(LS_SEATS, JSON.stringify(SEATS));
-    localStorage.setItem(LS_LAYOUT, JSON.stringify(LAYOUT));
-  } catch(e){ toast('⚠️ 儲存失敗'); return false; }
-  return true;
-}
-
-function saveCFG() {
-  try { localStorage.setItem(LS_CFG, JSON.stringify({
-    course:    document.getElementById('course-name').value,
-    classTime: document.getElementById('class-time').value,
-    lateMin:   document.getElementById('late-min').value,
-  })); } catch(e){}
-}
-
-function getAtt(cls) {
-  if(!TOKEN||!cls) return {};
-  try{ return JSON.parse(localStorage.getItem(LS_ATT_PFX+TOKEN+'_'+cls)||'{}'); }catch(e){ return {}; }
-}
-function saveAtt(cls,att) {
-  try{ localStorage.setItem(LS_ATT_PFX+TOKEN+'_'+cls,JSON.stringify(att)); }catch(e){}
-}
-
-// ── 工具 ──
-function toast(m,d=2400){ const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d); }
-function clock(){ const n=new Date(); document.getElementById('sb-ft').textContent=n.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit',weekday:'short'})+'\n'+n.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
-function addMins(t,m){ const[h,mm]=t.split(':').map(Number),tot=h*60+mm+m;return String(Math.floor(tot/60)%24).padStart(2,'0')+':'+String(tot%60).padStart(2,'0'); }
-function nowStr(){ return new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
-function todayStr(){ return new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}); }
-function getClasses(){ return [...new Set(ROSTER.map(s=>s.cls).filter(Boolean))]; }
-function getSC(cls){ return SEATS[cls]||{}; }
-function curCls(){ return document.getElementById('dash-cls')?.value||''; }
-function curSeatCls(){ return document.getElementById('seat-cls')?.value||''; }
+function toast(m,d=2400){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+function clock(){const n=new Date();document.getElementById('sb-ft').textContent=n.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit',weekday:'short'})+'\n'+n.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function addMins(t,m){const[h,mm]=t.split(':').map(Number),tot=h*60+mm+m;return String(Math.floor(tot/60)%24).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
+function nowStr(){return new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function todayStr(){return new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});}
+function getClasses(){return[...new Set(ROSTER.map(s=>s.cls).filter(Boolean))];}
+function getSC(cls){return SEATS[cls]||{};}
+function curCls(){return document.getElementById('dash-cls')?.value||'';}
+function curSeatCls(){return document.getElementById('seat-cls')?.value||'';}
+function getSeatOrder(cls){const rows=(LAYOUT[cls]?.rows)||4,cols=(LAYOUT[cls]?.cols)||5;const k=[];for(let r=1;r<=rows;r++)for(let c=0;c<cols;c++)k.push(r+String.fromCharCode(65+c));return k;}
 
 function go(id,el){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   el.classList.add('active');
-  if(id==='roster'){ renderRoster(); updManSel(); }
-  if(id==='dashboard') syncAll();
-  if(id==='clsmgr') renderClsMgr();
-  // 注意：seats 頁面不自動 rebuild，等使用者選班級
+  if(id==='roster'){renderRoster();updManSel();}
+  if(id==='dashboard')syncAll();
+  if(id==='clsmgr')renderClsMgr();
+  if(id==='import')renderCurRoster();
 }
 
 function popCls(){
@@ -581,37 +622,87 @@ function popCls(){
   ['dash-cls','qr-cls','seat-cls','r-cls','wk-cls'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=opt;});
 }
 
+function checkGistStatus(){
+  const ok=!!(GH_TOKEN&&GIST_ID);
+  const warn=document.getElementById('qr-no-gist');
+  if(warn)warn.style.display=ok?'none':'flex';
+}
+
+// ── Gist 設定 ──
+function saveGistSettings(){
+  GH_TOKEN=document.getElementById('gh-token').value.trim();
+  GIST_ID=document.getElementById('gh-gist-id').value.trim();
+  localStorage.setItem(LS.gt,GH_TOKEN);
+  localStorage.setItem(LS.gi,GIST_ID);
+  toast('設定已儲存，測試連線中...');
+  testGist();
+}
+
+async function testGist(){
+  const res=document.getElementById('gist-test-result');
+  if(!GH_TOKEN){res.innerHTML='<div class="al al-r">❌ 請先填入 Token</div>';return;}
+  res.innerHTML='<div class="al al-b">🔌 測試中...</div>';
+  try{
+    const r=await fetch(GIST_API+(GIST_ID?'/'+GIST_ID:''),{headers:{Authorization:'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json'}});
+    if(r.ok){
+      res.innerHTML='<div class="al al-g">✅ 連線成功！Token 有效</div>';
+      checkGistStatus();
+    }else if(r.status===404&&GIST_ID){
+      res.innerHTML='<div class="al al-y">⚠️ Token 有效但 Gist ID 不存在，請清空 Gist ID 讓系統自動建立</div>';
+    }else{
+      res.innerHTML=`<div class="al al-r">❌ 失敗（HTTP ${r.status}）</div>`;
+    }
+  }catch(e){res.innerHTML=`<div class="al al-r">❌ 網路錯誤：${e.message}</div>`;}
+}
+
+async function uploadToGist(data){
+  if(!GH_TOKEN)return null;
+  const body={description:'點名系統座位表',public:false,files:{'seats.json':{content:JSON.stringify(data)}}};
+  try{
+    let r;
+    if(GIST_ID){
+      r=await fetch(GIST_API+'/'+GIST_ID,{method:'PATCH',headers:{Authorization:'token '+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    }else{
+      r=await fetch(GIST_API,{method:'POST',headers:{Authorization:'token '+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    }
+    if(r.ok){
+      const data2=await r.json();
+      if(!GIST_ID){
+        GIST_ID=data2.id;
+        localStorage.setItem(LS.gi,GIST_ID);
+        document.getElementById('gh-gist-id').value=GIST_ID;
+      }
+      return GIST_ID;
+    }
+  }catch(e){}
+  return null;
+}
+
 // ── 同步 ──
-function syncAll(){ const cls=curCls(); if(!cls) return; updStats(cls); renderSG(cls); renderRL(cls); }
+function syncAll(){const cls=curCls();if(!cls)return;updStats(cls);renderSG(cls);renderRL(cls);}
 
 function updStats(cls){
-  const att=getAtt(cls), seats=getSC(cls);
-  let on=0,late=0; Object.values(att).forEach(r=>{if(r.late)late++;else on++;});
-  const tot=Object.keys(seats).filter(s=>seats[s]).length, abs=Math.max(0,tot-on-late);
+  const att=getAtt(cls),seats=getSC(cls);
+  let on=0,late=0;Object.values(att).forEach(r=>{if(r.late)late++;else on++;});
+  const tot=Object.keys(seats).filter(s=>seats[s]).length,abs=Math.max(0,tot-on-late);
   ['s-on','r-on'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=on;});
   ['s-late','r-late'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=late;});
   ['s-abs','r-abs'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=abs;});
   ['s-tot','r-tot'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=tot;});
 }
 
-function getSeatOrder(cls){
-  const rows=(LAYOUT[cls]?.rows)||4, cols=(LAYOUT[cls]?.cols)||5;
-  const k=[];for(let r=1;r<=rows;r++)for(let c=0;c<cols;c++)k.push(r+String.fromCharCode(65+c));return k;
-}
-
 function renderSG(cls){
   cls=cls||curCls();const grid=document.getElementById('sgrid');if(!grid)return;
-  const seats=getSC(cls),att=getAtt(cls);
-  const rows=(LAYOUT[cls]?.rows)||4,cols=(LAYOUT[cls]?.cols)||5;
+  const seats=getSC(cls),att=getAtt(cls),rows=(LAYOUT[cls]?.rows)||4,cols=(LAYOUT[cls]?.cols)||5;
   grid.style.gridTemplateColumns='repeat('+cols+',1fr)';
   const order=getSeatOrder(cls);
   grid.innerHTML=order.map(seat=>{
     const info=seats[seat];
-    if(!info) return '<div class="seat s-empty"><div>'+seat+'</div></div>';
+    if(!info)return'<div class="seat s-empty"><div>'+seat+'</div></div>';
     const rec=att[seat];
-    if(!QRon) return '<div class="seat s-empty"><div>'+seat+'</div><div class="sno">'+info.sno+'</div><div class="snm">'+info.name+'</div></div>';
-    if(rec){const l=rec.late;return '<div class="seat '+(l?'s-late':'s-ok')+'" title="'+rec.timeStr+'"><div>'+(l?'⚠':'✓')+' '+seat+'</div><div class="sno">'+info.sno+'</div><div class="snm">'+info.name+'</div></div>';}
-    return '<div class="seat s-abs"><div>'+seat+'</div><div class="sno">'+info.sno+'</div><div class="snm">'+info.name+'</div></div>';
+    if(!QRon)return'<div class="seat s-empty"><div>'+seat+'</div><div class="sno">'+info.sno+'</div><div class="snm">'+info.name+'</div></div>';
+    if(rec){const l=rec.late;return'<div class="seat '+(l?'s-late':'s-ok')+'" title="'+rec.timeStr+'"><div>'+(l?'⚠':'✓')+' '+seat+'</div><div class="sno">'+info.sno+'</div><div class="snm">'+info.name+'</div></div>';}
+    return'<div class="seat s-abs"><div>'+seat+'</div><div class="sno">'+info.sno+'</div><div class="snm">'+info.name+'</div></div>';
   }).join('');
 }
 
@@ -624,29 +715,33 @@ function renderRL(cls){
 
 // ── QR Code ──
 function getQRUrl(){
-  const p=new URLSearchParams({t:CFG.classTime,dl:CFG.lateDeadline,cls:CFG.cls,tk:TOKEN});
+  const p=new URLSearchParams({t:CFG.classTime,dl:CFG.lateDeadline,cls:CFG.cls,tk:TOKEN,g:GIST_ID});
   return STUDENT_URL+'?'+p.toString();
 }
-function drawQR(el,size){
+
+function renderQRToEl(el,size){
   el.innerHTML='';
-  const c=document.createElement('canvas');
-  // ★ 同時設定 canvas 的實際像素尺寸和 CSS 顯示尺寸，避免 flex 容器縮放造成模糊
-  c.width=size; c.height=size;
-  c.style.cssText='display:block;border-radius:5px;width:'+size+'px;height:'+size+'px';
-  el.appendChild(c);
-  try{ QRE.draw(getQRUrl(),c,size); }
-  catch(e){ el.innerHTML='<div style="color:var(--red);padding:1rem;font-size:13px;text-align:center">QR 產生失敗：'+e.message+'</div>'; }
+  // 用 SVG 而非 canvas，SVG 在任何解析度都清晰，掃描成功率更高
+  try{
+    const svg=QRCode.toSVG(getQRUrl(),size);
+    const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+    img.width=size;img.height=size;
+    img.style.cssText='display:block;border-radius:5px;width:'+size+'px;height:'+size+'px';
+    el.appendChild(img);
+  }catch(e){el.innerHTML='<div style="color:var(--red);padding:1rem;font-size:13px">QR 產生失敗：'+e.message+'</div>';}
 }
-function genQR(){
+
+async function genQR(){
   const cls=document.getElementById('qr-cls').value;
   if(!cls){toast('請先選擇班級');return;}
+  if(!GIST_ID){toast('⚠️ 請先至「⚙️ Gist 設定」完成設定，否則學生無法簽到',4000);return;}
   const course=document.getElementById('course-name').value.trim()||'課程';
   const classTime=document.getElementById('class-time').value;
   const lateMin=parseInt(document.getElementById('late-min').value)||15;
-  const dateStr=todayStr(), lateDeadline=addMins(classTime,lateMin);
+  const dateStr=todayStr(),lateDeadline=addMins(classTime,lateMin);
   TOKEN=String(Date.now()).slice(-8);
   CFG={course,classTime,lateMin,dateStr,lateDeadline,cls,token:TOKEN};
-  QRon=true; saveCFG();
+  QRon=true;saveCFG();
   document.getElementById('qr-info').style.display='block';
   document.getElementById('qr-display').style.display='block';
   document.getElementById('qr-empty').style.display='none';
@@ -658,28 +753,37 @@ function genQR(){
   document.getElementById('qi-url').textContent=getQRUrl();
   document.getElementById('dash-sub').textContent=cls+' · '+course+' · '+dateStr+'　截止 '+lateDeadline;
   document.getElementById('dash-cls').value=cls;
-  drawQR(document.getElementById('qr-box'),QRSZ);
-  updStats(cls); renderSG(cls); updManSel();
+  renderQRToEl(document.getElementById('qr-box'),QRSZ);
+  updStats(cls);renderSG(cls);updManSel();
   toast('✅ QR Code 已產生！');
   if(window._si)clearInterval(window._si);
   window._si=setInterval(syncAll,8000);
 }
-function resizeQR(v){ QRSZ=parseInt(v); document.getElementById('sz-lbl').textContent=v+'px'; if(QRon)drawQR(document.getElementById('qr-box'),QRSZ); }
+
+function resizeQR(v){QRSZ=parseInt(v);document.getElementById('sz-lbl').textContent=v+'px';if(QRon)renderQRToEl(document.getElementById('qr-box'),QRSZ);}
+
 function dlQR(){
   if(!QRon){toast('請先產生 QR Code');return;}
-  const c=document.querySelector('#qr-box canvas');if(!c){toast('尚未產生');return;}
-  const a=document.createElement('a');a.download='QR_'+CFG.cls+'_'+CFG.dateStr+'.png';a.href=c.toDataURL('image/png');a.click();toast('✅ 已下載 PNG');
+  try{
+    const svg=QRCode.toSVG(getQRUrl(),800);
+    const blob=new Blob([svg],{type:'image/svg+xml'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='QR_'+CFG.cls+'_'+CFG.dateStr+'.svg';a.click();
+    URL.revokeObjectURL(url);toast('✅ 已下載 SVG（高品質）');
+  }catch(e){toast('下載失敗');}
 }
+
 function openFS(){
   if(!QRon){toast('請先產生 QR Code');return;}
   document.getElementById('fsov').classList.add('open');
-  drawQR(document.getElementById('fs-qr'),480);
+  renderQRToEl(document.getElementById('fs-qr'),500);
   document.getElementById('fs-title').textContent=CFG.cls+' · '+CFG.course+'　'+CFG.dateStr+'　截止 '+CFG.lateDeadline;
 }
-function closeFS(){ document.getElementById('fsov').classList.remove('open'); }
+function closeFS(){document.getElementById('fsov').classList.remove('open');}
+
 function resetToday(){
   if(!confirm('確定重置今日簽到紀錄？'))return;
-  if(TOKEN&&curCls())localStorage.removeItem(LS_ATT_PFX+TOKEN+'_'+curCls());
+  if(TOKEN&&curCls())localStorage.removeItem(LS.at+TOKEN+'_'+curCls());
   QRon=false;TOKEN='';CFG={};
   if(window._si){clearInterval(window._si);window._si=null;}
   document.getElementById('qr-info').style.display='none';
@@ -691,80 +795,187 @@ function resetToday(){
   toast('已重置');
 }
 
-// ── 匯入名冊（純 CSV，零外部依賴）──
-function dropF(e){ e.preventDefault(); document.getElementById('upzone').classList.remove('over'); const f=e.dataTransfer.files[0]; if(f)readF(f); }
+// ── 匯入名冊（支援 Excel xlsx + CSV，自動偵測編碼）──
+function dropF(e){e.preventDefault();document.getElementById('upzone').classList.remove('over');const f=e.dataTransfer.files[0];if(f)readF(f);}
+
 function readF(file){
   if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
   const rd=new FileReader();
   rd.onload=e=>{
     try{
-      const buf=e.target.result;
-      const bytes=new Uint8Array(buf);
-      // ★ 自動偵測編碼：BOM 偵測 + 嘗試多種編碼
-      let text='';
-      if(bytes[0]===0xEF&&bytes[1]===0xBB&&bytes[2]===0xBF){
-        // UTF-8 with BOM
-        text=new TextDecoder('utf-8').decode(bytes.slice(3));
-      } else if(bytes[0]===0xFF&&bytes[1]===0xFE){
-        // UTF-16 LE (Windows 常見)
-        text=new TextDecoder('utf-16le').decode(bytes.slice(2));
-      } else if(bytes[0]===0xFE&&bytes[1]===0xFF){
-        // UTF-16 BE
-        text=new TextDecoder('utf-16be').decode(bytes.slice(2));
-      } else {
-        // 嘗試 UTF-8，若有替換字元則改用 Big5（台灣 Excel 預設）
-        const utf8=new TextDecoder('utf-8').decode(bytes);
-        text=utf8.includes('�')?new TextDecoder('big5').decode(bytes):utf8;
+      if(ext==='xlsx'||ext==='xls'){
+        parseXLSX(e.target.result);
+      }else{
+        parseCSVBuf(e.target.result);
       }
-      parseCSV(text);
     }catch(err){toast('⚠️ 解析失敗：'+err.message,4000);}
   };
-  rd.readAsArrayBuffer(file);
+  if(ext==='xlsx'||ext==='xls') rd.readAsArrayBuffer(file);
+  else rd.readAsArrayBuffer(file); // 都用 ArrayBuffer 以便偵測編碼
 }
-function parseCSV(text){
+
+// ── Excel (xlsx) 解析：純 JS 實作，不依賴任何函式庫 ──
+async function parseXLSX(buf){
+  // xlsx 是 ZIP 格式。用 DecompressionStream 解壓（現代瀏覽器原生支援）
   try{
-    const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l=>l.trim());
-    if(lines.length<2){toast('⚠️ 檔案至少需要標題行與一筆資料');return;}
-    // 偵測分隔符（支援逗號、Tab、分號）
-    const firstLine=lines[0];
-    const sep=firstLine.includes('\t')?'\t':firstLine.includes(';')?';':',';
-    // 解析，支援引號包圍的欄位
-    function parseLine(line){
-      const result=[];let cur='',inQ=false;
-      for(let i=0;i<line.length;i++){
-        const ch=line[i];
-        if(ch==='"'&&!inQ&&(i===0||line[i-1]===sep)){inQ=true;}
-        else if(ch==='"'&&inQ){if(line[i+1]==='"'){cur+='"';i++;}else inQ=false;}
-        else if(ch===sep&&!inQ){result.push(cur.trim());cur='';}
-        else cur+=ch;
-      }
-      result.push(cur.trim());
-      return result;
-    }
-    const hd=parseLine(firstLine).map(h=>h.replace(/^["']|["']$/g,'').trim());
-    const rows=lines.slice(1).map(l=>{
-      const c=parseLine(l);
-      const o={};hd.forEach((h,i)=>o[h]=(c[i]||'').replace(/^["']|["']$/g,'').trim());
-      return o;
+    const bytes=new Uint8Array(buf);
+    // 找 xl/worksheets/sheet1.xml 在 ZIP 裡的位置
+    const text=await unzipFile(bytes,'xl/worksheets/sheet1.xml');
+    if(!text){toast('⚠️ 找不到工作表資料');return;}
+    
+    // 同時讀 sharedStrings.xml（文字內容存在這裡）
+    const sharedStr=await unzipFile(bytes,'xl/sharedStrings.xml');
+    const strings=parseSharedStrings(sharedStr||'');
+    
+    const rows=parseSheetXML(text,strings);
+    if(!rows.length){toast('⚠️ 找不到資料');return;}
+    
+    const hd=rows[0];
+    const data=rows.slice(1).map(r=>{
+      const o={};hd.forEach((h,i)=>o[h]=(r[i]||'').toString().trim());return o;
     }).filter(r=>Object.values(r).some(v=>v));
-    impRaw=rows;impHd=hd;
-    setColOpts(hd);autoDetect(hd);prevImport(rows,hd);
+    
+    impRaw=data;impHd=hd;
+    setColOpts(hd);autoDetect(hd);prevImport(data,hd);
     document.getElementById('apply-btn').disabled=false;
-    toast('✅ 載入 '+rows.length+' 筆，確認欄位後按「確認匯入」');
-  }catch(err){toast('⚠️ 解析失敗：'+err.message,4000);}
+    toast('✅ Excel 載入 '+data.length+' 筆');
+  }catch(err){
+    toast('⚠️ Excel 解析失敗，請另存為 CSV 再匯入：'+err.message,5000);
+  }
 }
+
+function parseSharedStrings(xml){
+  const strings=[];
+  const matches=xml.matchAll(/<si[^>]*>[\s\S]*?<\/si>/g);
+  for(const m of matches){
+    const text=(m[0].match(/<t[^>]*>([\s\S]*?)<\/t>/)||[])[1]||'';
+    strings.push(text.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'"));
+  }
+  return strings;
+}
+
+function parseSheetXML(xml,strings){
+  const rows=[];
+  const rowMatches=xml.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g);
+  for(const rm of rowMatches){
+    const cells=[];
+    const cellMatches=rm[1].matchAll(/<c r="([A-Z]+)\d+" t?="?([^"]*)"?[^>]*>[\s\S]*?<v[^>]*>([\s\S]*?)<\/v>[\s\S]*?<\/c>/g);
+    // Simpler parse
+    const cMatches=[...rm[1].matchAll(/<c\s[^>]*>([\s\S]*?)<\/c>/g)];
+    cMatches.forEach(cm=>{
+      const t=(cm[0].match(/t="([^"]+)"/)||[])[1];
+      const v=(cm[1].match(/<v>([\s\S]*?)<\/v>/)||[])[1]||'';
+      if(t==='s') cells.push(strings[parseInt(v)]||'');
+      else cells.push(v);
+    });
+    if(cells.length)rows.push(cells);
+  }
+  return rows;
+}
+
+// 簡易 ZIP 解壓（讀取特定檔案）
+async function unzipFile(bytes,filename){
+  // ZIP 結構：Local file headers + data
+  // 找 filename 對應的 local file header
+  const enc=new TextEncoder();
+  const fnBytes=enc.encode(filename);
+  
+  let i=0;
+  while(i<bytes.length-30){
+    // Local file header signature: 0x04034b50
+    if(bytes[i]===0x50&&bytes[i+1]===0x4B&&bytes[i+2]===0x03&&bytes[i+3]===0x04){
+      const compression=bytes[i+8]|(bytes[i+9]<<8);
+      const compSize=bytes[i+18]|(bytes[i+19]<<8)|(bytes[i+20]<<16)|(bytes[i+21]<<24);
+      const fnLen=bytes[i+26]|(bytes[i+27]<<8);
+      const extraLen=bytes[i+28]|(bytes[i+29]<<8);
+      const fn=new TextDecoder().decode(bytes.slice(i+30,i+30+fnLen));
+      const dataStart=i+30+fnLen+extraLen;
+      
+      if(fn===filename){
+        const compData=bytes.slice(dataStart,dataStart+compSize);
+        if(compression===0){
+          return new TextDecoder('utf-8').decode(compData);
+        }else if(compression===8){
+          // DEFLATE
+          try{
+            const ds=new DecompressionStream('deflate-raw');
+            const writer=ds.writable.getWriter();
+            const reader=ds.readable.getReader();
+            writer.write(compData);writer.close();
+            const chunks=[];let done=false;
+            while(!done){const{value,done:d}=await reader.read();if(d)done=true;else chunks.push(value);}
+            const total=chunks.reduce((a,c)=>a+c.length,0);
+            const out=new Uint8Array(total);let off=0;
+            for(const c of chunks){out.set(c,off);off+=c.length;}
+            return new TextDecoder('utf-8').decode(out);
+          }catch(e){return null;}
+        }
+      }
+      i=dataStart+Math.max(0,compSize);
+    }else{i++;}
+  }
+  return null;
+}
+
+// ── CSV 解析（支援多種編碼）──
+function parseCSVBuf(buf){
+  const bytes=new Uint8Array(buf);
+  let text='';
+  // BOM 偵測
+  if(bytes[0]===0xEF&&bytes[1]===0xBB&&bytes[2]===0xBF){
+    text=new TextDecoder('utf-8').decode(bytes.slice(3));
+  }else if(bytes[0]===0xFF&&bytes[1]===0xFE){
+    text=new TextDecoder('utf-16le').decode(bytes.slice(2));
+  }else if(bytes[0]===0xFE&&bytes[1]===0xFF){
+    text=new TextDecoder('utf-16be').decode(bytes.slice(2));
+  }else{
+    const utf8=new TextDecoder('utf-8').decode(bytes);
+    // 若有替換字元（亂碼指標），改用 Big5
+    text=utf8.includes('\uFFFD')?new TextDecoder('big5').decode(bytes):utf8;
+  }
+  parseCSVText(text);
+}
+
+function parseCSVText(text){
+  const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l=>l.trim());
+  if(lines.length<2){toast('⚠️ 需要至少標題行和一筆資料');return;}
+  const sep=lines[0].includes('\t')?'\t':lines[0].includes(';')?';':',';
+  function parseLine(line){
+    const result=[];let cur='',inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){inQ?( line[i+1]==='"'?(cur+='"',i++):inQ=false ):(inQ=true);}
+      else if(ch===sep&&!inQ){result.push(cur.trim());cur='';}
+      else cur+=ch;
+    }
+    result.push(cur.trim());return result;
+  }
+  const hd=parseLine(lines[0]).map(h=>h.replace(/^"|"$/g,'').trim());
+  const rows=lines.slice(1).map(l=>{
+    const c=parseLine(l);const o={};hd.forEach((h,i)=>o[h]=(c[i]||'').replace(/^"|"$/g,'').trim());return o;
+  }).filter(r=>Object.values(r).some(v=>v));
+  impRaw=rows;impHd=hd;
+  setColOpts(hd);autoDetect(hd);prevImport(rows,hd);
+  document.getElementById('apply-btn').disabled=false;
+  toast('✅ 載入 '+rows.length+' 筆');
+}
+
 function setColOpts(hd){
   const opt='<option value="">自動偵測</option>'+hd.map(h=>'<option>'+h+'</option>').join('');
-  ['col-cls','col-sno','col-nm','col-sid'].forEach(id=>document.getElementById(id).innerHTML=opt);
+  ['col-cls','col-sno','col-sid','col-nm'].forEach(id=>document.getElementById(id).innerHTML=opt);
 }
+
+// 你的欄位順序：班級、座號、學號、姓名
 function autoDetect(hd){
   const hl=hd.map(h=>h.toLowerCase());
   const f=kws=>{for(const k of kws){const i=hl.findIndex(h=>h.includes(k));if(i>=0)return hd[i];}return '';};
   document.getElementById('col-cls').value=f(['班級','班','class']);
   document.getElementById('col-sno').value=f(['座號','座位','sno','seat']);
+  document.getElementById('col-sid').value=f(['學號','sid','id','student']);
   document.getElementById('col-nm').value =f(['姓名','name']);
-  document.getElementById('col-sid').value=f(['學號','sid','id']);
 }
+
 function prevImport(rows,hd){
   const show=rows.slice(0,5);
   document.getElementById('imp-prev').innerHTML=
@@ -772,24 +983,36 @@ function prevImport(rows,hd){
     +'<div class="tw"><table><thead><tr>'+hd.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead>'
     +'<tbody>'+show.map(r=>'<tr>'+hd.map(h=>'<td>'+r[h]+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
 }
+
 function applyImport(){
-  const fC=document.getElementById('col-cls').value ||impHd.find(h=>/班級|班|class/i.test(h))||impHd[0];
-  const fS=document.getElementById('col-sno').value ||impHd.find(h=>/座號|座位|sno/i.test(h)) ||impHd[1];
-  const fN=document.getElementById('col-nm').value  ||impHd.find(h=>/姓名|name/i.test(h))      ||impHd[2];
-  const fI=document.getElementById('col-sid').value ||impHd.find(h=>/學號|sid|id/i.test(h))    ||impHd[3];
-  if(!fN){toast('找不到姓名欄位，請手動選擇');return;}
-  const ns=impRaw.map((r,i)=>({cls:r[fC]||'未分班',sno:r[fS]||String(i+1),name:r[fN]||'',sid:r[fI]||''})).filter(r=>r.name);
+  const fC=document.getElementById('col-cls').value||impHd.find(h=>/班級|班|class/i.test(h))||impHd[0];
+  const fS=document.getElementById('col-sno').value||impHd.find(h=>/座號|座位|sno/i.test(h))||impHd[1];
+  const fI=document.getElementById('col-sid').value||impHd.find(h=>/學號|sid|id/i.test(h))||impHd[2];
+  const fN=document.getElementById('col-nm').value ||impHd.find(h=>/姓名|name/i.test(h))||impHd[3];
+  if(!fN){toast('找不到姓名欄位');return;}
+  const ns=impRaw.map((r,i)=>({cls:r[fC]||'未分班',sno:String(r[fS]||i+1),name:String(r[fN]||''),sid:String(r[fI]||'')})).filter(r=>r.name);
   if(!ns.length){toast('找不到有效資料');return;}
   let added=0,updated=0;
-  for(const s of ns){
-    const idx=ROSTER.findIndex(r=>r.cls===s.cls&&r.sno===s.sno);
-    if(idx>=0){ROSTER[idx]=s;updated++;}else{ROSTER.push(s);added++;}
-  }
-  saveRoster(); popCls();
+  for(const s of ns){const idx=ROSTER.findIndex(r=>r.cls===s.cls&&r.sno===s.sno);if(idx>=0){ROSTER[idx]=s;updated++;}else{ROSTER.push(s);added++;}}
+  saveRoster();popCls();renderCurRoster();
   toast(`✅ 新增 ${added} 人，更新 ${updated} 人，共 ${ROSTER.length} 人`);
   document.getElementById('apply-btn').disabled=true;
-  document.getElementById('imp-prev').innerHTML='<div class="empty"><span class="eico">✅</span>匯入完成！請至「班級管理」確認，或至「座位表」設定座位</div>';
+  document.getElementById('imp-prev').innerHTML='<div class="empty"><span class="eico">✅</span>匯入完成！</div>';
   impRaw=[];impHd=[];
+}
+
+function clearRoster(){if(!confirm('確定清空名冊？'))return;ROSTER=[];SEATS={};LAYOUT={};saveRoster();saveSeatsLS();renderCurRoster();popCls();toast('已清空');}
+
+function renderCurRoster(){
+  const el=document.getElementById('cur-roster');if(!el)return;
+  if(!ROSTER.length){el.innerHTML='<div class="empty"><span class="eico">📋</span>尚未匯入</div>';return;}
+  const byC={};ROSTER.forEach(s=>{const c=s.cls||'未分班';if(!byC[c])byC[c]=[];byC[c].push(s);});
+  let html='<div style="font-size:12px;color:var(--t2);margin-bottom:.6rem">共 '+ROSTER.length+' 位學生</div>';
+  for(const[c,ss]of Object.entries(byC)){
+    html+='<div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">'+c+'</div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:.6rem">'+ss.map(s=>`<span class="tag">No.${s.sno} ${s.name}</span>`).join('')+'</div>';
+  }
+  el.innerHTML=html;
 }
 
 // ── 班級管理 ──
@@ -800,122 +1023,88 @@ function renderClsMgr(){
   el.innerHTML=classes.map(cls=>{
     const students=ROSTER.filter(s=>s.cls===cls);
     const hasSeats=SEATS[cls]&&Object.keys(SEATS[cls]).length>0;
-    return`<div class="cls-card">
-      <div>
-        <div class="cls-name">🏫 ${cls}</div>
-        <div class="cls-info">共 ${students.length} 位學生　座位表：${hasSeats?'✅ 已設定（'+Object.keys(SEATS[cls]).length+' 個座位）':'⚠️ 未設定'}</div>
-      </div>
-      <button class="btn btn-sm btn-r" onclick="deleteCls('${cls}')">🗑️ 刪除此班</button>
-    </div>`;
+    return`<div class="cls-card"><div><div class="cls-name">🏫 ${cls}</div><div class="cls-info">共 ${students.length} 位學生　座位表：${hasSeats?'✅ 已設定':'⚠️ 未設定'}</div></div><button class="btn btn-sm btn-r" onclick="deleteCls('${cls}')">🗑️ 刪除此班</button></div>`;
   }).join('');
 }
+
 function deleteCls(cls){
-  if(!confirm(`確定刪除「${cls}」？\n名冊和座位表都會刪除，無法復原。`))return;
-  ROSTER=ROSTER.filter(s=>s.cls!==cls);
-  delete SEATS[cls]; delete LAYOUT[cls];
-  saveRoster(); saveSeatsToLS(); popCls(); renderClsMgr();
-  toast('已刪除 '+cls);
+  if(!confirm(`確定刪除「${cls}」？`))return;
+  ROSTER=ROSTER.filter(s=>s.cls!==cls);delete SEATS[cls];delete LAYOUT[cls];
+  saveRoster();saveSeatsLS();popCls();renderClsMgr();toast('已刪除 '+cls);
 }
 
 // ── 座位表 ──
-// ★ 修正：rebuildEditor 不讀也不寫 s-rows/s-cols，只根據傳入的 rows/cols 參數建立格子
-function buildSeatGrid(cls, rows, cols){
-  const seats=getSC(cls);
-  const area=document.getElementById('seat-editor');if(!area)return;
-  let html='<div class="sedit" style="grid-template-columns:repeat('+cols+',1fr);gap:5px">';
-  for(let r=1;r<=rows;r++) for(let c=0;c<cols;c++){
-    const key=r+String.fromCharCode(65+c);
-    const info=seats[key];
-    const disp=info?'No.'+info.sno+' '+info.name:'';
-    html+='<div class="sec"><div class="sel">'+key+'</div>'
-      +'<input type="text" id="se-'+key+'" value="'+disp+'" placeholder="空位" class="'+(info?'filled':'')+'" readonly'
-      +' onclick="openPicker(\''+key+'\',\''+cls+'\')"/></div>';
-  }
-  html+='</div>';
-  area.innerHTML=html;
-}
-
-// 使用者選班級時：從 LAYOUT 讀取已儲存的排列，填入欄位，然後建格子
 function onSeatClsChange(){
   const cls=curSeatCls();if(!cls)return;
-  const rows=(LAYOUT[cls]?.rows)||4;
-  const cols=(LAYOUT[cls]?.cols)||5;
+  const rows=(LAYOUT[cls]?.rows)||4,cols=(LAYOUT[cls]?.cols)||5;
   document.getElementById('s-rows').value=rows;
   document.getElementById('s-cols').value=cols;
   buildSeatGrid(cls,rows,cols);
 }
 
-// ★ 套用排列按鈕：讀欄位值，重建格子（不清空已設定的座位）
 function applyLayout(){
   const cls=curSeatCls();if(!cls){toast('請先選擇班級');return;}
   const rows=parseInt(document.getElementById('s-rows').value)||4;
   const cols=parseInt(document.getElementById('s-cols').value)||5;
-  if(rows<1||rows>12||cols<1||cols>12){toast('排數/欄數需在 1-12 之間');return;}
   buildSeatGrid(cls,rows,cols);
-  toast('已套用 '+rows+' 排 × '+cols+' 欄（記得按「💾 儲存座位表」）');
+  toast('已套用 '+rows+'×'+cols+'（記得按「💾 儲存並上傳」）');
 }
 
-// rebuildEditor 只在「座位表」頁面被 go() 呼叫 → 已移除，改由 onSeatClsChange 觸發
+function buildSeatGrid(cls,rows,cols){
+  const seats=getSC(cls),area=document.getElementById('seat-editor');if(!area)return;
+  let html='<div class="sedit" style="grid-template-columns:repeat('+cols+',1fr);gap:5px">';
+  for(let r=1;r<=rows;r++)for(let c=0;c<cols;c++){
+    const key=r+String.fromCharCode(65+c),info=seats[key];
+    const disp=info?'No.'+info.sno+' '+info.name:'';
+    html+='<div class="sec"><div class="sel">'+key+'</div><input type="text" id="se-'+key+'" value="'+disp+'" placeholder="空位" class="'+(info?'filled':'')+'" readonly onclick="openPicker(\''+key+'\',\''+cls+'\')"/></div>';
+  }
+  html+='</div>';area.innerHTML=html;
+}
 
 function openPicker(key,cls){
   if(!cls){toast('請先選擇班級');return;}
-  const clsStudents=ROSTER.filter(s=>s.cls===cls);
-  if(!clsStudents.length){toast('此班沒有學生，請先匯入名冊');return;}
+  if(!ROSTER.filter(s=>s.cls===cls).length){toast('此班沒有學生，請先匯入名冊');return;}
   pkKey=key;pkCls=cls;
   document.getElementById('pk-key').textContent=key;
   document.getElementById('pk-search').value='';
   filterPicker('');
   document.getElementById('picker-modal').classList.add('open');
 }
-function closePicker(){ document.getElementById('picker-modal').classList.remove('open'); }
+function closePicker(){document.getElementById('picker-modal').classList.remove('open');}
 function filterPicker(q){
   const seats=getSC(pkCls);
   const used=new Set(Object.entries(seats).filter(([k])=>k!==pkKey).map(([,v])=>v.sno));
-  const cur=seats[pkCls]?seats[pkCls][pkKey]:null; // 注意：這裡要用 pkKey 不是 pkCls
-  const curInfo=getSC(pkCls)[pkKey];
+  const cur=seats[pkKey];
   const fl=ROSTER.filter(s=>s.cls===pkCls&&(!q||s.name.includes(q)||String(s.sno).includes(q)));
   let html='<div class="pchip pclr" onclick="clrSeat()">✕ 清空此座位</div> ';
-  html+=fl.map(s=>{
-    const tk=used.has(s.sno),sl=curInfo&&curInfo.sno===s.sno;
-    return'<div class="pchip'+(sl?' sel':'')+(tk?' taken':'')+'" onclick="asgSeat(\''+s.sno+'\',\''+s.name+'\',\''+s.sid+'\')">'
-      +'<span style="font-size:10px;color:var(--t2)">No.'+s.sno+'</span>'
-      +'<span style="font-weight:600">'+s.name+'</span>'
-      +(tk?'<span style="font-size:10px;color:var(--t3)">(已排)</span>':'')+'</div>';
-  }).join(' ');
+  html+=fl.map(s=>{const tk=used.has(s.sno),sl=cur&&cur.sno===s.sno;return'<div class="pchip'+(sl?' sel':'')+(tk?' taken':'')+'" onclick="asgSeat(\''+s.sno+'\',\''+s.name+'\',\''+s.sid+'\')">'+'<span style="font-size:10px;color:var(--t2)">No.'+s.sno+'</span><span style="font-weight:600">'+s.name+'</span>'+(tk?'<span style="font-size:10px;color:var(--t3)">(已排)</span>':'')+'</div>';}).join(' ');
   document.getElementById('pk-body').innerHTML=html;
 }
-function asgSeat(sno,name,sid){
-  if(!SEATS[pkCls])SEATS[pkCls]={};
-  SEATS[pkCls][pkKey]={sno,name,sid};
-  const inp=document.getElementById('se-'+pkKey);
-  if(inp){inp.value='No.'+sno+' '+name;inp.className='filled';}
-  closePicker();
-  toast(name+' → '+pkKey+'（記得按「💾 儲存座位表」）');
-}
-function clrSeat(){
-  if(SEATS[pkCls])delete SEATS[pkCls][pkKey];
-  const inp=document.getElementById('se-'+pkKey);
-  if(inp){inp.value='';inp.className='';}
-  closePicker();
-  toast('已清空 '+pkKey+'（記得按「💾 儲存座位表」）');
-}
-function saveSeats(){
+function asgSeat(sno,name,sid){if(!SEATS[pkCls])SEATS[pkCls]={};SEATS[pkCls][pkKey]={sno,name,sid};const inp=document.getElementById('se-'+pkKey);if(inp){inp.value='No.'+sno+' '+name;inp.className='filled';}closePicker();toast(name+' → '+pkKey);}
+function clrSeat(){if(SEATS[pkCls])delete SEATS[pkCls][pkKey];const inp=document.getElementById('se-'+pkKey);if(inp){inp.value='';inp.className='';}closePicker();}
+
+async function saveSeats(){
   const cls=curSeatCls();if(!cls){toast('請先選擇班級');return;}
   const rows=parseInt(document.getElementById('s-rows').value)||4;
   const cols=parseInt(document.getElementById('s-cols').value)||5;
   if(!LAYOUT[cls])LAYOUT[cls]={};
-  LAYOUT[cls].rows=rows; LAYOUT[cls].cols=cols;
-  if(saveSeatsToLS()){toast('✅ 座位表已儲存！學生掃 QR 後可以簽到了');}
+  LAYOUT[cls].rows=rows;LAYOUT[cls].cols=cols;
+  saveSeatsLS();
+  if(!GH_TOKEN){toast('⚠️ 未設定 Gist Token，資料僅存本機。請至「⚙️ Gist 設定」',5000);return;}
+  toast('上傳中...');
+  const gid=await uploadToGist({seats:SEATS,layout:LAYOUT});
+  if(gid){toast('✅ 座位表已儲存並上傳！學生現在可以掃 QR 簽到');}
+  else{toast('⚠️ 上傳失敗，請至「⚙️ Gist 設定」檢查 Token',4000);}
 }
+
 function clearSeats(){
   const cls=curSeatCls();if(!cls){toast('請先選擇班級');return;}
-  if(!confirm('確定清空「'+cls+'」的所有座位？'))return;
+  if(!confirm('確定清空「'+cls+'」的座位？'))return;
   SEATS[cls]={};
-  const rows=parseInt(document.getElementById('s-rows').value)||4;
-  const cols=parseInt(document.getElementById('s-cols').value)||5;
-  buildSeatGrid(cls,rows,cols);
-  toast('已清空（記得按「💾 儲存座位表」）');
+  buildSeatGrid(cls,parseInt(document.getElementById('s-rows').value)||4,parseInt(document.getElementById('s-cols').value)||5);
+  toast('已清空（記得按「💾 儲存並上傳」）');
 }
+
 function autoAssign(){
   const cls=curSeatCls();if(!cls){toast('請先選擇班級');return;}
   const rows=parseInt(document.getElementById('s-rows').value)||4;
@@ -924,93 +1113,62 @@ function autoAssign(){
   if(!sts.length){toast('此班沒有學生');return;}
   if(!SEATS[cls])SEATS[cls]={};
   let i=0;
-  for(let r=1;r<=rows&&i<sts.length;r++)
-    for(let c=0;c<cols&&i<sts.length;c++){
-      const key=r+String.fromCharCode(65+c),s=sts[i++];
-      SEATS[cls][key]={sno:s.sno,name:s.name,sid:s.sid};
-    }
+  for(let r=1;r<=rows&&i<sts.length;r++)for(let c=0;c<cols&&i<sts.length;c++){const key=r+String.fromCharCode(65+c),s=sts[i++];SEATS[cls][key]={sno:s.sno,name:s.name,sid:s.sid};}
   buildSeatGrid(cls,rows,cols);
-  toast('✅ 已排列 '+i+' 位（記得按「💾 儲存座位表」）');
+  toast('✅ 已排列 '+i+' 位（記得按「💾 儲存並上傳」）');
 }
 
 // ── 出席名冊 ──
 function renderRoster(){
-  const cls=document.getElementById('r-cls').value;
-  updStats(cls);
+  const cls=document.getElementById('r-cls').value;updStats(cls);
   const tbl=document.getElementById('r-tbl');
   if(!cls){tbl.innerHTML='<div class="empty"><span class="eico">👥</span>請先選擇班級</div>';return;}
   const seats=getSC(cls),att=getAtt(cls),order=getSeatOrder(cls).filter(s=>seats[s]);
   if(!order.length){tbl.innerHTML='<div class="empty"><span class="eico">🪑</span>此班尚未設定座位表</div>';return;}
-  const rows=order.map(seat=>{
-    const info=seats[seat],rec=att[seat];
+  const rows=order.map(seat=>{const info=seats[seat],rec=att[seat];
     if(rec)return{seat,sno:info.sno,name:rec.name||info.name,time:rec.timeStr||'',status:rec.late?'遲到':'準時到課',late:rec.late,abs:false};
     return{seat,sno:info.sno,name:info.name,time:'—',status:'缺席',abs:true};
   });
-  document.getElementById('r-on').textContent  =rows.filter(r=>!r.abs&&!r.late).length;
+  document.getElementById('r-on').textContent=rows.filter(r=>!r.abs&&!r.late).length;
   document.getElementById('r-late').textContent=rows.filter(r=>r.late).length;
-  document.getElementById('r-abs').textContent =rows.filter(r=>r.abs).length;
-  document.getElementById('r-tot').textContent =rows.length;
-  tbl.innerHTML='<div class="tw"><table><thead><tr><th>座位</th><th>座號</th><th>姓名</th><th>簽到時間</th><th>狀態</th></tr></thead><tbody>'
-    +rows.map(r=>'<tr><td><span class="tag">'+r.seat+'</span></td><td style="color:var(--t2)">'+r.sno+'</td><td style="font-weight:'+(r.abs?400:600)+'">'+r.name+'</td><td style="font-variant-numeric:tabular-nums;color:'+(r.abs?'var(--t3)':'var(--t1)')+'">'+r.time+'</td><td><span class="badge '+(r.abs?'bm':r.late?'br':'bg')+'">'+r.status+'</span></td></tr>').join('')
-    +'</tbody></table></div>';
+  document.getElementById('r-abs').textContent=rows.filter(r=>r.abs).length;
+  document.getElementById('r-tot').textContent=rows.length;
+  tbl.innerHTML='<div class="tw"><table><thead><tr><th>座位</th><th>座號</th><th>姓名</th><th>簽到時間</th><th>狀態</th></tr></thead><tbody>'+rows.map(r=>'<tr><td><span class="tag">'+r.seat+'</span></td><td style="color:var(--t2)">'+r.sno+'</td><td style="font-weight:'+(r.abs?400:600)+'">'+r.name+'</td><td style="font-variant-numeric:tabular-nums;color:'+(r.abs?'var(--t3)':'var(--t1)')+'">'+r.time+'</td><td><span class="badge '+(r.abs?'bm':r.late?'br':'bg')+'">'+r.status+'</span></td></tr>').join('')+'</tbody></table></div>';
 }
+
 function expCSV(){
   const cls=document.getElementById('r-cls').value;if(!cls){toast('請選擇班級');return;}
   const seats=getSC(cls),att=getAtt(cls),order=getSeatOrder(cls).filter(s=>seats[s]);
   if(!order.length){toast('尚無座位資料');return;}
-  const lines=order.map(seat=>{
-    const info=seats[seat],rec=att[seat];
-    if(rec)return seat+','+info.sno+','+rec.name+','+rec.timeStr+','+(rec.late?'遲到':'準時到課');
-    return seat+','+info.sno+','+info.name+',—,缺席';
-  });
-  const hdr=CFG.course?'課程,'+CFG.course+',班級,'+cls+',日期,'+todayStr()+'\n\n':'';
-  const csv='\uFEFF'+hdr+'座位,座號,姓名,簽到時間,狀態\n'+lines.join('\n');
-  dlCSV(csv,'出席_'+cls+'_'+todayStr()+'.csv');
+  const lines=order.map(seat=>{const info=seats[seat],rec=att[seat];if(rec)return seat+','+info.sno+','+rec.name+','+rec.timeStr+','+(rec.late?'遲到':'準時到課');return seat+','+info.sno+','+info.name+',—,缺席';});
+  dlCSV('\uFEFF'+(CFG.course?'課程,'+CFG.course+',班級,'+cls+',日期,'+todayStr()+'\n\n':'')+'座位,座號,姓名,簽到時間,狀態\n'+lines.join('\n'),'出席_'+cls+'_'+todayStr()+'.csv');
   toast('CSV 已下載');
 }
+
 function updManSel(){
   const cls=curCls()||CFG.cls||'',att=getAtt(cls),seats=getSC(cls);
   const sel=document.getElementById('man-nm');if(!sel)return;
-  sel.innerHTML='<option value="">— 選擇學生 —</option>'
-    +getSeatOrder(cls).filter(s=>seats[s]).map(seat=>{
-      const info=seats[seat],done=!!att[seat];
-      return'<option value="'+seat+'" '+(done?'disabled':'')+'>'+info.name+'（'+seat+'）'+(done?' ✓':'')+'</option>';
-    }).join('');
+  sel.innerHTML='<option value="">— 選擇學生 —</option>'+getSeatOrder(cls).filter(s=>seats[s]).map(seat=>{const info=seats[seat],done=!!att[seat];return'<option value="'+seat+'" '+(done?'disabled':'')+'>'+info.name+'（'+seat+'）'+(done?' ✓':'')+'</option>';}).join('');
 }
+
 function manualCI(){
-  const seat=document.getElementById('man-nm').value,st=document.getElementById('man-st').value;
-  if(!seat){toast('請選擇學生');return;}
-  const cls=curCls()||CFG.cls||'',att=getAtt(cls);
-  if(att[seat]){toast('此學生已有紀錄');return;}
+  const seat=document.getElementById('man-nm').value,st=document.getElementById('man-st').value;if(!seat){toast('請選擇學生');return;}
+  const cls=curCls()||CFG.cls||'',att=getAtt(cls);if(att[seat]){toast('已有紀錄');return;}
   const info=getSC(cls)[seat];const isLate=st==='late';
   att[seat]={name:info.name,seat,sno:info.sno,timeStr:nowStr(),ts:Date.now(),late:isLate};
-  saveAtt(cls,att);syncAll();updManSel();renderRoster();
-  toast('已補登：'+info.name+'（'+(isLate?'遲到':'準時')+'）');
+  saveAtt(cls,att);syncAll();updManSel();renderRoster();toast('已補登：'+info.name);
 }
 
 // ── 週報表 ──
 function loadWeekly(){
-  const cls=document.getElementById('wk-cls').value;
-  const from=document.getElementById('wk-from').value;
-  const to=document.getElementById('wk-to').value;
+  const cls=document.getElementById('wk-cls').value,from=document.getElementById('wk-from').value,to=document.getElementById('wk-to').value;
   if(!cls){toast('請選擇班級');return;}
-  const tbl=document.getElementById('wk-tbl');
-  tbl.innerHTML='<div class="empty"><span class="eico">⏳</span>計算中...</div>';
+  const tbl=document.getElementById('wk-tbl');tbl.innerHTML='<div class="empty"><span class="eico">⏳</span>計算中...</div>';
   const dates=new Set(),byNm={},seats=getSC(cls);
   for(let i=0;i<localStorage.length;i++){
-    const k=localStorage.key(i);
-    if(!k||!k.startsWith(LS_ATT_PFX))continue;
-    try{
-      const att=JSON.parse(localStorage.getItem(k)||'{}');
-      Object.values(att).forEach(rec=>{
-        if(!rec.name||rec.cls!==cls)return;
-        const d=rec.date||CFG.dateStr||todayStr();
-        const df=from.replace(/-/g,'/'),dt=to.replace(/-/g,'/');
-        if(d<df||d>dt)return;
-        dates.add(d);
-        if(!byNm[rec.name])byNm[rec.name]={sno:rec.sno||''};
-        byNm[rec.name][d]=rec.late?'遲到':'準時';
-      });
+    const k=localStorage.key(i);if(!k||!k.startsWith(LS.at))continue;
+    try{const att=JSON.parse(localStorage.getItem(k)||'{}');
+      Object.values(att).forEach(rec=>{if(!rec.name||rec.cls!==cls)return;const d=rec.date||CFG.dateStr||todayStr();const df=from.replace(/-/g,'/'),dt=to.replace(/-/g,'/');if(d<df||d>dt)return;dates.add(d);if(!byNm[rec.name])byNm[rec.name]={sno:rec.sno||''};byNm[rec.name][d]=rec.late?'遲到':'準時';});
     }catch(e){}
   }
   Object.values(seats).forEach(info=>{if(!byNm[info.name])byNm[info.name]={sno:info.sno};});
@@ -1018,35 +1176,18 @@ function loadWeekly(){
   const students=Object.entries(byNm).map(([name,info])=>({name,sno:info.sno,records:sdates.map(d=>info[d]||'缺席')})).sort((a,b)=>parseInt(a.sno||999)-parseInt(b.sno||999));
   wkData={cls,from,to,dates:sdates,students};
   if(!sdates.length){tbl.innerHTML='<div class="empty"><span class="eico">📭</span>此區間無紀錄</div>';return;}
-  tbl.innerHTML='<div class="tw"><table><thead><tr><th>座號</th><th>姓名</th>'
-    +sdates.map(d=>'<th class="wkc">'+d.slice(-5)+'</th>').join('')
-    +'<th>出席</th><th>遲到</th><th>缺席</th></tr></thead><tbody>'
-    +students.map(s=>{
-      const on=s.records.filter(r=>r==='準時').length,late=s.records.filter(r=>r==='遲到').length,abs=s.records.filter(r=>r==='缺席').length;
-      return'<tr><td style="color:var(--t2)">'+s.sno+'</td><td style="font-weight:600">'+s.name+'</td>'
-        +s.records.map(r=>'<td class="wkc"><span class="badge '+(r==='準時'?'bg':r==='遲到'?'br':'bm')+'" style="min-width:24px;justify-content:center">'+(r==='準時'?'✓':r==='遲到'?'⚠':'✗')+'</span></td>').join('')
-        +'<td style="color:var(--grn);font-weight:600">'+on+'</td><td style="color:var(--red);font-weight:600">'+late+'</td><td style="color:var(--t2)">'+abs+'</td></tr>';
-    }).join('')+'</tbody></table></div>';
+  tbl.innerHTML='<div class="tw"><table><thead><tr><th>座號</th><th>姓名</th>'+sdates.map(d=>'<th class="wkc">'+d.slice(-5)+'</th>').join('')+'<th>出席</th><th>遲到</th><th>缺席</th></tr></thead><tbody>'+students.map(s=>{const on=s.records.filter(r=>r==='準時').length,late=s.records.filter(r=>r==='遲到').length,abs=s.records.filter(r=>r==='缺席').length;return'<tr><td style="color:var(--t2)">'+s.sno+'</td><td style="font-weight:600">'+s.name+'</td>'+s.records.map(r=>'<td class="wkc"><span class="badge '+(r==='準時'?'bg':r==='遲到'?'br':'bm')+'" style="min-width:24px;justify-content:center">'+(r==='準時'?'✓':r==='遲到'?'⚠':'✗')+'</span></td>').join('')+'<td style="color:var(--grn);font-weight:600">'+on+'</td><td style="color:var(--red);font-weight:600">'+late+'</td><td style="color:var(--t2)">'+abs+'</td></tr>';}).join('')+'</tbody></table></div>';
 }
+
 function expWeekly(){
   if(!wkData||!wkData.dates||!wkData.dates.length){toast('請先查詢');return;}
   const{dates,students,cls,from,to}=wkData;
   const hdr=['座號','姓名',...dates,'出席','遲到','缺席'].join(',');
-  const rows=students.map(s=>{
-    const on=s.records.filter(r=>r==='準時').length,late=s.records.filter(r=>r==='遲到').length,abs=s.records.filter(r=>r==='缺席').length;
-    return[s.sno,s.name,...s.records,on,late,abs].join(',');
-  });
-  const csv='\uFEFF週報表：'+cls+'\n日期：'+from+' 至 '+to+'\n\n'+hdr+'\n'+rows.join('\n');
-  dlCSV(csv,'週報表_'+cls+'_'+from+'_'+to+'.csv');
-  toast('CSV 已下載');
+  const rows=students.map(s=>{const on=s.records.filter(r=>r==='準時').length,late=s.records.filter(r=>r==='遲到').length,abs=s.records.filter(r=>r==='缺席').length;return[s.sno,s.name,...s.records,on,late,abs].join(',');});
+  dlCSV('\uFEFF週報表：'+cls+'\n日期：'+from+' 至 '+to+'\n\n'+hdr+'\n'+rows.join('\n'),'週報表_'+cls+'_'+from+'_'+to+'.csv');toast('CSV 已下載');
 }
 
-function dlCSV(content,filename){
-  const blob=new Blob([content],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=filename;a.click();
-  URL.revokeObjectURL(url);
-}
+function dlCSV(content,filename){const blob=new Blob([content],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);}
 
 init();
 </script>

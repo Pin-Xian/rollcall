@@ -15,26 +15,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
 .card{background:#fff;border:1px solid #E2E2DC;border-radius:13px;padding:1.35rem 1.5rem;margin-bottom:.9rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .card-label{font-size:10px;font-weight:700;color:#9F9FA5;text-transform:uppercase;letter-spacing:.09em;margin-bottom:.85rem}
 .ip{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:7px 0;border-bottom:1px solid #F0F0EC}
-.ip:last-child{border-bottom:none}
-.ip-k{color:#5F5F65}.ip-v{font-weight:700;color:#18181A}
+.ip:last-child{border-bottom:none}.ip-k{color:#5F5F65}.ip-v{font-weight:700;color:#18181A}
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:.85rem}
 .field label{font-size:13px;color:#5F5F65;font-weight:600}
-input[type=text]{height:52px;padding:0 16px;border-radius:10px;border:1.5px solid #CACAC2;background:#fff;color:#18181A;font-size:17px;font-family:inherit;width:100%;transition:.15s;-webkit-appearance:none}
+input[type=text]{height:52px;padding:0 16px;border-radius:10px;border:1.5px solid #C8C8C0;background:#fff;color:#18181A;font-size:17px;font-family:inherit;width:100%;-webkit-appearance:none}
 input[type=text]:focus{outline:none;border-color:#2A6049;box-shadow:0 0 0 3px rgba(42,96,73,.12)}
 .btn{width:100%;height:54px;border-radius:12px;border:none;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;-webkit-tap-highlight-color:transparent}
 .btn-p{background:#18181A;color:#fff}.btn-p:active{background:#333;transform:scale(.98)}
-.btn-o{background:#fff;color:#18181A;border:1.5px solid #CACAC2;height:46px;font-size:14px;font-weight:600;border-radius:10px}.btn-o:active{background:#F5F5F2}
+.btn-o{background:#fff;color:#18181A;border:1.5px solid #C8C8C0;height:46px;font-size:14px;font-weight:600;border-radius:10px}
 .deadline{background:linear-gradient(135deg,#18181A,#2D3748);border-radius:12px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem}
 .dl-lbl{font-size:11px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.05em;text-transform:uppercase}
 .dl-time{font-size:22px;font-weight:700;color:#4DAE80;letter-spacing:-.01em}
-.center{text-align:center}
-.big-icon{font-size:64px;display:block;margin:0 auto 1rem;line-height:1}
-.res-title{font-size:24px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px;color:#18181A}
-.res-sub{font-size:14px;color:#5F5F65;line-height:1.6;margin-bottom:1.5rem}
 .alert{border-radius:10px;padding:12px 16px;font-size:13px;display:flex;align-items:flex-start;gap:10px;margin-bottom:.9rem;line-height:1.6;font-weight:500}
 .a-ok{background:#D6EDE1;color:#2A6049;border:1px solid #A7D7B9}
 .a-err{background:#FEE2E2;color:#B91C1C;border:1px solid #FCA5A5}
 .a-warn{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
+.center{text-align:center}
+.big-icon{font-size:64px;display:block;margin:0 auto 1rem;line-height:1}
+.res-title{font-size:24px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px;color:#18181A}
+.res-sub{font-size:14px;color:#5F5F65;line-height:1.6;margin-bottom:1.5rem}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{animation:spin .8s linear infinite;display:inline-block}
 </style>
@@ -59,10 +58,11 @@ input[type=text]:focus{outline:none;border-color:#2A6049;box-shadow:0 0 0 3px rg
       <div class="ip"><span class="ip-k">上課時間</span><span class="ip-v" id="c-time">—</span></div>
       <div class="ip"><span class="ip-k">遲到截止</span><span class="ip-v" id="c-dl">—</span></div>
     </div>
-    <div class="card">
+    <div id="loading-seats" class="alert a-warn">⏳ 載入座位資料中...</div>
+    <div class="card" id="name-form" style="display:none">
       <div class="card-label">輸入姓名</div>
       <div class="field">
-        <label>你的全名（需與名冊完全相符）</label>
+        <label>你的全名（需與名冊相符）</label>
         <input type="text" id="stu-name" placeholder="例：王小明"
           autocomplete="name" autocorrect="off" autocapitalize="off"
           inputmode="text" enterkeyhint="done"
@@ -91,9 +91,7 @@ input[type=text]:focus{outline:none;border-color:#2A6049;box-shadow:0 0 0 3px rg
       <div class="ip"><span class="ip-k">簽到時間</span><span class="ip-v" id="d-time">—</span></div>
       <div class="ip"><span class="ip-k">出席狀態</span><span class="ip-v" id="d-status">—</span></div>
     </div>
-    <div id="d-late" class="alert a-warn" style="display:none;text-align:left;margin-top:.75rem">
-      ⚠️ 已超過截止時間，本次記錄為遲到
-    </div>
+    <div id="d-late" class="alert a-warn" style="display:none;text-align:left;margin-top:.75rem">⚠️ 已超過截止時間，本次記錄為遲到</div>
   </div>
 
   <!-- 錯誤 -->
@@ -113,121 +111,99 @@ input[type=text]:focus{outline:none;border-color:#2A6049;box-shadow:0 0 0 3px rg
 </div>
 
 <script>
-// ══════════════════════════════════════
-// 與 teacher.html 完全相同的 localStorage key
-// ══════════════════════════════════════
-const LS_ROSTER  = 'att_roster_v3';
-const LS_SEATS   = 'att_seats_v3';
-const LS_ATT_PFX = 'att_at_';
-
-// 從 URL 讀取 QR 參數
 const p        = new URLSearchParams(location.search);
-const clsTime  = p.get('t')   || '';
-const deadline = p.get('dl')  || '';
-const cls      = p.get('cls') || '';
-const token    = p.get('tk')  || '';
+const clsTime  = p.get('t')  || '';
+const deadline = p.get('dl') || '';
+const cls      = p.get('cls')|| '';
+const token    = p.get('tk') || '';
+const gistId   = p.get('g')  || '';
 
-// 從 localStorage 讀取課程資訊（老師端和學生端同一台電腦時有效）
-// 若不同裝置，只顯示 QR 帶來的資訊
-let course = '', dateStr = '';
-try {
-  const cfg = JSON.parse(localStorage.getItem('att_cfg_v3') || '{}');
-  course  = cfg.course  || '';
-  dateStr = cfg.dateStr || '';
-} catch(e) {}
+let SEATS = {}; // 從 Gist 載入
 
-function show(id) {
+function show(id){
   ['view-form','view-loading','view-done','view-error','view-invalid']
-    .forEach(v => document.getElementById(v).style.display = (v===id)?'block':'none');
+    .forEach(v=>document.getElementById(v).style.display=(v===id)?'block':'none');
 }
-function showErr(title, msg) {
-  document.getElementById('e-title').textContent = title;
-  document.getElementById('e-msg').textContent   = msg;
+function showErr(title,msg){
+  document.getElementById('e-title').textContent=title;
+  document.getElementById('e-msg').textContent=msg;
   show('view-error');
 }
 
-// 初始化
-if (!deadline || !token || !cls) {
+if(!deadline||!token||!cls||!gistId){
   show('view-invalid');
 } else {
-  document.getElementById('hdr-title').textContent = course || '課堂簽到';
-  document.getElementById('hdr-sub').textContent   = (dateStr?dateStr+'　':'') + cls;
-  document.getElementById('dl-time').textContent   = deadline;
-  document.getElementById('c-cls').textContent     = cls;
-  document.getElementById('c-time').textContent    = clsTime || '—';
-  document.getElementById('c-dl').textContent      = deadline + '（超過視為遲到）';
-  setTimeout(() => { try { document.getElementById('stu-name').focus(); } catch(e){} }, 400);
+  document.getElementById('hdr-title').textContent='課堂簽到';
+  document.getElementById('hdr-sub').textContent=cls;
+  document.getElementById('dl-time').textContent=deadline;
+  document.getElementById('c-cls').textContent=cls;
+  document.getElementById('c-time').textContent=clsTime||'—';
+  document.getElementById('c-dl').textContent=deadline+'（超過視為遲到）';
+
+  // 從 Gist 載入座位表
+  loadSeats();
 }
 
-function submit() {
-  const name = document.getElementById('stu-name').value.trim();
-  if (!name) { alert('請輸入姓名'); return; }
+async function loadSeats(){
+  try{
+    const r=await fetch('https://api.github.com/gists/'+gistId,{headers:{Accept:'application/vnd.github.v3+json'}});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    const content=data.files['seats.json']?.content;
+    if(!content)throw new Error('找不到座位資料');
+    const parsed=JSON.parse(content);
+    SEATS=parsed.seats?.[cls]||parsed[cls]||{};
+    if(!Object.keys(SEATS).length)throw new Error('此班無座位資料，請老師確認座位表已儲存');
+    document.getElementById('loading-seats').style.display='none';
+    document.getElementById('name-form').style.display='block';
+    setTimeout(()=>{try{document.getElementById('stu-name').focus();}catch(e){}},300);
+  }catch(e){
+    document.getElementById('loading-seats').className='alert a-err';
+    document.getElementById('loading-seats').textContent='❌ 載入座位資料失敗：'+e.message;
+  }
+}
+
+function submit(){
+  const name=document.getElementById('stu-name').value.trim();
+  if(!name){alert('請輸入姓名');return;}
   show('view-loading');
 
-  // 計算遲到
-  const now      = new Date();
-  const timeStr  = now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  const nowMin   = now.getHours()*60 + now.getMinutes();
-  const [dh, dm] = deadline.split(':').map(Number);
-  const isLate   = nowMin > dh*60+dm;
+  const now=new Date();
+  const timeStr=now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const nowMin=now.getHours()*60+now.getMinutes();
+  const[dh,dm]=deadline.split(':').map(Number);
+  const isLate=nowMin>dh*60+dm;
 
-  // ★ 從 localStorage 讀取座位表（key 與 teacher.html 完全相同）
-  let seat='—', sno='—', sid='';
-  try {
-    const seats    = JSON.parse(localStorage.getItem(LS_SEATS) || '{}');
-    const clsSeats = seats[cls] || {};
-    const entry    = Object.entries(clsSeats).find(([, v]) => v.name === name);
-    if (entry) {
-      seat = entry[0];
-      sno  = entry[1].sno || '—';
-      sid  = entry[1].sid || '';
-    } else {
-      showErr('找不到此學生', '「'+name+'」不在此班座位表中，請確認姓名是否與名冊完全相符，或請老師手動補登。');
-      return;
-    }
-  } catch(e) {
-    showErr('讀取座位表失敗', '請重新整理頁面後再試。');
+  // 在座位表中找姓名
+  const entry=Object.entries(SEATS).find(([,v])=>v.name===name);
+  if(!entry){
+    showErr('找不到此學生','「'+name+'」不在本班座位表中，請確認姓名是否與名冊完全相符，或請老師手動補登。');
     return;
   }
+  const[seat,info]=entry;
 
-  // 防重複簽到
-  const attKey = LS_ATT_PFX + token + '_' + cls;
-  let att = {};
-  try { att = JSON.parse(localStorage.getItem(attKey) || '{}'); } catch(e) {}
-  if (att[seat]) {
-    showErr('已完成簽到', '你已完成今日簽到，請勿重複送出。');
-    return;
-  }
+  // 防重複（存在同源 localStorage）
+  const doneKey='done_'+token+'_'+seat;
+  if(localStorage.getItem(doneKey)){showErr('已完成簽到','你已完成今日簽到，請勿重複送出。');return;}
 
-  // 寫入簽到紀錄（與 teacher.html 共用 localStorage）
-  att[seat] = {
-    name, seat, sno, sid,
-    timeStr, ts: now.getTime(),
-    late: isLate,
-    date: dateStr,
-    cls,
-    course
-  };
-  try {
-    localStorage.setItem(attKey, JSON.stringify(att));
-  } catch(e) {
-    showErr('儲存失敗', '瀏覽器儲存空間不足，請清除部分資料後重試。');
-    return;
-  }
+  // 寫入簽到紀錄
+  const attKey='att_at_'+token+'_'+cls;
+  let att={};
+  try{att=JSON.parse(localStorage.getItem(attKey)||'{}');}catch(e){}
+  att[seat]={name,seat,sno:info.sno,sid:info.sid,timeStr,ts:now.getTime(),late:isLate,date:new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}),cls};
+  localStorage.setItem(attKey,JSON.stringify(att));
+  localStorage.setItem(doneKey,'1');
 
-  // 顯示成功
-  document.getElementById('d-name').textContent   = name;
-  document.getElementById('d-seat').textContent   = seat;
-  document.getElementById('d-sno').textContent    = sno;
-  document.getElementById('d-time').textContent   = timeStr;
-  document.getElementById('d-status').innerHTML   = isLate
-    ? '<span style="color:#B91C1C;font-weight:700">遲到</span>'
-    : '<span style="color:#2A6049;font-weight:700">準時到課</span>';
-  document.getElementById('done-icon').textContent  = isLate ? '⏰' : '✅';
-  document.getElementById('done-title').textContent = isLate ? '已簽到（遲到）' : '簽到成功！';
-  document.getElementById('done-sub').textContent   = isLate
-    ? '出席已記錄，但已超過截止時間。' : '你的出席已成功記錄！';
-  document.getElementById('d-late').style.display  = isLate ? 'flex' : 'none';
+  // 顯示結果
+  document.getElementById('d-name').textContent=name;
+  document.getElementById('d-seat').textContent=seat;
+  document.getElementById('d-sno').textContent=info.sno||'—';
+  document.getElementById('d-time').textContent=timeStr;
+  document.getElementById('d-status').innerHTML=isLate?'<span style="color:#B91C1C;font-weight:700">遲到</span>':'<span style="color:#2A6049;font-weight:700">準時到課</span>';
+  document.getElementById('done-icon').textContent=isLate?'⏰':'✅';
+  document.getElementById('done-title').textContent=isLate?'已簽到（遲到）':'簽到成功！';
+  document.getElementById('done-sub').textContent=isLate?'出席已記錄，但已超過截止時間。':'你的出席已成功記錄！';
+  document.getElementById('d-late').style.display=isLate?'flex':'none';
   show('view-done');
 }
 </script>
