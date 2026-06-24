@@ -630,7 +630,9 @@ function getQRUrl(){
 function drawQR(el,size){
   el.innerHTML='';
   const c=document.createElement('canvas');
-  c.style.cssText='display:block;border-radius:5px';
+  // ★ 同時設定 canvas 的實際像素尺寸和 CSS 顯示尺寸，避免 flex 容器縮放造成模糊
+  c.width=size; c.height=size;
+  c.style.cssText='display:block;border-radius:5px;width:'+size+'px;height:'+size+'px';
   el.appendChild(c);
   try{ QRE.draw(getQRUrl(),c,size); }
   catch(e){ el.innerHTML='<div style="color:var(--red);padding:1rem;font-size:13px;text-align:center">QR 產生失敗：'+e.message+'</div>'; }
@@ -696,23 +698,60 @@ function readF(file){
   const rd=new FileReader();
   rd.onload=e=>{
     try{
-      const text=e.target.result;
-      const lines=text.split(/\r?\n/).filter(l=>l.trim());
-      if(lines.length<2){toast('⚠️ 檔案至少需要標題行與一筆資料');return;}
-      // 偵測分隔符
-      const sep=lines[0].includes('\t')?'\t':',';
-      const hd=lines[0].split(sep).map(h=>h.replace(/^["']|["']$/g,'').trim());
-      const rows=lines.slice(1).map(l=>{
-        const c=l.split(sep).map(v=>v.replace(/^["']|["']$/g,'').trim());
-        const o={};hd.forEach((h,i)=>o[h]=c[i]||'');return o;
-      }).filter(r=>Object.values(r).some(v=>v));
-      impRaw=rows;impHd=hd;
-      setColOpts(hd);autoDetect(hd);prevImport(rows,hd);
-      document.getElementById('apply-btn').disabled=false;
-      toast('✅ 載入 '+rows.length+' 筆，確認欄位後按「確認匯入」');
+      const buf=e.target.result;
+      const bytes=new Uint8Array(buf);
+      // ★ 自動偵測編碼：BOM 偵測 + 嘗試多種編碼
+      let text='';
+      if(bytes[0]===0xEF&&bytes[1]===0xBB&&bytes[2]===0xBF){
+        // UTF-8 with BOM
+        text=new TextDecoder('utf-8').decode(bytes.slice(3));
+      } else if(bytes[0]===0xFF&&bytes[1]===0xFE){
+        // UTF-16 LE (Windows 常見)
+        text=new TextDecoder('utf-16le').decode(bytes.slice(2));
+      } else if(bytes[0]===0xFE&&bytes[1]===0xFF){
+        // UTF-16 BE
+        text=new TextDecoder('utf-16be').decode(bytes.slice(2));
+      } else {
+        // 嘗試 UTF-8，若有替換字元則改用 Big5（台灣 Excel 預設）
+        const utf8=new TextDecoder('utf-8').decode(bytes);
+        text=utf8.includes('�')?new TextDecoder('big5').decode(bytes):utf8;
+      }
+      parseCSV(text);
     }catch(err){toast('⚠️ 解析失敗：'+err.message,4000);}
   };
-  rd.readAsText(file,'UTF-8');
+  rd.readAsArrayBuffer(file);
+}
+function parseCSV(text){
+  try{
+    const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l=>l.trim());
+    if(lines.length<2){toast('⚠️ 檔案至少需要標題行與一筆資料');return;}
+    // 偵測分隔符（支援逗號、Tab、分號）
+    const firstLine=lines[0];
+    const sep=firstLine.includes('\t')?'\t':firstLine.includes(';')?';':',';
+    // 解析，支援引號包圍的欄位
+    function parseLine(line){
+      const result=[];let cur='',inQ=false;
+      for(let i=0;i<line.length;i++){
+        const ch=line[i];
+        if(ch==='"'&&!inQ&&(i===0||line[i-1]===sep)){inQ=true;}
+        else if(ch==='"'&&inQ){if(line[i+1]==='"'){cur+='"';i++;}else inQ=false;}
+        else if(ch===sep&&!inQ){result.push(cur.trim());cur='';}
+        else cur+=ch;
+      }
+      result.push(cur.trim());
+      return result;
+    }
+    const hd=parseLine(firstLine).map(h=>h.replace(/^["']|["']$/g,'').trim());
+    const rows=lines.slice(1).map(l=>{
+      const c=parseLine(l);
+      const o={};hd.forEach((h,i)=>o[h]=(c[i]||'').replace(/^["']|["']$/g,'').trim());
+      return o;
+    }).filter(r=>Object.values(r).some(v=>v));
+    impRaw=rows;impHd=hd;
+    setColOpts(hd);autoDetect(hd);prevImport(rows,hd);
+    document.getElementById('apply-btn').disabled=false;
+    toast('✅ 載入 '+rows.length+' 筆，確認欄位後按「確認匯入」');
+  }catch(err){toast('⚠️ 解析失敗：'+err.message,4000);}
 }
 function setColOpts(hd){
   const opt='<option value="">自動偵測</option>'+hd.map(h=>'<option>'+h+'</option>').join('');
