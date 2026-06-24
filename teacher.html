@@ -4,179 +4,161 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>點名系統｜老師端</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
-  --bg:#F4F4F1; --surface:#fff; --border:#E4E4DF; --border2:#CACAC4;
-  --t1:#18181A; --t2:#62626A; --t3:#A0A0A8;
-  --green:#2D6A4F; --green-l:#D8EDDF; --green-t:#52B788;
-  --red:#C1121F; --red-l:#FFE8EA;
-  --amber:#92400E; --amber-l:#FEF3C7;
-  --blue:#1E40AF; --blue-l:#EFF6FF;
-  --r:10px; --rl:14px; --shadow:0 1px 3px rgba(0,0,0,.08);
+  --bg:#F5F5F2;--sur:#fff;--bdr:#E2E2DC;--bdr2:#CACAC2;
+  --t1:#18181A;--t2:#5F5F65;--t3:#9F9FA5;
+  --grn:#2A6049;--grnl:#D6EDE1;--grnt:#4DAE80;
+  --red:#B91C1C;--redl:#FEE2E2;
+  --amb:#92400E;--ambl:#FEF3C7;
+  --r:9px;--rl:13px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',-apple-system,'Noto Sans TC',sans-serif;background:var(--bg);color:var(--t1);font-size:14px;line-height:1.5;min-height:100vh}
-
-/* ─── Layout ─── */
+body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;background:var(--bg);color:var(--t1);font-size:14px;line-height:1.5;min-height:100vh}
 .shell{display:flex;min-height:100vh}
-.sidebar{width:230px;flex-shrink:0;background:var(--t1);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200}
-.main{margin-left:230px;flex:1;padding:2rem;min-height:100vh}
 
-/* ─── Sidebar ─── */
-.sb-logo{padding:1.5rem 1.25rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.08)}
-.sb-logo-mark{font-size:22px;margin-bottom:4px}
-.sb-logo-name{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.02em}
-.sb-logo-sub{font-size:11px;color:rgba(255,255,255,.38);margin-top:1px}
-.sb-nav{flex:1;padding:.75rem 0;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
-.sb-section{font-size:10px;font-weight:600;color:rgba(255,255,255,.25);letter-spacing:.1em;text-transform:uppercase;padding:.6rem 1.25rem .3rem}
-.sb-item{display:flex;align-items:center;gap:10px;padding:.65rem 1.25rem;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;transition:all .15s;border-left:3px solid transparent;position:relative}
+/* Sidebar */
+.sb{width:210px;flex-shrink:0;background:var(--t1);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sb-logo{padding:1.4rem 1.2rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-mark{font-size:20px;margin-bottom:3px}
+.sb-name{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.sb-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:1px}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto}
+.sb-sec{font-size:10px;font-weight:700;color:rgba(255,255,255,.22);letter-spacing:.1em;text-transform:uppercase;padding:.55rem 1.2rem .25rem}
+.sb-item{display:flex;align-items:center;gap:9px;padding:.6rem 1.2rem;cursor:pointer;color:rgba(255,255,255,.48);font-size:13px;font-weight:500;transition:all .14s;border-left:3px solid transparent}
 .sb-item:hover{color:#fff;background:rgba(255,255,255,.07)}
-.sb-item.active{color:#fff;background:rgba(255,255,255,.11);border-left-color:var(--green-t)}
-.sb-ico{font-size:15px;width:20px;text-align:center}
-.sb-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:100px;font-size:10px;font-weight:700;padding:1px 6px;display:none}
-.sb-bottom{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:rgba(255,255,255,.3);line-height:1.7}
-.sb-api-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#666;margin-right:5px;vertical-align:middle}
-.sb-api-dot.ok{background:var(--green-t)}
-.sb-api-dot.err{background:var(--red)}
+.sb-item.active{color:#fff;background:rgba(255,255,255,.1);border-left-color:var(--grnt)}
+.sb-ico{font-size:14px;width:18px;text-align:center}
+.sb-ft{padding:.9rem 1.2rem;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:rgba(255,255,255,.28);line-height:1.7;white-space:pre}
 
-/* ─── Page ─── */
+/* Main */
+.main{margin-left:210px;flex:1;padding:1.75rem;min-height:100vh}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.6rem;flex-wrap:wrap;gap:.75rem}
+.pt{font-size:21px;font-weight:700;letter-spacing:-.02em}
+.ps{font-size:13px;color:var(--t2);margin-top:3px}
+.btnrow{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+
+/* Panel */
 .panel{display:none}.panel.active{display:block}
-.page-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.75rem;flex-wrap:wrap;gap:1rem}
-.page-title{font-size:22px;font-weight:700;letter-spacing:-.02em}
-.page-sub{font-size:13px;color:var(--t2);margin-top:3px}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
-/* ─── Cards ─── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem 1.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
-.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:6px}
-.card-title{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem}
+/* Card */
+.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rl);padding:1.15rem 1.4rem;margin-bottom:.85rem;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;flex-wrap:wrap;gap:5px}
+.ct{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:.85rem}
 
-/* ─── Form ─── */
-.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:120px}
+/* Form */
+.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px}
 .field label{font-size:12px;color:var(--t2);font-weight:600}
-input[type=text],input[type=time],input[type=number],input[type=date],select{height:38px;padding:0 12px;border-radius:var(--r);border:1px solid var(--border2);background:#fff;color:var(--t1);font-size:13px;font-family:inherit;width:100%;transition:.15s}
-input:focus,select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(45,106,79,.12);background:#fff}
-.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:.9rem;align-items:flex-end}
+input,select{height:36px;padding:0 11px;border-radius:var(--r);border:1px solid var(--bdr2);background:#fff;color:var(--t1);font-size:13px;font-family:inherit;width:100%;transition:.14s}
+input:focus,select:focus{outline:none;border-color:var(--grn);box-shadow:0 0 0 3px rgba(42,96,73,.11)}
+.row{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:.8rem;align-items:flex-end}
 
-/* ─── Buttons ─── */
-.btn{height:38px;padding:0 16px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--t1);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap}
+/* Btn */
+.btn{height:36px;padding:0 14px;border-radius:var(--r);border:1px solid var(--bdr2);background:var(--sur);color:var(--t1);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .13s;white-space:nowrap}
 .btn:hover{background:var(--bg)}.btn:active{transform:scale(.98)}
-.btn-primary{background:var(--t1);color:#fff;border-color:var(--t1)}.btn-primary:hover{background:#333;border-color:#333}
-.btn-green{background:var(--green);color:#fff;border-color:var(--green)}.btn-green:hover{background:#245A42}
-.btn-sm{height:32px;padding:0 12px;font-size:12px}
-.btn-ghost{background:transparent;border-color:transparent;color:var(--t2)}.btn-ghost:hover{background:var(--bg);color:var(--t1);border-color:var(--border)}
-.btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+.btn-p{background:var(--t1);color:#fff;border-color:var(--t1)}.btn-p:hover{background:#2d2d2d}
+.btn-g{background:var(--grn);color:#fff;border-color:var(--grn)}.btn-g:hover{background:#22503C}
+.btn-sm{height:30px;padding:0 11px;font-size:12px}
+.btn-gh{background:transparent;border-color:transparent;color:var(--t2)}.btn-gh:hover{background:var(--bg);color:var(--t1)}
+.btn:disabled{opacity:.38;cursor:not-allowed;pointer-events:none}
 
-/* ─── Stats ─── */
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.1rem 1.25rem;box-shadow:var(--shadow)}
-.stat-n{font-size:30px;font-weight:700;letter-spacing:-.03em;line-height:1;margin-bottom:4px}
-.stat-l{font-size:12px;color:var(--t2);font-weight:500}
-.c-green{color:var(--green)}.c-red{color:var(--red)}.c-amber{color:var(--amber)}.c-gray{color:var(--t2)}
+/* Stat */
+.stat{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rl);padding:1rem 1.15rem;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.sn{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1;margin-bottom:3px}
+.sl{font-size:12px;color:var(--t2);font-weight:500}
+.cg{color:var(--grn)}.cr{color:var(--red)}.ca{color:var(--amb)}.cm{color:var(--t2)}
 
-/* ─── Badge ─── */
-.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:100px;font-size:11px;font-weight:600}
-.b-green{background:var(--green-l);color:var(--green)}.b-red{background:var(--red-l);color:var(--red)}.b-gray{background:var(--bg);color:var(--t2);border:1px solid var(--border)}
+/* Badge */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600}
+.bg{background:var(--grnl);color:var(--grn)}.br{background:var(--redl);color:var(--red)}.bm{background:var(--bg);color:var(--t2);border:1px solid var(--bdr)}
 
-/* ─── Alert ─── */
-.alert{border-radius:var(--r);padding:10px 14px;font-size:13px;display:flex;align-items:flex-start;gap:8px;line-height:1.5;margin-bottom:.75rem}
-.a-green{background:var(--green-l);color:var(--green);border:1px solid #A7D7B9}
-.a-red{background:var(--red-l);color:var(--red);border:1px solid #F5B8BD}
-.a-amber{background:var(--amber-l);color:var(--amber);border:1px solid #FDE68A}
-.a-blue{background:var(--blue-l);color:var(--blue);border:1px solid #BFDBFE}
+/* Table */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;color:var(--t2);font-weight:700;text-align:left;padding:7px 10px;border-bottom:1px solid var(--bdr);background:var(--bg);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--bdr);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--bg)}
 
-/* ─── Table ─── */
-.tbl-wrap{overflow-x:auto}
-.tbl{width:100%;border-collapse:collapse;font-size:13px}
-.tbl th{font-size:11px;color:var(--t2);font-weight:700;text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap}
-.tbl td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tbody tr:hover td{background:var(--bg)}
+/* Seat */
+.podium{text-align:center;font-size:10px;color:var(--t3);padding:6px;margin-bottom:9px;border-bottom:1px dashed var(--bdr2);letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.sgrid{display:grid;gap:5px}
+.seat{border-radius:7px;border:1px solid var(--bdr);font-size:10px;font-weight:600;text-align:center;padding:5px 2px;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.4;transition:.13s;user-select:none}
+.s-empty{background:var(--bg);color:var(--t3);border-style:dashed}
+.s-ok{background:var(--grnl);color:var(--grn);border-color:var(--grnt)}
+.s-late{background:var(--redl);color:var(--red);border-color:#FCA5A5}
+.s-abs{background:#fff;color:var(--t3)}
+.seat .sno{font-size:9px;opacity:.6;margin-top:1px}
+.seat .snm{font-size:11px;font-weight:700;margin-top:2px}
 
-/* ─── Seat ─── */
-.podium{text-align:center;font-size:10px;color:var(--t3);padding:8px;margin-bottom:10px;border-bottom:1px dashed var(--border2);letter-spacing:.12em;text-transform:uppercase;font-weight:700}
-.seat-grid{display:grid;gap:6px}
-.seat{border-radius:8px;border:1px solid var(--border);font-size:10px;font-weight:600;text-align:center;padding:6px 3px;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.4;transition:.15s}
-.seat-empty{background:var(--bg);color:var(--t3);border-style:dashed}
-.seat-present{background:var(--green-l);color:var(--green);border-color:var(--green-t)}
-.seat-late{background:var(--red-l);color:var(--red);border-color:#F5B8BD}
-.seat-absent{background:#fff;color:var(--t3)}
-.seat-sno{font-size:9px;opacity:.6;margin-top:1px}
-.seat-nm{font-size:11px;font-weight:700;margin-top:2px}
+/* Rec */
+.reclist{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto}
+.recitem{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:var(--bg);border-radius:var(--r);border:1px solid var(--bdr);font-size:13px}
+.rn{font-weight:600}.rm{font-size:11px;color:var(--t2);margin-top:1px}
 
-/* ─── Record list ─── */
-.rec-list{display:flex;flex-direction:column;gap:4px;max-height:280px;overflow-y:auto}
-.rec-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border);font-size:13px}
-.rec-name{font-weight:600}
-.rec-meta{font-size:11px;color:var(--t2);margin-top:1px}
+/* Upload */
+.upzone{border:2px dashed var(--bdr2);border-radius:var(--rl);padding:1.75rem 1rem;text-align:center;cursor:pointer;transition:.18s;background:var(--bg)}
+.upzone:hover,.upzone.over{border-color:var(--grn);background:var(--grnl)}
+.upico{font-size:38px;margin-bottom:.4rem}
+.upt{font-size:14px;font-weight:600;margin-bottom:3px}
+.ups{font-size:12px;color:var(--t2)}
 
-/* ─── Upload ─── */
-.upload-zone{border:2px dashed var(--border2);border-radius:var(--rl);padding:2rem 1rem;text-align:center;cursor:pointer;transition:.2s;background:var(--bg)}
-.upload-zone:hover,.upload-zone.over{border-color:var(--green);background:var(--green-l)}
-.upload-ico{font-size:40px;margin-bottom:.5rem}
-.upload-t{font-size:14px;font-weight:600;margin-bottom:4px}
-.upload-s{font-size:12px;color:var(--t2)}
+/* QR */
+.qrwrap{background:#fff;border:1px solid var(--bdr);border-radius:var(--rl);padding:14px;display:inline-flex;align-items:center;justify-content:center;min-width:240px;min-height:240px}
+.slrow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2)}
+.slrow input[type=range]{flex:1;accent-color:var(--grn)}
+.slval{font-weight:600;min-width:42px;color:var(--t1);font-size:12px}
 
-/* ─── QR ─── */
-.qr-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px;display:inline-flex;align-items:center;justify-content:center;min-width:250px;min-height:250px}
-.qr-wrap img{display:block;border-radius:4px}
-.slider-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2)}
-.slider-row input[type=range]{flex:1;accent-color:var(--green);height:4px}
-.slider-val{font-weight:600;min-width:44px;color:var(--t1)}
-
-/* ─── Info pair ─── */
-.ip{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)}
+/* Info pair */
+.ip{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid var(--bdr)}
 .ip:last-child{border-bottom:none}
-.ip-k{color:var(--t2)}
-.ip-v{font-weight:600}
+.ik{color:var(--t2)}.iv{font-weight:600}
 
-/* ─── Modal ─── */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:flex-start;justify-content:center;padding:3rem 1rem;overflow-y:auto;backdrop-filter:blur(3px)}
-.modal-bg.open{display:flex}
-.modal-box{background:var(--surface);border-radius:16px;padding:1.75rem;width:100%;max-width:560px;box-shadow:0 24px 64px rgba(0,0,0,.2)}
-.modal-title{font-size:16px;font-weight:700;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between}
+/* Modal */
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:500;align-items:flex-start;justify-content:center;padding:2.5rem 1rem;overflow-y:auto;backdrop-filter:blur(2px)}
+.mbg.open{display:flex}
+.mbox{background:var(--sur);border-radius:14px;padding:1.6rem;width:100%;max-width:540px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.mtit{font-size:15px;font-weight:700;margin-bottom:1.1rem;display:flex;align-items:center;justify-content:space-between}
 
-/* ─── Fullscreen QR ─── */
-#fs-ov{display:none;position:fixed;inset:0;background:#fff;z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:20px;cursor:pointer}
-#fs-ov.open{display:flex}
+/* Seat editor */
+.sedit{display:grid;gap:5px}
+.sec{display:flex;flex-direction:column;gap:2px}
+.sel{font-size:9px;font-weight:700;color:var(--t3);text-align:center;letter-spacing:.04em}
+.sec input{text-align:center;font-size:11px;height:30px;padding:0 3px;border-radius:6px;cursor:pointer}
+.sec input.filled{background:var(--grnl);border-color:var(--grnt);color:var(--grn);font-weight:600}
 
-/* ─── Seat editor ─── */
-.sg-edit{display:grid;gap:5px}
-.se-cell{display:flex;flex-direction:column;gap:2px}
-.se-lbl{font-size:9px;font-weight:700;color:var(--t3);text-align:center;letter-spacing:.04em}
-.se-cell input{text-align:center;font-size:11px;height:32px;padding:0 3px;border-radius:6px;cursor:pointer}
-.se-cell input.filled{background:var(--green-l);border-color:var(--green-t);color:var(--green);font-weight:600}
+/* Picker */
+.pchip{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:7px;cursor:pointer;border:1px solid var(--bdr);background:var(--bg);font-size:13px;transition:.12s}
+.pchip:hover{background:var(--grnl);border-color:var(--grnt)}
+.pchip.sel{background:var(--grnl);border-color:var(--grnt);color:var(--grn)}
+.pchip.taken{opacity:.32;cursor:not-allowed;pointer-events:none}
+.pclr{background:var(--redl);border-color:#FCA5A5;color:var(--red)}.pclr:hover{background:#FECACA}
 
-/* ─── Picker ─── */
-.picker-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--bg);font-size:13px;transition:.12s}
-.picker-chip:hover{background:var(--green-l);border-color:var(--green-t)}
-.picker-chip.sel{background:var(--green-l);border-color:var(--green-t);color:var(--green)}
-.picker-chip.taken{opacity:.35;cursor:not-allowed;pointer-events:none}
-.picker-clear{background:var(--red-l);border-color:#F5B8BD;color:var(--red)}
-.picker-clear:hover{background:#FFCDD2}
+/* Weekly */
+.wkc{min-width:50px;text-align:center}
 
-/* ─── Toast ─── */
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--t1);color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+/* Fullscreen */
+#fsov{display:none;position:fixed;inset:0;background:#fff;z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:18px;cursor:pointer}
+#fsov.open{display:flex}
+
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--t1);color:#fff;padding:9px 18px;border-radius:100px;font-size:13px;font-weight:500;opacity:0;transition:opacity .18s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.22)}
 #toast.show{opacity:1}
 
-/* ─── Weekly ─── */
-.wk-cell{min-width:52px;text-align:center}
-.wk-ok{background:var(--green-l);color:var(--green)}
-.wk-late{background:var(--red-l);color:var(--red)}
-.wk-abs{background:var(--bg);color:var(--t3)}
+.divider{height:1px;background:var(--bdr);margin:.8rem 0}
+.empty{text-align:center;padding:1.75rem;color:var(--t3);font-size:13px}
+.eico{font-size:32px;display:block;margin-bottom:7px}
+.tag{display:inline-block;background:var(--bg);border:1px solid var(--bdr);border-radius:5px;padding:2px 7px;font-size:11px;font-weight:600;color:var(--t2)}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:500;border:1px solid var(--bdr);background:var(--sur);color:var(--t2)}
+.alert{border-radius:var(--r);padding:9px 13px;font-size:13px;display:flex;align-items:flex-start;gap:7px;line-height:1.5;margin-bottom:.7rem}
+.al-b{background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE}
+.al-g{background:var(--grnl);color:var(--grn);border:1px solid #A7D7B9}
+.al-r{background:var(--redl);color:var(--red);border:1px solid #FCA5A5}
 
-.divider{height:1px;background:var(--border);margin:.9rem 0}
-.empty{text-align:center;padding:2rem;color:var(--t3);font-size:13px}
-.empty-ico{font-size:36px;display:block;margin-bottom:8px}
-.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:500;border:1px solid var(--border);background:var(--surface);color:var(--t2)}
-.tag{display:inline-block;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;color:var(--t2)}
-
-@media(max-width:768px){
-  .sidebar{width:60px}.sb-logo-name,.sb-logo-sub,.sb-item span,.sb-section,.sb-bottom{display:none}
-  .sb-item{justify-content:center;padding:.7rem}.main{margin-left:60px;padding:1rem}
+@media(max-width:720px){
+  .sb{width:56px}.sb-name,.sb-sub,.sb-item span,.sb-sec,.sb-ft{display:none}
+  .sb-item{justify-content:center;padding:.65rem}.main{margin-left:56px;padding:1rem}
   .g2,.g4{grid-template-columns:1fr!important}
 }
 </style>
@@ -185,29 +167,24 @@ input:focus,select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0
 <div class="shell">
 
 <!-- ── Sidebar ── -->
-<aside class="sidebar">
+<aside class="sb">
   <div class="sb-logo">
-    <div class="sb-logo-mark">📋</div>
-    <div class="sb-logo-name">點名系統</div>
-    <div class="sb-logo-sub">老師管理端</div>
+    <div class="sb-mark">📋</div>
+    <div class="sb-name">點名系統</div>
+    <div class="sb-sub">老師管理端</div>
   </div>
   <nav class="sb-nav">
-    <div class="sb-section">課堂</div>
-    <div class="sb-item active" onclick="goPage('dashboard',this)"><span class="sb-ico">🏠</span><span>總覽</span></div>
-    <div class="sb-item" onclick="goPage('qr',this)"><span class="sb-ico">🔲</span><span>QR Code</span></div>
-    <div class="sb-section">資料管理</div>
-    <div class="sb-item" onclick="goPage('import',this)"><span class="sb-ico">📥</span><span>匯入名冊</span></div>
-    <div class="sb-item" onclick="goPage('seats',this)"><span class="sb-ico">🪑</span><span>座位表</span></div>
-    <div class="sb-item" onclick="goPage('roster',this)"><span class="sb-ico">📄</span><span>出席名冊</span></div>
-    <div class="sb-section">報表</div>
-    <div class="sb-item" onclick="goPage('weekly',this)"><span class="sb-ico">📊</span><span>週報表</span></div>
-    <div class="sb-section">設定</div>
-    <div class="sb-item" onclick="goPage('settings',this)"><span class="sb-ico">⚙️</span><span>API 設定</span></div>
+    <div class="sb-sec">課堂</div>
+    <div class="sb-item active" onclick="go('dashboard',this)"><span class="sb-ico">🏠</span><span>總覽</span></div>
+    <div class="sb-item" onclick="go('qr',this)"><span class="sb-ico">🔲</span><span>QR Code</span></div>
+    <div class="sb-sec">資料</div>
+    <div class="sb-item" onclick="go('import',this)"><span class="sb-ico">📥</span><span>匯入名冊</span></div>
+    <div class="sb-item" onclick="go('seats',this)"><span class="sb-ico">🪑</span><span>座位表</span></div>
+    <div class="sb-item" onclick="go('roster',this)"><span class="sb-ico">📄</span><span>出席名冊</span></div>
+    <div class="sb-sec">報表</div>
+    <div class="sb-item" onclick="go('weekly',this)"><span class="sb-ico">📊</span><span>週報表</span></div>
   </nav>
-  <div class="sb-bottom">
-    <div><span class="sb-api-dot" id="api-dot"></span><span id="api-status-txt">未連線</span></div>
-    <div id="sb-clock" style="margin-top:4px"></div>
-  </div>
+  <div class="sb-ft" id="sb-ft"></div>
 </aside>
 
 <!-- ── Main ── -->
@@ -215,97 +192,87 @@ input:focus,select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0
 
 <!-- 總覽 -->
 <div id="page-dashboard" class="panel active">
-  <div class="page-hd">
-    <div><div class="page-title">今日總覽</div><div class="page-sub" id="dash-sub">尚未產生今日 QR Code</div></div>
-    <div class="btn-row">
-      <select id="dash-cls" style="height:38px;min-width:140px" onchange="onClassChange()"><option value="">— 選擇班級 —</option></select>
+  <div class="ph">
+    <div><div class="pt">今日總覽</div><div class="ps" id="dash-sub">尚未產生今日 QR Code</div></div>
+    <div class="btnrow">
+      <select id="dash-cls" style="height:36px;min-width:130px" onchange="onClsChange()"><option value="">— 選擇班級 —</option></select>
       <button class="btn btn-sm" onclick="syncAll()">🔄 重新整理</button>
       <button class="btn btn-sm" onclick="resetToday()">🗑️ 重置今日</button>
     </div>
   </div>
   <div class="g4">
-    <div class="stat"><div class="stat-n c-green" id="s-on">0</div><div class="stat-l">準時到課</div></div>
-    <div class="stat"><div class="stat-n c-red"   id="s-late">0</div><div class="stat-l">遲到</div></div>
-    <div class="stat"><div class="stat-n c-gray"  id="s-abs">0</div><div class="stat-l">缺席</div></div>
-    <div class="stat"><div class="stat-n c-amber" id="s-total">0</div><div class="stat-l">總人數</div></div>
+    <div class="stat"><div class="sn cg" id="s-on">0</div><div class="sl">準時到課</div></div>
+    <div class="stat"><div class="sn cr" id="s-late">0</div><div class="sl">遲到</div></div>
+    <div class="stat"><div class="sn cm" id="s-abs">0</div><div class="sl">缺席</div></div>
+    <div class="stat"><div class="sn ca" id="s-tot">0</div><div class="sl">總人數</div></div>
   </div>
   <div class="card">
-    <div class="card-hd">
-      <div class="card-title">即時座位表</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <span class="chip" style="background:var(--green-l);color:var(--green);border-color:var(--green-t)">● 準時</span>
-        <span class="chip" style="background:var(--red-l);color:var(--red);border-color:#F5B8BD">● 遲到</span>
+    <div class="ch">
+      <div class="ct">即時座位表</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <span class="chip" style="background:var(--grnl);color:var(--grn);border-color:var(--grnt)">● 準時</span>
+        <span class="chip" style="background:var(--redl);color:var(--red);border-color:#FCA5A5">● 遲到</span>
         <span class="chip">○ 缺席</span>
       </div>
     </div>
     <div class="podium">▲ 講台</div>
-    <div class="seat-grid" id="seat-grid"></div>
+    <div class="sgrid" id="sgrid"></div>
   </div>
   <div class="card">
-    <div class="card-hd"><div class="card-title">最新簽到</div><button class="btn btn-sm btn-ghost" onclick="syncAll()">🔄</button></div>
-    <div class="rec-list" id="rec-list"><div class="empty"><span class="empty-ico">🕐</span>等待學生簽到</div></div>
+    <div class="ch"><div class="ct">最新簽到</div><button class="btn btn-sm btn-gh" onclick="syncAll()">🔄</button></div>
+    <div class="reclist" id="reclist"><div class="empty"><span class="eico">🕐</span>等待學生簽到</div></div>
   </div>
 </div>
 
 <!-- QR Code -->
 <div id="page-qr" class="panel">
-  <div class="page-hd">
-    <div><div class="page-title">產生 QR Code</div><div class="page-sub">學生掃描後直接在手機填寫簽到</div></div>
-  </div>
+  <div class="ph"><div><div class="pt">產生 QR Code</div><div class="ps">學生掃描後在手機填寫姓名簽到</div></div></div>
   <div class="g2">
     <div>
       <div class="card">
-        <div class="card-title" style="margin-bottom:.9rem">課程設定</div>
-        <div class="row">
-          <div class="field"><label>班級</label>
-            <select id="qr-cls"><option value="">— 選擇班級 —</option></select>
-          </div>
-        </div>
-        <div class="row">
-          <div class="field"><label>課程名稱</label><input type="text" id="course-name" value="資訊科技概論"/></div>
-        </div>
+        <div class="ct" style="margin-bottom:.9rem">課程設定</div>
+        <div class="row"><div class="field"><label>班級</label><select id="qr-cls"><option value="">— 選擇班級 —</option></select></div></div>
+        <div class="row"><div class="field"><label>課程名稱</label><input type="text" id="course-name" value="資訊科技概論"/></div></div>
         <div class="row">
           <div class="field"><label>上課時間</label><input type="time" id="class-time" value="09:00"/></div>
-          <div class="field"><label>遲到寬限（分鐘）</label><input type="number" id="late-min" value="15" min="1" max="60"/></div>
+          <div class="field"><label>遲到寬限（分）</label><input type="number" id="late-min" value="15" min="1" max="60"/></div>
         </div>
         <div class="divider"></div>
-        <button class="btn btn-green" style="width:100%;justify-content:center;height:44px;font-size:14px" onclick="generateQR()">
-          🔲 產生今日 QR Code
-        </button>
+        <button class="btn btn-g" style="width:100%;justify-content:center;height:42px;font-size:14px" onclick="genQR()">🔲 產生今日 QR Code</button>
       </div>
-      <div class="card" id="qr-info-card" style="display:none">
-        <div class="card-title" style="margin-bottom:.75rem">本次設定</div>
-        <div class="ip"><span class="ip-k">班級</span><span class="ip-v" id="qi-cls"></span></div>
-        <div class="ip"><span class="ip-k">課程</span><span class="ip-v" id="qi-course"></span></div>
-        <div class="ip"><span class="ip-k">日期</span><span class="ip-v" id="qi-date"></span></div>
-        <div class="ip"><span class="ip-k">上課</span><span class="ip-v" id="qi-time"></span></div>
-        <div class="ip"><span class="ip-k">遲到截止</span><span class="ip-v" id="qi-late"></span></div>
+      <div class="card" id="qr-info" style="display:none">
+        <div class="ct" style="margin-bottom:.75rem">本次設定</div>
+        <div class="ip"><span class="ik">班級</span><span class="iv" id="qi-cls"></span></div>
+        <div class="ip"><span class="ik">課程</span><span class="iv" id="qi-c"></span></div>
+        <div class="ip"><span class="ik">日期</span><span class="iv" id="qi-d"></span></div>
+        <div class="ip"><span class="ik">上課</span><span class="iv" id="qi-t"></span></div>
+        <div class="ip"><span class="ik">截止</span><span class="iv" id="qi-dl"></span></div>
+        <div style="margin-top:.75rem;font-size:11px;color:var(--t2);word-break:break-all;background:var(--bg);padding:8px;border-radius:var(--r);line-height:1.5" id="qi-url"></div>
       </div>
     </div>
     <div>
-      <div class="card" id="qr-display-card" style="display:none">
-        <div class="card-hd">
-          <div class="card-title">QR Code</div>
+      <div class="card" id="qr-display" style="display:none">
+        <div class="ch">
+          <div class="ct">QR Code</div>
           <div style="display:flex;gap:6px">
-            <button class="btn btn-sm" onclick="openQRNewTab()">↗️ 在新分頁開啟</button>
-            <button class="btn btn-sm btn-green" onclick="openFS()">⛶ 全螢幕</button>
+            <button class="btn btn-sm" onclick="dlQR()">⬇️ 下載</button>
+            <button class="btn btn-sm btn-g" onclick="openFS()">⛶ 全螢幕</button>
           </div>
         </div>
-        <div style="display:flex;justify-content:center;margin-bottom:.9rem">
-          <div class="qr-wrap" id="qr-container"><div class="empty" style="padding:.5rem;font-size:13px">產生中...</div></div>
+        <div style="display:flex;justify-content:center;margin-bottom:.85rem">
+          <div class="qrwrap" id="qr-box"><div class="empty" style="padding:.5rem">產生中...</div></div>
         </div>
-        <div class="slider-row">
+        <div class="slrow">
           <span>小</span>
-          <input type="range" id="qr-size" min="160" max="400" value="250" oninput="resizeQR(this.value)">
+          <input type="range" id="qr-sz" min="160" max="420" value="260" oninput="resizeQR(this.value)">
           <span>大</span>
-          <span class="slider-val" id="size-lbl">250px</span>
+          <span class="slval" id="sz-lbl">260px</span>
         </div>
-        <div style="margin-top:.75rem;padding:.75rem;background:var(--bg);border-radius:var(--r);font-size:11px;color:var(--t2);word-break:break-all;line-height:1.6" id="qr-url-show"></div>
       </div>
-      <div class="card" id="qr-empty-card">
+      <div class="card" id="qr-empty">
         <div style="text-align:center;padding:2.5rem 1rem">
-          <div style="font-size:56px;margin-bottom:1rem">🔲</div>
-          <div style="font-weight:600;font-size:15px;margin-bottom:6px">尚未產生 QR Code</div>
+          <div style="font-size:52px;margin-bottom:.85rem">🔲</div>
+          <div style="font-weight:600;font-size:15px;margin-bottom:5px">尚未產生 QR Code</div>
           <div style="font-size:13px;color:var(--t2)">設定左側課程資訊後按「產生」</div>
         </div>
       </div>
@@ -315,49 +282,38 @@ input:focus,select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0
 
 <!-- 匯入名冊 -->
 <div id="page-import" class="panel">
-  <div class="page-hd">
-    <div><div class="page-title">匯入名冊</div><div class="page-sub">支援 Excel（.xlsx / .xls）或 CSV，欄位：班級、座號、姓名、學號</div></div>
-  </div>
+  <div class="ph"><div><div class="pt">匯入名冊</div><div class="ps">支援 Excel（.xlsx）或 CSV，欄位：班級、座號、姓名、學號</div></div></div>
   <div class="g2">
     <div>
       <div class="card">
-        <div class="card-title" style="margin-bottom:.9rem">上傳檔案</div>
-        <div class="upload-zone" id="upload-zone"
-          onclick="document.getElementById('file-inp').click()"
-          ondragover="e=>{e.preventDefault();this.classList.add('over')}"
+        <div class="ct" style="margin-bottom:.9rem">上傳檔案</div>
+        <div class="upzone" id="upzone" onclick="document.getElementById('finp').click()"
+          ondragover="ev=>{ev.preventDefault();this.classList.add('over')}"
           ondragleave="this.classList.remove('over')"
-          ondrop="dropFile(event)">
-          <div class="upload-ico">📊</div>
-          <div class="upload-t">點擊或拖曳上傳</div>
-          <div class="upload-s">.xlsx / .xls / .csv</div>
+          ondrop="dropF(event)">
+          <div class="upico">📊</div>
+          <div class="upt">點擊或拖曳上傳</div>
+          <div class="ups">.xlsx / .xls / .csv</div>
         </div>
-        <input type="file" id="file-inp" accept=".xlsx,.xls,.csv" style="display:none" onchange="readFile(this.files[0])"/>
+        <input type="file" id="finp" accept=".xlsx,.xls,.csv" style="display:none" onchange="readF(this.files[0])"/>
         <div class="divider"></div>
-        <div class="card-title" style="margin-bottom:.75rem">欄位對應</div>
+        <div class="ct" style="margin-bottom:.7rem">欄位對應</div>
         <div class="row">
           <div class="field"><label>班級欄</label><select id="col-cls"></select></div>
           <div class="field"><label>座號欄</label><select id="col-sno"></select></div>
         </div>
         <div class="row">
-          <div class="field"><label>姓名欄</label><select id="col-name"></select></div>
+          <div class="field"><label>姓名欄</label><select id="col-nm"></select></div>
           <div class="field"><label>學號欄</label><select id="col-sid"></select></div>
         </div>
-        <button class="btn btn-green" id="apply-btn" disabled onclick="applyImport()" style="width:100%;justify-content:center">
-          ✔ 確認匯入名冊
-        </button>
+        <button class="btn btn-g" id="apply-btn" disabled onclick="applyImport()" style="width:100%;justify-content:center">✔ 確認匯入</button>
       </div>
     </div>
     <div>
+      <div class="card"><div class="ct" style="margin-bottom:.7rem">預覽</div><div id="imp-prev"><div class="empty"><span class="eico">📂</span>請先上傳檔案</div></div></div>
       <div class="card">
-        <div class="card-title" style="margin-bottom:.75rem">預覽</div>
-        <div id="import-preview"><div class="empty"><span class="empty-ico">📂</span>請先上傳檔案</div></div>
-      </div>
-      <div class="card">
-        <div class="card-hd">
-          <div class="card-title">目前名冊</div>
-          <button class="btn btn-sm btn-ghost" onclick="clearRoster()">🗑️ 清空</button>
-        </div>
-        <div id="cur-roster"><div class="empty"><span class="empty-ico">📋</span>尚未匯入</div></div>
+        <div class="ch"><div class="ct">目前名冊</div><button class="btn btn-sm btn-gh" onclick="clearRoster()">🗑️ 清空</button></div>
+        <div id="cur-roster"><div class="empty"><span class="eico">📋</span>尚未匯入</div></div>
       </div>
     </div>
   </div>
@@ -365,1115 +321,617 @@ input:focus,select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0
 
 <!-- 座位表 -->
 <div id="page-seats" class="panel">
-  <div class="page-hd">
-    <div><div class="page-title">座位表管理</div><div class="page-sub">點擊格子選擇學生，設定完儲存即永久保留</div></div>
-    <div class="btn-row">
-      <select id="seat-cls-sel" style="height:38px;min-width:140px" onchange="onSeatClsChange()"><option value="">— 選擇班級 —</option></select>
-      <button class="btn btn-sm" onclick="autoAssign()">✨ 依座號自動排列</button>
-      <button class="btn btn-sm btn-green" onclick="saveSeats()">💾 儲存座位表</button>
+  <div class="ph">
+    <div><div class="pt">座位表</div><div class="ps">點格子選學生，設定後儲存即永久保留</div></div>
+    <div class="btnrow">
+      <select id="seat-cls" style="height:36px;min-width:130px" onchange="rebuildEditor()"><option value="">— 選擇班級 —</option></select>
+      <button class="btn btn-sm" onclick="autoAssign()">✨ 依座號自動排</button>
+      <button class="btn btn-sm btn-g" onclick="saveSeats()">💾 儲存</button>
     </div>
   </div>
-  <div class="card" style="margin-bottom:.75rem">
+  <div class="card" style="margin-bottom:.7rem">
     <div class="row" style="margin-bottom:0">
-      <div class="field" style="max-width:110px"><label>排數</label><input type="number" id="s-rows" value="4" min="1" max="12" oninput="rebuildEditor()"/></div>
-      <div class="field" style="max-width:110px"><label>欄數</label><input type="number" id="s-cols" value="5" min="1" max="12" oninput="rebuildEditor()"/></div>
-      <div style="display:flex;align-items:flex-end;gap:6px">
-        <button class="btn btn-sm" onclick="clearSeats()">🗑️ 清空</button>
-      </div>
+      <div class="field" style="max-width:100px"><label>排數</label><input type="number" id="s-rows" value="4" min="1" max="12" oninput="rebuildEditor()"/></div>
+      <div class="field" style="max-width:100px"><label>欄數</label><input type="number" id="s-cols" value="5" min="1" max="12" oninput="rebuildEditor()"/></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn btn-sm" onclick="clearSeats()">🗑️ 清空</button></div>
     </div>
   </div>
   <div class="card">
-    <div class="card-title" style="margin-bottom:.9rem">▲ 講台</div>
+    <div class="ct" style="margin-bottom:.85rem">▲ 講台</div>
     <div id="seat-editor"></div>
   </div>
 </div>
 
 <!-- 出席名冊 -->
 <div id="page-roster" class="panel">
-  <div class="page-hd">
-    <div><div class="page-title">出席名冊</div><div class="page-sub" id="roster-sub">今日出席紀錄</div></div>
-    <div class="btn-row">
-      <select id="roster-cls" style="height:38px;min-width:140px" onchange="renderRoster()"><option value="">— 選擇班級 —</option></select>
-      <button class="btn btn-sm btn-green" onclick="exportRosterCSV()">⬇️ 匯出 CSV</button>
+  <div class="ph">
+    <div><div class="pt">出席名冊</div><div class="ps" id="rsub">今日出席紀錄</div></div>
+    <div class="btnrow">
+      <select id="r-cls" style="height:36px;min-width:130px" onchange="renderRoster()"><option value="">— 選擇班級 —</option></select>
+      <button class="btn btn-sm btn-g" onclick="expCSV()">⬇️ 匯出 CSV</button>
     </div>
   </div>
   <div class="g4">
-    <div class="stat"><div class="stat-n c-green" id="r-on">0</div><div class="stat-l">準時</div></div>
-    <div class="stat"><div class="stat-n c-red"   id="r-late">0</div><div class="stat-l">遲到</div></div>
-    <div class="stat"><div class="stat-n c-gray"  id="r-abs">0</div><div class="stat-l">缺席</div></div>
-    <div class="stat"><div class="stat-n c-amber" id="r-total">0</div><div class="stat-l">總人數</div></div>
+    <div class="stat"><div class="sn cg" id="r-on">0</div><div class="sl">準時</div></div>
+    <div class="stat"><div class="sn cr" id="r-late">0</div><div class="sl">遲到</div></div>
+    <div class="stat"><div class="sn cm" id="r-abs">0</div><div class="sl">缺席</div></div>
+    <div class="stat"><div class="sn ca" id="r-tot">0</div><div class="sl">總人數</div></div>
   </div>
+  <div class="card"><div id="r-tbl"><div class="empty"><span class="eico">👥</span>請先選擇班級</div></div></div>
   <div class="card">
-    <div id="roster-tbl"><div class="empty"><span class="empty-ico">👥</span>請先選擇班級</div></div>
-  </div>
-  <div class="card">
-    <div class="card-title" style="margin-bottom:.75rem">手動補登</div>
+    <div class="ct" style="margin-bottom:.7rem">手動補登</div>
     <div class="row" style="margin-bottom:.5rem">
-      <div class="field"><label>學生</label><select id="man-name"><option value="">— 選擇 —</option></select></div>
-      <div class="field" style="max-width:130px"><label>狀態</label>
-        <select id="man-status"><option value="on">準時到課</option><option value="late">遲到</option></select>
+      <div class="field"><label>學生</label><select id="man-nm"><option value="">— 選擇 —</option></select></div>
+      <div class="field" style="max-width:120px"><label>狀態</label>
+        <select id="man-st"><option value="on">準時到課</option><option value="late">遲到</option></select>
       </div>
-      <div style="display:flex;align-items:flex-end"><button class="btn btn-primary" onclick="manualCheckin()">✔ 補登</button></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn btn-p" onclick="manualCI()">✔ 補登</button></div>
     </div>
   </div>
 </div>
 
 <!-- 週報表 -->
 <div id="page-weekly" class="panel">
-  <div class="page-hd">
-    <div><div class="page-title">週報表</div><div class="page-sub">查看指定日期區間的出席彙整</div></div>
-    <div class="btn-row">
-      <button class="btn btn-sm btn-green" onclick="exportWeeklyExcel()">⬇️ 匯出 Excel</button>
-    </div>
+  <div class="ph">
+    <div><div class="pt">週報表</div><div class="ps">查看出席彙整，支援匯出 Excel</div></div>
+    <div class="btnrow"><button class="btn btn-sm btn-g" onclick="expWeekly()">⬇️ 匯出 Excel</button></div>
   </div>
   <div class="card">
     <div class="row">
       <div class="field"><label>班級</label><select id="wk-cls"><option value="">— 選擇 —</option></select></div>
       <div class="field"><label>開始日期</label><input type="date" id="wk-from"/></div>
       <div class="field"><label>結束日期</label><input type="date" id="wk-to"/></div>
-      <div style="display:flex;align-items:flex-end"><button class="btn btn-primary" onclick="loadWeekly()">查詢</button></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn btn-p" onclick="loadWeekly()">查詢</button></div>
     </div>
   </div>
-  <div class="card">
-    <div id="weekly-tbl"><div class="empty"><span class="empty-ico">📊</span>選擇班級與日期後按查詢</div></div>
-  </div>
-</div>
-
-<!-- API 設定 -->
-<div id="page-settings" class="panel">
-  <div class="page-hd">
-    <div><div class="page-title">API 設定</div><div class="page-sub">連接 Google Apps Script 後端</div></div>
-  </div>
-  <div style="max-width:520px">
-    <div class="card">
-      <div class="card-title" style="margin-bottom:.9rem">Google Apps Script 網址</div>
-      <div class="alert a-blue" style="margin-bottom:1rem">
-        📌 請先完成 Apps Script 部署，取得「網頁應用程式網址」後貼入下方
-      </div>
-      <div class="field" style="margin-bottom:.9rem">
-        <label>Apps Script 部署網址</label>
-        <input type="text" id="api-url" placeholder="https://script.google.com/macros/s/..."/>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-green" onclick="saveApiUrl()">💾 儲存並測試連線</button>
-        <button class="btn" onclick="testApi()">🔌 測試連線</button>
-      </div>
-      <div id="api-test-result" style="margin-top:.75rem"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title" style="margin-bottom:.9rem">📖 設定步驟</div>
-      <div style="font-size:13px;color:var(--t2);line-height:2;counter-reset:step">
-        <div style="display:flex;gap:10px;margin-bottom:.5rem"><span style="background:var(--t1);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span><span>開啟 <a href="https://sheets.google.com" target="_blank" style="color:var(--green)">Google 試算表</a>，建立新的試算表，複製網址中的 ID</span></div>
-        <div style="display:flex;gap:10px;margin-bottom:.5rem"><span style="background:var(--t1);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span><span>開啟 <a href="https://script.google.com" target="_blank" style="color:var(--green)">Google Apps Script</a>，建立新專案，貼上提供的程式碼</span></div>
-        <div style="display:flex;gap:10px;margin-bottom:.5rem"><span style="background:var(--t1);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</span><span>將程式碼第 4 行的 <code style="background:var(--bg);padding:1px 5px;border-radius:4px">YOUR_SHEET_ID_HERE</code> 換成你的試算表 ID</span></div>
-        <div style="display:flex;gap:10px;margin-bottom:.5rem"><span style="background:var(--t1);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">4</span><span>執行 <code style="background:var(--bg);padding:1px 5px;border-radius:4px">initSheets</code> 函式一次，建立初始 Sheet</span></div>
-        <div style="display:flex;gap:10px;margin-bottom:.5rem"><span style="background:var(--t1);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">5</span><span>點「部署」→「新增部署」→ 類型選「網頁應用程式」→ 存取權選「所有人」→ 部署</span></div>
-        <div style="display:flex;gap:10px"><span style="background:var(--t1);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">6</span><span>複製「網頁應用程式網址」貼到上方欄位</span></div>
-      </div>
-    </div>
-  </div>
+  <div class="card"><div id="wk-tbl"><div class="empty"><span class="eico">📊</span>選擇班級與日期後查詢</div></div></div>
 </div>
 
 </main>
 </div>
 
 <!-- 全螢幕 QR -->
-<div id="fs-ov" onclick="closeFS()">
-  <div id="fs-qr" style="background:#fff;padding:20px;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.15)"></div>
-  <div id="fs-title" style="font-size:20px;font-weight:700;color:var(--t1);text-align:center"></div>
-  <div style="font-size:13px;color:#999">點擊任意處關閉</div>
+<div id="fsov" onclick="closeFS()">
+  <div id="fs-qr" style="background:#fff;padding:18px;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.15)"></div>
+  <div id="fs-title" style="font-size:19px;font-weight:700;color:var(--t1);text-align:center"></div>
+  <div style="font-size:12px;color:#aaa">點擊任意處關閉</div>
 </div>
 
 <!-- 座位選擇器 Modal -->
-<div class="modal-bg" id="picker-modal">
-  <div class="modal-box">
-    <div class="modal-title">
-      <span>指定座位 <span id="picker-key-lbl" style="color:var(--green);font-size:18px"></span></span>
-      <button class="btn btn-sm btn-ghost" onclick="closePicker()">✕</button>
+<div class="mbg" id="picker-modal">
+  <div class="mbox">
+    <div class="mtit">
+      <span>指定座位 <span id="pk-key" style="color:var(--grn)"></span></span>
+      <button class="btn btn-sm btn-gh" onclick="closePicker()">✕</button>
     </div>
-    <input type="text" placeholder="搜尋姓名 / 座號..." style="margin-bottom:.75rem" oninput="filterPicker(this.value)" id="picker-search"/>
-    <div id="picker-body" style="display:flex;flex-wrap:wrap;gap:6px;max-height:320px;overflow-y:auto"></div>
+    <input type="text" placeholder="搜尋姓名 / 座號..." style="margin-bottom:.7rem" id="pk-search" oninput="filterPicker(this.value)"/>
+    <div id="pk-body" style="display:flex;flex-wrap:wrap;gap:5px;max-height:300px;overflow-y:auto"></div>
   </div>
 </div>
 
 <div id="toast"></div>
 
+<!-- ═══ QR Code 引擎（完整內嵌，不依賴任何外部服務）═══ -->
 <script>
-// ═══════════════════════════════════════════════════════
-// QR Code 產生器 — 完整實作（Version 1-10, EC Level M）
-// 不依賴任何外部函式庫，直接繪製到 canvas
-// ═══════════════════════════════════════════════════════
-const QREngine = (() => {
+const QRE=(()=>{
+  const E=new Uint8Array(512),L=new Uint8Array(256);
+  (()=>{let x=1;for(let i=0;i<255;i++){E[i]=x;L[x]=i;x=x<128?x*2:(x*2)^0x11D;}for(let i=255;i<512;i++)E[i]=E[i-255];})();
+  const gm=(a,b)=>(a&&b)?E[(L[a]+L[b])%255]:0;
+  function rsp(ec){let p=[1];for(let i=0;i<ec;i++){const q=[1,E[i]],r=new Array(p.length+q.length-1).fill(0);for(let j=0;j<p.length;j++)for(let k=0;k<q.length;k++)r[j+k]^=gm(p[j],q[k]);p=r;}return p;}
+  function rse(d,ec){const g=rsp(ec),m=[...d,...new Array(ec).fill(0)];for(let i=0;i<d.length;i++){const c=m[i];if(c)for(let j=0;j<g.length;j++)m[i+j]^=gm(g[j],c);}return m.slice(d.length);}
+  // Version 1-10, EC Level M: [total_dw, ec_per_blk, n1, k1, n2, k2]
+  const VT=[[],[16,10,1,16,0,0],[28,16,1,28,0,0],[44,26,1,44,0,0],[64,18,2,32,0,0],[86,24,2,43,0,0],[108,16,4,27,0,0],[124,18,4,31,0,0],[154,22,2,38,4,39],[182,22,3,36,5,37],[216,26,4,43,1,44]];
+  const TD=[0,16,28,44,64,86,108,124,154,182,216];
+  const AL=[[],[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,28,46],[6,26,46]];
+  const RM=[0,0,7,7,7,0,0,0,0,0,0];
+  // Format strings for EC=M, mask 0-7
+  const FMT=[0b101010000010010,0b101000100100101,0b101111001111100,0b101101101001011,0b100010111111001,0b100000011001110,0b100111110010111,0b100101010100000];
+  const MASKS=[(r,c)=>(r+c)%2==0,(r,c)=>r%2==0,(r,c)=>c%3==0,(r,c)=>(r+c)%3==0,(r,c)=>(Math.floor(r/2)+Math.floor(c/3))%2==0,(r,c)=>(r*c)%2+(r*c)%3==0,(r,c)=>((r*c)%2+(r*c)%3)%2==0,(r,c)=>((r+c)%2+(r*c)%3)%2==0];
 
-  // ── Galois Field GF(256) ──
-  const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
-  (()=>{
-    let x=1;
-    for(let i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x=x<128?x*2:(x*2)^0x11D;}
-    for(let i=255;i<512;i++) EXP[i]=EXP[i-255];
-  })();
-  const gm=(a,b)=>(a&&b)?EXP[(LOG[a]+LOG[b])%255]:0;
+  function pv(n){for(let v=1;v<=10;v++)if(n+2<=TD[v])return v;return 10;}
 
-  function rsPoly(ec){
-    let p=[1];
-    for(let i=0;i<ec;i++){
-      const q=[1,EXP[i]], r=new Array(p.length+q.length-1).fill(0);
-      for(let j=0;j<p.length;j++) for(let k=0;k<q.length;k++) r[j+k]^=gm(p[j],q[k]);
-      p=r;
-    }
-    return p;
-  }
-
-  function rsEncode(data, ec){
-    const g=rsPoly(ec), msg=[...data,...new Array(ec).fill(0)];
-    for(let i=0;i<data.length;i++){const c=msg[i];if(c)for(let j=0;j<g.length;j++)msg[i+j]^=gm(g[j],c);}
-    return msg.slice(data.length);
-  }
-
-  // ── Version tables (EC Level M) ──
-  // [total_data_cw, ec_per_block, num_blocks_g1, dw_per_block_g1, num_blocks_g2, dw_per_block_g2]
-  const VER = [
-    null,
-    [16,10,1,16,0,0],   // 1
-    [28,16,1,28,0,0],   // 2
-    [44,26,1,44,0,0],   // 3
-    [64,18,2,32,0,0],   // 4
-    [86,24,2,43,0,0],   // 5
-    [108,16,4,27,0,0],  // 6
-    [124,18,4,31,0,0],  // 7
-    [154,22,2,38,4,39], // 8
-    [182,22,3,36,5,37], // 9
-    [216,26,4,43,1,44], // 10
-  ];
-  const TOTAL = [0,16,28,44,64,86,108,124,154,182,216]; // total data codewords
-
-  // Alignment pattern centers
-  const ALIGN = [[],[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,28,46],[6,26,46]];
-
-  // Remainder bits
-  const REM = [0,0,7,7,7,0,0,0,0,0,0];
-
-  // Format info strings (EC=M=00, masks 0-7) XOR'd with 101010000010010
-  const FMT = [
-    0b101010000010010, // mask 0 – (r+c)%2==0
-    0b101000100100101, // mask 1 – r%2==0
-    0b101111001111100, // mask 2 – c%3==0
-    0b101101101001011, // mask 3 – (r+c)%3==0
-    0b100010111111001, // mask 4 – (floor(r/2)+floor(c/3))%2==0
-    0b100000011001110, // mask 5 – (r*c)%2+(r*c)%3==0
-    0b100111110010111, // mask 6 – ((r*c)%2+(r*c)%3)%2==0
-    0b100101010100000, // mask 7 – ((r+c)%2+(r*c)%3)%2==0
-  ];
-
-  function pickVersion(byteLen) {
-    for(let v=1;v<=10;v++) if(byteLen+2 <= TOTAL[v]) return v;
-    return 10;
-  }
-
-  function buildData(bytes, version) {
-    const bits=[], add=(v,n)=>{for(let i=n-1;i>=0;i--)bits.push((v>>i)&1);};
-    add(4,4); add(bytes.length,8);
-    for(const b of bytes) add(b,8);
-    add(0,4);
-    while(bits.length%8) bits.push(0);
-    const pads=[0xEC,0x11]; let pi=0;
-    while(bits.length < TOTAL[version]*8){ add(pads[pi%2],8); pi++; }
-
-    // Convert to codewords
-    const cw=[];
-    for(let i=0;i<bits.length;i+=8){
-      let b=0; for(let j=0;j<8;j++) b=(b<<1)|(bits[i+j]||0);
-      cw.push(b);
-    }
+  function build(bytes,ver){
+    const bits=[],add=(v,n)=>{for(let i=n-1;i>=0;i--)bits.push((v>>i)&1);};
+    add(4,4);add(bytes.length,8);for(const b of bytes)add(b,8);
+    add(0,4);while(bits.length%8)bits.push(0);
+    const pd=[0xEC,0x11];let pi=0;while(bits.length<TD[ver]*8){add(pd[pi%2],8);pi++;}
+    const cw=[];for(let i=0;i<bits.length;i+=8){let b=0;for(let j=0;j<8;j++)b=(b<<1)|(bits[i+j]||0);cw.push(b);}
     return cw;
   }
 
-  function interleaveAndEC(cw, version) {
-    const [totalDW,ecPB,n1,k1,n2,k2] = VER[version];
-    const blocks=[];
-    let ptr=0;
-    for(let i=0;i<n1;i++){ blocks.push(cw.slice(ptr,ptr+k1)); ptr+=k1; }
-    for(let i=0;i<n2;i++){ blocks.push(cw.slice(ptr,ptr+k2)); ptr+=k2; }
-    const ecBlocks = blocks.map(b => rsEncode(b, ecPB));
-
-    // Interleave data
+  function interleave(cw,ver){
+    const[,ecpb,n1,k1,n2,k2]=VT[ver];
+    const blks=[];let p=0;
+    for(let i=0;i<n1;i++){blks.push(cw.slice(p,p+k1));p+=k1;}
+    for(let i=0;i<n2;i++){blks.push(cw.slice(p,p+k2));p+=k2;}
+    const ec=blks.map(b=>rse(b,ecpb));
     const out=[];
-    const maxLen = Math.max(k1,k2);
-    for(let i=0;i<maxLen;i++) for(const b of blocks) if(i<b.length) out.push(b[i]);
-    // Interleave EC
-    for(let i=0;i<ecPB;i++) for(const b of ecBlocks) out.push(b[i]);
+    const mx=Math.max(k1,k2);
+    for(let i=0;i<mx;i++)for(const b of blks)if(i<b.length)out.push(b[i]);
+    for(let i=0;i<ecpb;i++)for(const b of ec)out.push(b[i]);
     return out;
   }
 
-  function makeMask(maskId) {
-    return [
-      (r,c)=>(r+c)%2===0,
-      (r,c)=>r%2===0,
-      (r,c)=>c%3===0,
-      (r,c)=>(r+c)%3===0,
-      (r,c)=>(Math.floor(r/2)+Math.floor(c/3))%2===0,
-      (r,c)=>(r*c)%2+(r*c)%3===0,
-      (r,c)=>((r*c)%2+(r*c)%3)%2===0,
-      (r,c)=>((r+c)%2+(r*c)%3)%2===0,
-    ][maskId];
-  }
-
-  function score(mat, dim) {
+  function score(M,dim){
     let s=0;
-    // Rule 1: 5+ same in row/col
-    for(let r=0;r<dim;r++){let n=1,v=mat[r][0];for(let c=1;c<dim;c++){if(mat[r][c]===v)n++;else{if(n>=5)s+=n-2;n=1;v=mat[r][c];}if(n>=5)s+=n-2;}    }
-    for(let c=0;c<dim;c++){let n=1,v=mat[0][c];for(let r=1;r<dim;r++){if(mat[r][c]===v)n++;else{if(n>=5)s+=n-2;n=1;v=mat[r][c];}if(n>=5)s+=n-2;}    }
-    // Rule 2: 2x2 blocks
-    for(let r=0;r<dim-1;r++) for(let c=0;c<dim-1;c++) if(mat[r][c]===mat[r][c+1]&&mat[r][c]===mat[r+1][c]&&mat[r][c]===mat[r+1][c+1]) s+=3;
-    // Rule 4: dark proportion
-    let dark=0; for(let r=0;r<dim;r++) for(let c=0;c<dim;c++) if(mat[r][c]) dark++;
-    const pct=dark*100/(dim*dim), k=Math.floor(Math.abs(pct-50)/5);
-    s+=k*10;
+    for(let r=0;r<dim;r++){let n=1,v=M[r][0];for(let c=1;c<dim;c++){if(M[r][c]===v)n++;else{if(n>=5)s+=n-2;n=1;v=M[r][c];}if(n>=5)s+=n-2;}}
+    for(let c=0;c<dim;c++){let n=1,v=M[0][c];for(let r=1;r<dim;r++){if(M[r][c]===v)n++;else{if(n>=5)s+=n-2;n=1;v=M[r][c];}if(n>=5)s+=n-2;}}
+    for(let r=0;r<dim-1;r++)for(let c=0;c<dim-1;c++)if(M[r][c]===M[r][c+1]&&M[r][c]===M[r+1][c]&&M[r][c]===M[r+1][c+1])s+=3;
+    let dk=0;for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)if(M[r][c])dk++;
+    s+=Math.floor(Math.abs(dk*100/(dim*dim)-50)/5)*10;
     return s;
   }
 
-  function generate(text, canvas, size) {
+  function draw(text,canvas,size){
     const bytes=[...new TextEncoder().encode(text)];
-    const version=pickVersion(bytes.length);
-    const dim=version*4+17;
+    const ver=pv(bytes.length);
+    const dim=ver*4+17;
+    const cw=build(bytes,ver);
+    const all=interleave(cw,ver);
+    const bits=[];for(const c of all)for(let i=7;i>=0;i--)bits.push((c>>i)&1);
+    for(let i=0;i<(RM[ver]||0);i++)bits.push(0);
 
-    // Build final codeword stream
-    const dataCW=buildData(bytes,version);
-    const allCW=interleaveAndEC(dataCW,version);
-    const allBits=[];
-    for(const c of allCW) for(let i=7;i>=0;i--) allBits.push((c>>i)&1);
-    for(let i=0;i<(REM[version]||0);i++) allBits.push(0);
-
-    // Try all 8 masks, pick best score
-    let bestMat=null, bestScore=Infinity;
-    for(let maskId=0;maskId<8;maskId++){
+    let bestM=null,bestS=Infinity;
+    for(let mid=0;mid<8;mid++){
       const M=Array.from({length:dim},()=>new Uint8Array(dim));
-      const FN=Array.from({length:dim},()=>new Uint8Array(dim)); // function modules
-
-      const setM=(r,c,v,fn=false)=>{if(r>=0&&r<dim&&c>=0&&c<dim){M[r][c]=v;if(fn)FN[r][c]=1;}};
-
-      // Finder patterns
-      const finder=(tr,tc)=>{
-        for(let dr=-1;dr<=7;dr++) for(let dc=-1;dc<=7;dc++){
-          if(tr+dr<0||tr+dr>=dim||tc+dc<0||tc+dc>=dim) continue;
-          if(dr>=-1&&dr<=7&&dc>=-1&&dc<=7){
-            const v=(dr>=0&&dr<=6&&dc>=0&&dc<=6)&&(dr===0||dr===6||dc===0||dc===6||(dr>=2&&dr<=4&&dc>=2&&dc<=4))?1:0;
-            setM(tr+dr,tc+dc,v,true);
-          }
-        }
-      };
-      finder(0,0); finder(0,dim-7); finder(dim-7,0);
-
+      const FN=Array.from({length:dim},()=>new Uint8Array(dim));
+      const set=(r,c,v,fn)=>{if(r>=0&&r<dim&&c>=0&&c<dim){M[r][c]=v;if(fn)FN[r][c]=1;}};
+      // Finder
+      const finder=(tr,tc)=>{for(let dr=-1;dr<=7;dr++)for(let dc=-1;dc<=7;dc++){if(tr+dr<0||tr+dr>=dim||tc+dc<0||tc+dc>=dim)continue;if(dr>=-1&&dr<=7&&dc>=-1&&dc<=7){const v=(dr>=0&&dr<=6&&dc>=0&&dc<=6)&&(dr===0||dr===6||dc===0||dc===6||(dr>=2&&dr<=4&&dc>=2&&dc<=4))?1:0;set(tr+dr,tc+dc,v,true);}}};
+      finder(0,0);finder(0,dim-7);finder(dim-7,0);
       // Timing
-      for(let i=8;i<dim-8;i++){
-        if(!FN[6][i]){setM(6,i,i%2===0?1:0,true);}
-        if(!FN[i][6]){setM(i,6,i%2===0?1:0,true);}
-      }
-
-      // Dark module
-      setM(dim-8,8,1,true);
-
-      // Alignment patterns
-      const ap=ALIGN[version]||[];
-      for(const ar of ap) for(const ac of ap){
-        if(FN[ar][ac]) continue;
-        for(let dr=-2;dr<=2;dr++) for(let dc=-2;dc<=2;dc++)
-          setM(ar+dr,ac+dc,(Math.abs(dr)===2||Math.abs(dc)===2||dr===0&&dc===0)?1:0,true);
-      }
-
-      // Format info placeholders (mark as function)
-      [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8],
-       [8,dim-1],[8,dim-2],[8,dim-3],[8,dim-4],[8,dim-5],[8,dim-6],[8,dim-7],
-       [dim-7,8],[dim-6,8],[dim-5,8],[dim-4,8],[dim-3,8],[dim-2,8],[dim-1,8]
-      ].forEach(([r,c])=>{FN[r][c]=1;});
-
-      // Place data bits (two-column zigzag)
+      for(let i=8;i<dim-8;i++){if(!FN[6][i])set(6,i,i%2===0?1:0,true);if(!FN[i][6])set(i,6,i%2===0?1:0,true);}
+      set(dim-8,8,1,true);
+      // Alignment
+      const ap=AL[ver]||[];
+      for(const ar of ap)for(const ac of ap){if(FN[ar][ac])continue;for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++)set(ar+dr,ac+dc,(Math.abs(dr)===2||Math.abs(dc)===2||dr===0&&dc===0)?1:0,true);}
+      // Format placeholders
+      [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8],[8,dim-1],[8,dim-2],[8,dim-3],[8,dim-4],[8,dim-5],[8,dim-6],[8,dim-7],[dim-7,8],[dim-6,8],[dim-5,8],[dim-4,8],[dim-3,8],[dim-2,8],[dim-1,8]].forEach(([r,c])=>{FN[r][c]=1;});
+      // Data
       let bi=0,up=true,col=dim-1;
-      while(col>=0){
-        if(col===6) col--;
-        for(let row=0;row<dim;row++){
-          const r=up?dim-1-row:row;
-          for(let dc=0;dc<2;dc++){
-            const c=col-dc;
-            if(!FN[r][c] && bi<allBits.length) M[r][c]=allBits[bi++];
-          }
-        }
-        up=!up; col-=2;
-      }
-
-      // Apply mask
-      const mfn=makeMask(maskId);
-      for(let r=0;r<dim;r++) for(let c=0;c<dim;c++)
-        if(!FN[r][c] && mfn(r,c)) M[r][c]^=1;
-
-      // Write format info
-      const fmt=FMT[maskId];
-      const fb=[]; for(let i=14;i>=0;i--) fb.push((fmt>>i)&1);
-      for(let i=0;i<6;i++) M[8][i]=fb[i];
-      M[8][7]=fb[6]; M[8][8]=fb[7]; M[7][8]=fb[8];
-      for(let i=0;i<6;i++) M[5-i][8]=fb[9+i];
-      for(let i=0;i<8;i++) M[dim-1-i][8]=fb[i];
-      for(let i=0;i<7;i++) M[8][dim-7+i]=fb[8+i];
-
-      const s=score(M,dim);
-      if(s<bestScore){bestScore=s;bestMat=M.map(r=>Uint8Array.from(r));}
+      while(col>=0){if(col===6)col--;for(let row=0;row<dim;row++){const r=up?dim-1-row:row;for(let dc=0;dc<2;dc++){const c=col-dc;if(!FN[r][c]&&bi<bits.length)M[r][c]=bits[bi++];}}up=!up;col-=2;}
+      // Mask
+      const mfn=MASKS[mid];
+      for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)if(!FN[r][c]&&mfn(r,c))M[r][c]^=1;
+      // Format info
+      const fmt=FMT[mid],fb=[];for(let i=14;i>=0;i--)fb.push((fmt>>i)&1);
+      for(let i=0;i<6;i++)M[8][i]=fb[i];M[8][7]=fb[6];M[8][8]=fb[7];M[7][8]=fb[8];
+      for(let i=0;i<6;i++)M[5-i][8]=fb[9+i];
+      for(let i=0;i<8;i++)M[dim-1-i][8]=fb[i];
+      for(let i=0;i<7;i++)M[8][dim-7+i]=fb[8+i];
+      const s=score(M,dim);if(s<bestS){bestS=s;bestM=M.map(r=>Uint8Array.from(r));}
     }
-
-    // Draw to canvas
+    // Draw
+    canvas.width=size;canvas.height=size;
     const ctx=canvas.getContext('2d');
-    const quiet=4;
-    const total=dim+quiet*2;
-    canvas.width=size; canvas.height=size;
-    const cell=size/total;
-    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,size,size);
+    const q=4,tot=dim+q*2,cell=size/tot;
+    ctx.fillStyle='#ffffff';ctx.fillRect(0,0,size,size);
     ctx.fillStyle='#000000';
-    for(let r=0;r<dim;r++) for(let c=0;c<dim;c++)
-      if(bestMat[r][c]) ctx.fillRect((quiet+c)*cell,(quiet+r)*cell,cell,cell);
+    for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)if(bestM[r][c])ctx.fillRect((q+c)*cell,(q+r)*cell,cell,cell);
     return true;
   }
-
-  return {generate};
+  return{draw};
 })();
-
 </script>
 
+<!-- ═══ 主程式 ═══ -->
 <script>
-// ═══════════════════ 常數 & 狀態 ═══════════════════
-const STUDENT_URL = 'https://pin-xian.github.io/rollcall/student.html';
-const LS = {
-  roster:'att_roster_v3', seats:'att_seats_v3', layout:'att_layout_v3',
-  cfg:'att_cfg_v3', apiUrl:'att_api_url', attendance:'att_attend_'
-};
+// ── 狀態 ──
+const STUDENT_URL='https://pin-xian.github.io/rollcall/student.html';
+const LS={ro:'att_ro3',se:'att_se3',la:'att_la3',cf:'att_cf3',at:'att_at_'};
+let ROSTER=[],SEATS={},SROWS=4,SCOLS=5,CFG={},TOKEN='',QRon=false,QRSZ=260;
+let impRaw=[],impHd=[];
+let pkKey='',pkCls='';
+let wkData=null;
 
-let ROSTER  = [];   // [{cls,sno,name,sid}]
-let SEATS   = {};   // {cls: {seatKey:{sno,name,sid}}}
-let SROWS   = 4, SCOLS = 5;
-let CFG     = {};
-let TOKEN   = '';
-let QR_GENERATED = false;
-let QR_SIZE = 250;
-let API_URL = '';
-let CLASSES = [];
-let pickerKey = '', pickerCls = '';
-let importRaw = [], importHdrs = [];
-let weeklyData = null;
-
-// ═══════════════════ 初始化 ═══════════════════
-function init() {
-  loadLocal();
-  populateClassSelectors();
-  renderSeatGrid();
-  rebuildEditor();
-  renderCurRoster();
-  clockTick(); setInterval(clockTick, 1000);
-  testApi(true);
+// ── 初始化 ──
+function init(){
+  loadLS();popCls();rebuildEditor();renderCurRoster();
+  clock();setInterval(clock,1000);
   // 預設週報日期
-  const today = new Date();
-  const mon   = new Date(today); mon.setDate(today.getDate() - today.getDay() + 1);
-  const sun   = new Date(mon);   sun.setDate(mon.getDate() + 6);
-  document.getElementById('wk-from').value = mon.toISOString().slice(0,10);
-  document.getElementById('wk-to').value   = sun.toISOString().slice(0,10);
+  const t=new Date(),mo=new Date(t);mo.setDate(t.getDate()-t.getDay()+1);
+  const su=new Date(mo);su.setDate(mo.getDate()+6);
+  document.getElementById('wk-from').value=mo.toISOString().slice(0,10);
+  document.getElementById('wk-to').value=su.toISOString().slice(0,10);
+  // BroadcastChannel：接收學生簽到
+  try{
+    const bc=new BroadcastChannel('att_checkin');
+    bc.onmessage=e=>{
+      const d=e.data;
+      if(d.type==='checkin'&&d.token===TOKEN){
+        const att=getAtt(d.cls);
+        att[d.seat]=d;
+        saveAtt(d.cls,att);
+        syncAll();
+        toast('📍 '+d.name+' 已簽到');
+      }
+    };
+  }catch(e){}
 }
 
-function loadLocal() {
-  try {
-    const r=localStorage.getItem(LS.roster),  s=localStorage.getItem(LS.seats),
-          l=localStorage.getItem(LS.layout),  c=localStorage.getItem(LS.cfg),
-          a=localStorage.getItem(LS.apiUrl);
-    if(r) ROSTER=JSON.parse(r);
-    if(s) SEATS=JSON.parse(s);
-    if(l){ const lo=JSON.parse(l); SROWS=lo.rows||4; SCOLS=lo.cols||5; }
-    if(c){ CFG=JSON.parse(c);
-      if(CFG.course) document.getElementById('course-name').value=CFG.course;
-      if(CFG.classTime) document.getElementById('class-time').value=CFG.classTime;
-      if(CFG.lateMin) document.getElementById('late-min').value=CFG.lateMin;
+function loadLS(){
+  try{
+    const r=localStorage.getItem(LS.ro),s=localStorage.getItem(LS.se),
+          l=localStorage.getItem(LS.la),c=localStorage.getItem(LS.cf);
+    if(r)ROSTER=JSON.parse(r);
+    if(s)SEATS=JSON.parse(s);
+    if(l){const lo=JSON.parse(l);SROWS=lo.rows||4;SCOLS=lo.cols||5;}
+    if(c){const co=JSON.parse(c);
+      if(co.course)document.getElementById('course-name').value=co.course;
+      if(co.classTime)document.getElementById('class-time').value=co.classTime;
+      if(co.lateMin)document.getElementById('late-min').value=co.lateMin;
     }
-    if(a){ API_URL=a; document.getElementById('api-url').value=a; }
     document.getElementById('s-rows').value=SROWS;
     document.getElementById('s-cols').value=SCOLS;
-  } catch(e){}
+  }catch(e){}
+}
+function saveLS(){try{localStorage.setItem(LS.ro,JSON.stringify(ROSTER));localStorage.setItem(LS.se,JSON.stringify(SEATS));localStorage.setItem(LS.la,JSON.stringify({rows:SROWS,cols:SCOLS}));}catch(e){}}
+function saveCF(){try{localStorage.setItem(LS.cf,JSON.stringify({course:document.getElementById('course-name').value,classTime:document.getElementById('class-time').value,lateMin:document.getElementById('late-min').value}));}catch(e){}}
+function getAtt(cls){if(!TOKEN||!cls)return{};try{return JSON.parse(localStorage.getItem(LS.at+TOKEN+'_'+cls)||'{}');}catch(e){return{};}}
+function saveAtt(cls,att){try{localStorage.setItem(LS.at+TOKEN+'_'+cls,JSON.stringify(att));}catch(e){}}
+
+// ── 工具 ──
+function toast(m,d=2400){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+function clock(){const n=new Date();document.getElementById('sb-ft').textContent=n.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit',weekday:'short'})+'\n'+n.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function addMins(t,m){const[h,mm]=t.split(':').map(Number),tot=h*60+mm+m;return String(Math.floor(tot/60)%24).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
+function nowStr(){return new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function todayStr(){return new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});}
+function go(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');el.classList.add('active');if(id==='roster'){renderRoster();updManSel();}if(id==='dashboard')syncAll();if(id==='seats')rebuildEditor();if(id==='import')renderCurRoster();}
+function getSO(){const k=[];for(let r=1;r<=SROWS;r++)for(let c=0;c<SCOLS;c++)k.push(r+String.fromCharCode(65+c));return k;}
+function getSC(cls){return SEATS[cls]||{};}
+function curCls(){return document.getElementById('dash-cls')?.value||'';}
+function popCls(){
+  const cls=[...new Set(ROSTER.map(s=>s.cls).filter(Boolean))];
+  const opt='<option value="">— 選擇班級 —</option>'+cls.map(c=>`<option>${c}</option>`).join('');
+  ['dash-cls','qr-cls','seat-cls','r-cls','wk-cls'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=opt;});
 }
 
-function saveLocal() {
-  try {
-    localStorage.setItem(LS.roster,  JSON.stringify(ROSTER));
-    localStorage.setItem(LS.seats,   JSON.stringify(SEATS));
-    localStorage.setItem(LS.layout,  JSON.stringify({rows:SROWS,cols:SCOLS}));
-  } catch(e){}
+// ── 同步 ──
+function syncAll(){const cls=curCls();if(!cls)return;updStats(cls);renderSG(cls);renderRL(cls);}
+function onClsChange(){syncAll();}
+
+// ── 統計 ──
+function updStats(cls){
+  const att=getAtt(cls),seats=getSC(cls);
+  let on=0,late=0;Object.values(att).forEach(r=>{if(r.late)late++;else on++;});
+  const tot=Object.keys(seats).filter(s=>seats[s]).length,abs=Math.max(0,tot-on-late);
+  ['s-on','r-on'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=on;});
+  ['s-late','r-late'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=late;});
+  ['s-abs','r-abs'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=abs;});
+  ['s-tot','r-tot'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=tot;});
 }
 
-function saveCfg() {
-  try {
-    localStorage.setItem(LS.cfg, JSON.stringify({
-      course:    document.getElementById('course-name').value,
-      classTime: document.getElementById('class-time').value,
-      lateMin:   document.getElementById('late-min').value,
-    }));
-  } catch(e){}
-}
-
-// ═══════════════════ 工具 ═══════════════════
-function toast(m,d=2400){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d)}
-function clockTick(){
-  const now=new Date();
-  document.getElementById('sb-clock').textContent=
-    now.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit',weekday:'short'})+'\n'+
-    now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-}
-function addMins(t,m){const[h,mm]=t.split(':').map(Number),tot=h*60+mm+m;return String(Math.floor(tot/60)%24).padStart(2,'0')+':'+String(tot%60).padStart(2,'0')}
-function nowStr(){return new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
-function todayStr(){return new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'})}
-
-function goPage(id,el){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  el.classList.add('active');
-  if(id==='roster'){renderRoster();updateManualSelect()}
-  if(id==='dashboard'){syncAll()}
-  if(id==='seats'){rebuildEditor()}
-  if(id==='import'){renderCurRoster()}
-}
-
-function getSeatOrder(cls){
-  const k=[];
-  for(let r=1;r<=SROWS;r++) for(let c=0;c<SCOLS;c++) k.push(r+String.fromCharCode(65+c));
-  return k;
-}
-
-function getSeatsForCls(cls){return SEATS[cls]||{}}
-
-function getAttLocal(cls){
-  if(!TOKEN) return {};
-  try{return JSON.parse(localStorage.getItem(LS.attendance+TOKEN+'_'+cls)||'{}');}catch(e){return{};}
-}
-function saveAttLocal(cls,att){
-  try{localStorage.setItem(LS.attendance+TOKEN+'_'+cls,JSON.stringify(att));}catch(e){}
-}
-
-function currentCls(){return document.getElementById('dash-cls')?.value||''}
-
-function populateClassSelectors(){
-  CLASSES=[...new Set(ROSTER.map(s=>s.cls).filter(Boolean))];
-  const opts='<option value="">— 選擇班級 —</option>'+CLASSES.map(c=>`<option>${c}</option>`).join('');
-  ['dash-cls','qr-cls','seat-cls-sel','roster-cls','wk-cls'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.innerHTML=opts;
-  });
-}
-
-// ═══════════════════ API ═══════════════════
-async function apiFetch(params){
-  if(!API_URL) return null;
-  try{
-    const url=API_URL+'?'+new URLSearchParams(params);
-    const res=await fetch(url,{redirect:'follow'});
-    return await res.json();
-  }catch(e){return null;}
-}
-
-async function apiPost(data){
-  if(!API_URL) return null;
-  try{
-    const res=await fetch(API_URL,{method:'POST',body:JSON.stringify(data)});
-    return await res.json();
-  }catch(e){return null;}
-}
-
-async function testApi(silent=false){
-  const dot=document.getElementById('api-dot');
-  const txt=document.getElementById('api-status-txt');
-  const res=document.getElementById('api-test-result');
-  dot.className='sb-api-dot';
-  if(!API_URL){
-    txt.textContent='未設定';
-    if(!silent&&res) res.innerHTML='<div class="alert a-amber">⚠️ 請先填入 Apps Script 網址</div>';
-    return;
-  }
-  const data=await apiFetch({action:'getClasses'});
-  if(data&&data.ok){
-    dot.className='sb-api-dot ok'; txt.textContent='已連線';
-    CLASSES=[...new Set([...CLASSES,...(data.data||[])])];
-    populateClassSelectors();
-    if(!silent&&res) res.innerHTML='<div class="alert a-green">✅ 連線成功！已取得班級資料</div>';
-  } else {
-    dot.className='sb-api-dot err'; txt.textContent='連線失敗';
-    if(!silent&&res) res.innerHTML='<div class="alert a-red">❌ 無法連線，請確認網址是否正確，以及部署時存取權設為「所有人」</div>';
-  }
-}
-
-function saveApiUrl(){
-  API_URL=document.getElementById('api-url').value.trim();
-  localStorage.setItem(LS.apiUrl,API_URL);
-  testApi(false);
-}
-
-// ═══════════════════ 同步 ═══════════════════
-async function syncAll(){
-  const cls=currentCls();
-  if(!cls) return;
-  await syncAttendance(cls);
-  updateStats(cls);
-  renderSeatGrid(cls);
-  renderRecList(cls);
-}
-
-async function syncAttendance(cls){
-  if(!API_URL||!TOKEN) return;
-  const date=todayStr();
-  const data=await apiFetch({action:'getAttendance',cls,date});
-  if(data&&data.ok){
-    saveAttLocal(cls,data.data);
-  }
-}
-
-function onClassChange(){syncAll()}
-
-// ═══════════════════ 統計 & 座位 ═══════════════════
-function updateStats(cls){
-  const att=getAttLocal(cls||currentCls());
-  const seats=getSeatsForCls(cls||currentCls());
-  let on=0,late=0;
-  Object.values(att).forEach(r=>{if(r.late||r.status==='遲到')late++;else on++;});
-  const total=Object.keys(seats).filter(s=>seats[s]).length;
-  const abs=Math.max(0,total-on-late);
-  ['s-on','r-on'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=on});
-  ['s-late','r-late'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=late});
-  ['s-abs','r-abs'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=abs});
-  ['s-total','r-total'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=total});
-}
-
-function renderSeatGrid(cls){
-  cls=cls||currentCls();
-  const grid=document.getElementById('seat-grid'); if(!grid) return;
-  const seats=getSeatsForCls(cls);
-  const att=getAttLocal(cls);
-  const order=getSeatOrder();
+// ── 座位表 ──
+function renderSG(cls){
+  cls=cls||curCls();const grid=document.getElementById('sgrid');if(!grid)return;
+  const seats=getSC(cls),att=getAtt(cls);
   grid.style.gridTemplateColumns='repeat('+SCOLS+',1fr)';
-  grid.innerHTML=order.map(seat=>{
+  grid.innerHTML=getSO().map(seat=>{
     const info=seats[seat];
-    if(!info) return '<div class="seat seat-empty"><div>'+seat+'</div></div>';
+    if(!info)return'<div class="seat s-empty"><div>'+seat+'</div></div>';
     const rec=att[seat];
-    if(!QR_GENERATED) return '<div class="seat seat-empty"><div>'+seat+'</div><div class="seat-sno">No.'+info.sno+'</div><div class="seat-nm">'+info.name+'</div></div>';
-    if(rec){
-      const late=rec.late||rec.status==='遲到';
-      return '<div class="seat '+(late?'seat-late':'seat-present')+'" title="'+(rec.timeStr||'')+'">'
-        +'<div>'+(late?'⚠':'✓')+' '+seat+'</div>'
-        +'<div class="seat-sno">No.'+info.sno+'</div>'
-        +'<div class="seat-nm">'+info.name+'</div></div>';
-    }
-    return '<div class="seat seat-absent"><div>'+seat+'</div><div class="seat-sno">No.'+info.sno+'</div><div class="seat-nm">'+info.name+'</div></div>';
+    if(!QRon)return'<div class="seat s-empty"><div>'+seat+'</div><div class="sno">'+info.sno+'</div><div class="snm">'+info.name+'</div></div>';
+    if(rec){const l=rec.late;return'<div class="seat '+(l?'s-late':'s-ok')+'" title="'+rec.timeStr+'"><div>'+(l?'⚠':'✓')+' '+seat+'</div><div class="sno">'+info.sno+'</div><div class="snm">'+info.name+'</div></div>';}
+    return'<div class="seat s-abs"><div>'+seat+'</div><div class="sno">'+info.sno+'</div><div class="snm">'+info.name+'</div></div>';
   }).join('');
 }
 
-function renderRecList(cls){
-  cls=cls||currentCls();
-  const list=document.getElementById('rec-list'); if(!list) return;
-  const att=getAttLocal(cls);
-  const recs=Object.values(att).sort((a,b)=>(a.ts||0)-(b.ts||0));
-  if(!recs.length){list.innerHTML='<div class="empty"><span class="empty-ico">🕐</span>等待學生簽到</div>';return;}
-  list.innerHTML=recs.map(r=>`
-    <div class="rec-item">
-      <div><div class="rec-name">${r.name}</div><div class="rec-meta">${r.seat||''}${r.sno?' · No.'+r.sno:''}</div></div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;color:var(--t2)">${r.timeStr||''}</span>
-        <span class="badge ${(r.late||r.status==='遲到')?'b-red':'b-green'}">${(r.late||r.status==='遲到')?'遲到':'準時'}</span>
-      </div>
-    </div>`).join('');
+// ── 紀錄 ──
+function renderRL(cls){
+  cls=cls||curCls();const list=document.getElementById('reclist');if(!list)return;
+  const att=getAtt(cls),recs=Object.values(att).sort((a,b)=>(a.ts||0)-(b.ts||0));
+  if(!recs.length){list.innerHTML='<div class="empty"><span class="eico">🕐</span>等待學生簽到</div>';return;}
+  list.innerHTML=recs.map(r=>`<div class="recitem"><div><div class="rn">${r.name}</div><div class="rm">${r.seat}${r.sno?' · No.'+r.sno:''}</div></div><div style="display:flex;align-items:center;gap:7px"><span style="font-size:12px;color:var(--t2)">${r.timeStr||''}</span><span class="badge ${r.late?'br':'bg'}">${r.late?'遲到':'準時'}</span></div></div>`).join('');
 }
 
-// ═══════════════════ QR Code ═══════════════════
+// ── QR Code ──
 function getQRUrl(){
-  // ★ api 網址存在 student.html，不放進 QR（避免太長掃不到）
-  const p=new URLSearchParams({
-    t:CFG.classTime,
-    dl:CFG.lateDeadline,
-    cls:CFG.cls,
-    tk:TOKEN
-  });
+  const p=new URLSearchParams({t:CFG.classTime,dl:CFG.lateDeadline,cls:CFG.cls,tk:TOKEN});
   return STUDENT_URL+'?'+p.toString();
 }
 
-function renderQR(containerId,size){
-  const el=document.getElementById(containerId); if(!el) return;
-  const url=getQRUrl();
+function drawQR(el,size){
   el.innerHTML='';
   const c=document.createElement('canvas');
-  c.style.cssText='display:block;border-radius:6px';
+  c.style.cssText='display:block;border-radius:5px';
   el.appendChild(c);
-  try{ QREngine.generate(url,c,size); }
-  catch(e){ el.innerHTML='<div style="color:var(--red);font-size:13px;padding:1.5rem;text-align:center">❌ QR 產生失敗：'+e.message+'</div>'; }
+  QRE.draw(getQRUrl(),c,size);
 }
 
-function generateQR(){
+function genQR(){
   const cls=document.getElementById('qr-cls').value;
   if(!cls){toast('請先選擇班級');return;}
   const course=document.getElementById('course-name').value.trim()||'課程';
   const classTime=document.getElementById('class-time').value;
   const lateMin=parseInt(document.getElementById('late-min').value)||15;
-  const today=new Date();
-  const dateStr=today.toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
+  const dateStr=todayStr();
   const lateDeadline=addMins(classTime,lateMin);
-  TOKEN=String(Date.now()).slice(-8);  // 只取後 8 碼，縮短 QR URL
+  TOKEN=String(Date.now()).slice(-8);
   CFG={course,classTime,lateMin,dateStr,lateDeadline,cls,token:TOKEN};
-  QR_GENERATED=true; saveCfg();
-
-  document.getElementById('qr-info-card').style.display='block';
-  document.getElementById('qr-display-card').style.display='block';
-  document.getElementById('qr-empty-card').style.display='none';
+  QRon=true;saveCF();
+  document.getElementById('qr-info').style.display='block';
+  document.getElementById('qr-display').style.display='block';
+  document.getElementById('qr-empty').style.display='none';
   document.getElementById('qi-cls').textContent=cls;
-  document.getElementById('qi-course').textContent=course;
-  document.getElementById('qi-date').textContent=dateStr;
-  document.getElementById('qi-time').textContent=classTime;
-  document.getElementById('qi-late').textContent=lateDeadline;
-  document.getElementById('qr-url-show').textContent=getQRUrl();
+  document.getElementById('qi-c').textContent=course;
+  document.getElementById('qi-d').textContent=dateStr;
+  document.getElementById('qi-t').textContent=classTime;
+  document.getElementById('qi-dl').textContent=lateDeadline;
+  document.getElementById('qi-url').textContent=getQRUrl();
   document.getElementById('dash-sub').textContent=cls+' · '+course+' · '+dateStr+'　截止 '+lateDeadline;
   document.getElementById('dash-cls').value=cls;
-
-  renderQR('qr-container',QR_SIZE);
-  updateStats(cls); renderSeatGrid(cls); updateManualSelect();
+  drawQR(document.getElementById('qr-box'),QRSZ);
+  updStats(cls);renderSG(cls);updManSel();
   toast('✅ QR Code 已產生！');
-  if(window._si) clearInterval(window._si);
-  window._si=setInterval(syncAll,10000);
+  if(window._si)clearInterval(window._si);
+  window._si=setInterval(syncAll,8000);
 }
 
-function resizeQR(v){
-  QR_SIZE=parseInt(v);
-  document.getElementById('size-lbl').textContent=v+'px';
-  if(QR_GENERATED) renderQR('qr-container',QR_SIZE);
-}
+function resizeQR(v){QRSZ=parseInt(v);document.getElementById('sz-lbl').textContent=v+'px';if(QRon)drawQR(document.getElementById('qr-box'),QRSZ);}
 
-function openQRNewTab(){
-  if(!QR_GENERATED){toast('請先產生 QR Code');return;}
-  const _c=document.querySelector('#qr-container canvas');
-  if(!_c){toast('QR Code 尚未產生');return;}
-  const _a=document.createElement('a');
-  _a.download='QRCode_'+(CFG.cls||'')+'_'+(CFG.dateStr||'')+'.png';
-  _a.href=_c.toDataURL('image/png'); _a.click();
-  toast('✅ QR Code 已下載');
+function dlQR(){
+  if(!QRon){toast('請先產生 QR Code');return;}
+  const c=document.querySelector('#qr-box canvas');if(!c){toast('尚未產生');return;}
+  const a=document.createElement('a');a.download='QR_'+CFG.cls+'_'+CFG.dateStr+'.png';a.href=c.toDataURL('image/png');a.click();toast('已下載 PNG');
 }
 
 function openFS(){
-  if(!QR_GENERATED){toast('請先產生 QR Code');return;}
-  document.getElementById('fs-ov').classList.add('open');
-  const _fw=document.getElementById('fs-qr');
-  _fw.innerHTML='';
-  const _fc=document.createElement('canvas');
-  _fc.style.cssText='display:block;border-radius:8px';
-  _fw.appendChild(_fc);
-  QREngine.generate(getQRUrl(),_fc,500);
+  if(!QRon){toast('請先產生 QR Code');return;}
+  document.getElementById('fsov').classList.add('open');
+  drawQR(document.getElementById('fs-qr'),480);
   document.getElementById('fs-title').textContent=CFG.cls+' · '+CFG.course+'　'+CFG.dateStr+'　截止 '+CFG.lateDeadline;
 }
-function closeFS(){document.getElementById('fs-ov').classList.remove('open')}
+function closeFS(){document.getElementById('fsov').classList.remove('open');}
 
 function resetToday(){
-  if(!confirm('確定重置今日簽到紀錄？')) return;
-  if(TOKEN&&currentCls()) localStorage.removeItem(LS.attendance+TOKEN+'_'+currentCls());
-  QR_GENERATED=false; TOKEN=''; CFG={};
+  if(!confirm('確定重置今日簽到紀錄？'))return;
+  if(TOKEN&&curCls())localStorage.removeItem(LS.at+TOKEN+'_'+curCls());
+  QRon=false;TOKEN='';CFG={};
   if(window._si){clearInterval(window._si);window._si=null;}
-  document.getElementById('qr-info-card').style.display='none';
-  document.getElementById('qr-display-card').style.display='none';
-  document.getElementById('qr-empty-card').style.display='block';
+  document.getElementById('qr-info').style.display='none';
+  document.getElementById('qr-display').style.display='none';
+  document.getElementById('qr-empty').style.display='block';
   document.getElementById('dash-sub').textContent='尚未產生今日 QR Code';
-  updateStats(''); renderSeatGrid(''); document.getElementById('rec-list').innerHTML='<div class="empty"><span class="empty-ico">🕐</span>等待學生簽到</div>';
+  updStats('');renderSG('');document.getElementById('reclist').innerHTML='<div class="empty"><span class="eico">🕐</span>等待學生簽到</div>';
   toast('已重置');
 }
 
-// ═══════════════════ 匯入名冊 ═══════════════════
-function dropFile(e){
-  e.preventDefault();
-  document.getElementById('upload-zone').classList.remove('over');
-  const f=e.dataTransfer.files[0]; if(f) readFile(f);
-}
-
-function readFile(file){
-  if(!file) return;
+// ── 名冊匯入 ──
+function dropF(e){e.preventDefault();document.getElementById('upzone').classList.remove('over');const f=e.dataTransfer.files[0];if(f)readF(f);}
+function readF(file){
+  if(!file)return;
   const ext=file.name.split('.').pop().toLowerCase();
-  const reader=new FileReader();
-  reader.onload=function(e){
+  const rd=new FileReader();
+  rd.onload=e=>{
     try{
-      let rows=[],hdrs=[];
+      let rows=[],hd=[];
       if(ext==='csv'){
-        const lines=e.target.result.split(/\r?\n/).filter(l=>l.trim());
-        hdrs=lines[0].split(',').map(h=>h.trim());
-        rows=lines.slice(1).map(l=>{const c=l.split(',');const o={};hdrs.forEach((h,i)=>o[h]=(c[i]||'').trim());return o;}).filter(r=>Object.values(r).some(v=>v));
-      } else {
+        const ln=e.target.result.split(/\r?\n/).filter(l=>l.trim());
+        hd=ln[0].split(',').map(h=>h.trim());
+        rows=ln.slice(1).map(l=>{const c=l.split(',');const o={};hd.forEach((h,i)=>o[h]=(c[i]||'').trim());return o;}).filter(r=>Object.values(r).some(v=>v));
+      }else{
+        // 使用瀏覽器原生 CSV 能力讀 Excel — 需要 XLSX 函式庫
+        // 若沒有則提示改用 CSV
+        if(typeof XLSX==='undefined'){toast('Excel 解析需要網路，請改用 CSV 格式',5000);return;}
         const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
         const ws=wb.Sheets[wb.SheetNames[0]];
         const json=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-        hdrs=json[0].map(h=>String(h).trim());
-        rows=json.slice(1).map(r=>{const o={};hdrs.forEach((h,i)=>o[h]=String(r[i]||'').trim());return o;}).filter(r=>Object.values(r).some(v=>v));
+        hd=json[0].map(h=>String(h).trim());
+        rows=json.slice(1).map(r=>{const o={};hd.forEach((h,i)=>o[h]=String(r[i]||'').trim());return o;}).filter(r=>Object.values(r).some(v=>v));
       }
-      importRaw=rows; importHdrs=hdrs;
-      setColOptions(hdrs); autoDetect(hdrs);
-      previewImport(rows,hdrs);
+      impRaw=rows;impHd=hd;
+      setColOpts(hd);autoDetect(hd);prevImport(rows,hd);
       document.getElementById('apply-btn').disabled=false;
       toast('✅ 載入 '+rows.length+' 筆');
     }catch(err){toast('⚠️ 解析失敗：'+err.message,4000);}
   };
-  if(ext==='csv') reader.readAsText(file,'UTF-8');
-  else reader.readAsArrayBuffer(file);
+  if(ext==='csv')rd.readAsText(file,'UTF-8');
+  else rd.readAsArrayBuffer(file);
 }
 
-function setColOptions(hdrs){
-  const opts='<option value="">自動偵測</option>'+hdrs.map(h=>'<option>'+h+'</option>').join('');
-  ['col-cls','col-sno','col-name','col-sid'].forEach(id=>document.getElementById(id).innerHTML=opts);
+function setColOpts(hd){
+  const opt='<option value="">自動偵測</option>'+hd.map(h=>'<option>'+h+'</option>').join('');
+  ['col-cls','col-sno','col-nm','col-sid'].forEach(id=>document.getElementById(id).innerHTML=opt);
 }
-
-function autoDetect(hdrs){
-  const hl=hdrs.map(h=>h.toLowerCase());
-  const find=kws=>{for(const k of kws){const i=hl.findIndex(h=>h.includes(k));if(i>=0)return hdrs[i];}return '';};
-  document.getElementById('col-cls').value =find(['班級','班','class']);
-  document.getElementById('col-sno').value =find(['座號','座位','sno','seat']);
-  document.getElementById('col-name').value=find(['姓名','name']);
-  document.getElementById('col-sid').value =find(['學號','sid','id','學生']);
+function autoDetect(hd){
+  const hl=hd.map(h=>h.toLowerCase());
+  const f=kws=>{for(const k of kws){const i=hl.findIndex(h=>h.includes(k));if(i>=0)return hd[i];}return '';};
+  document.getElementById('col-cls').value=f(['班級','班','class']);
+  document.getElementById('col-sno').value=f(['座號','座位','sno','seat']);
+  document.getElementById('col-nm').value =f(['姓名','name']);
+  document.getElementById('col-sid').value=f(['學號','sid','id']);
 }
-
-function previewImport(rows,hdrs){
-  const area=document.getElementById('import-preview');
+function prevImport(rows,hd){
+  const area=document.getElementById('imp-prev');
   const show=rows.slice(0,5);
-  area.innerHTML=`<div style="font-size:12px;color:var(--t2);margin-bottom:.5rem">共 ${rows.length} 筆（預覽前 ${show.length} 筆）</div>
-    <div class="tbl-wrap"><table class="tbl">
-      <thead><tr>${hdrs.map(h=>'<th>'+h+'</th>').join('')}</tr></thead>
-      <tbody>${show.map(r=>'<tr>'+hdrs.map(h=>'<td>'+r[h]+'</td>').join('')+'</tr>').join('')}</tbody>
-    </table></div>`;
+  area.innerHTML='<div style="font-size:12px;color:var(--t2);margin-bottom:.5rem">共 '+rows.length+' 筆（預覽前 '+show.length+' 筆）</div><div class="tw"><table><thead><tr>'+hd.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+show.map(r=>'<tr>'+hd.map(h=>'<td>'+r[h]+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
 }
-
 function applyImport(){
-  const fCls =document.getElementById('col-cls').value  ||importHdrs.find(h=>/班級|班|class/i.test(h))||importHdrs[0];
-  const fSno =document.getElementById('col-sno').value  ||importHdrs.find(h=>/座號|座位|sno|seat/i.test(h))||importHdrs[1];
-  const fName=document.getElementById('col-name').value ||importHdrs.find(h=>/姓名|name/i.test(h))||importHdrs[2];
-  const fSid =document.getElementById('col-sid').value  ||importHdrs.find(h=>/學號|sid|id/i.test(h))||importHdrs[3];
-  if(!fName){toast('找不到姓名欄位');return;}
-  ROSTER=importRaw.map((r,i)=>({
-    cls: r[fCls]||'', sno:r[fSno]||String(i+1), name:r[fName]||'', sid:r[fSid]||''
-  })).filter(r=>r.name);
-  saveLocal(); populateClassSelectors(); renderCurRoster(); updateManualSelect();
+  const fC=document.getElementById('col-cls').value||impHd.find(h=>/班級|班|class/i.test(h))||impHd[0];
+  const fS=document.getElementById('col-sno').value||impHd.find(h=>/座號|座位|sno/i.test(h))||impHd[1];
+  const fN=document.getElementById('col-nm').value||impHd.find(h=>/姓名|name/i.test(h))||impHd[2];
+  const fI=document.getElementById('col-sid').value||impHd.find(h=>/學號|sid|id/i.test(h))||impHd[3];
+  if(!fN){toast('找不到姓名欄位');return;}
+  ROSTER=impRaw.map((r,i)=>({cls:r[fC]||'',sno:r[fS]||String(i+1),name:r[fN]||'',sid:r[fI]||''})).filter(r=>r.name);
+  saveLS();popCls();renderCurRoster();updManSel();
   toast('✅ 已匯入 '+ROSTER.length+' 位學生');
   document.getElementById('apply-btn').disabled=true;
-  document.getElementById('import-preview').innerHTML='<div class="empty"><span class="empty-ico">✅</span>匯入成功！請至「座位表」設定座位</div>';
+  document.getElementById('imp-prev').innerHTML='<div class="empty"><span class="eico">✅</span>匯入完成！請至「座位表」設定座位</div>';
 }
-
-function clearRoster(){
-  if(!confirm('確定清空名冊？')) return;
-  ROSTER=[]; SEATS={}; saveLocal(); renderCurRoster(); populateClassSelectors(); toast('已清空');
-}
-
+function clearRoster(){if(!confirm('確定清空？'))return;ROSTER=[];SEATS={};saveLS();renderCurRoster();popCls();toast('已清空');}
 function renderCurRoster(){
-  const el=document.getElementById('cur-roster'); if(!el) return;
-  if(!ROSTER.length){el.innerHTML='<div class="empty"><span class="empty-ico">📋</span>尚未匯入</div>';return;}
-  const byC={};
-  ROSTER.forEach(s=>{const c=s.cls||'未分班';if(!byC[c])byC[c]=[];byC[c].push(s);});
-  let html=`<div style="font-size:12px;color:var(--t2);margin-bottom:.75rem">共 ${ROSTER.length} 位學生</div>`;
-  for(const[c,ss] of Object.entries(byC)){
-    html+=`<div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em">${c}</div>`;
-    html+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.75rem">'+ss.map(s=>`<span class="tag">No.${s.sno} ${s.name}</span>`).join('')+'</div>';
+  const el=document.getElementById('cur-roster');if(!el)return;
+  if(!ROSTER.length){el.innerHTML='<div class="empty"><span class="eico">📋</span>尚未匯入</div>';return;}
+  const byC={};ROSTER.forEach(s=>{const c=s.cls||'未分班';if(!byC[c])byC[c]=[];byC[c].push(s);});
+  let html='<div style="font-size:12px;color:var(--t2);margin-bottom:.6rem">共 '+ROSTER.length+' 位學生</div>';
+  for(const[c,ss]of Object.entries(byC)){
+    html+='<div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px;text-transform:uppercase">'+c+'</div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:.7rem">'+ss.map(s=>'<span class="tag">No.'+s.sno+' '+s.name+'</span>').join('')+'</div>';
   }
   el.innerHTML=html;
 }
 
-// ═══════════════════ 座位表 ═══════════════════
-function onSeatClsChange(){rebuildEditor()}
-
+// ── 座位表 ──
 function rebuildEditor(){
-  const cls=document.getElementById('seat-cls-sel')?.value||'';
+  const cls=document.getElementById('seat-cls')?.value||'';
   const rows=parseInt(document.getElementById('s-rows').value)||4;
   const cols=parseInt(document.getElementById('s-cols').value)||5;
-  const seats=getSeatsForCls(cls);
-  const area=document.getElementById('seat-editor'); if(!area) return;
-  let html='<div class="sg-edit" style="grid-template-columns:repeat('+cols+',1fr);gap:6px">';
-  for(let r=1;r<=rows;r++) for(let c=0;c<cols;c++){
-    const key=r+String.fromCharCode(65+c);
-    const info=seats[key];
+  const seats=getSC(cls),area=document.getElementById('seat-editor');if(!area)return;
+  let html='<div class="sedit" style="grid-template-columns:repeat('+cols+',1fr);gap:5px">';
+  for(let r=1;r<=rows;r++)for(let c=0;c<cols;c++){
+    const key=r+String.fromCharCode(65+c),info=seats[key];
     const disp=info?'No.'+info.sno+' '+info.name:'';
-    html+=`<div class="se-cell">
-      <div class="se-lbl">${key}</div>
-      <input type="text" id="se-${key}" value="${disp}" placeholder="空位"
-        class="${info?'filled':''}" readonly
-        onclick="openPicker('${key}','${cls}')"/>
-    </div>`;
+    html+='<div class="sec"><div class="sel">'+key+'</div><input type="text" id="se-'+key+'" value="'+disp+'" placeholder="空位" class="'+(info?'filled':'')+'" readonly onclick="openPicker(\''+key+'\',\''+cls+'\')"/></div>';
   }
-  html+='</div>';
-  area.innerHTML=html;
+  html+='</div>';area.innerHTML=html;
 }
-
 function openPicker(key,cls){
   if(!ROSTER.length){toast('請先匯入名冊');return;}
   if(!cls){toast('請先選擇班級');return;}
-  pickerKey=key; pickerCls=cls;
-  document.getElementById('picker-key-lbl').textContent=key;
-  document.getElementById('picker-search').value='';
+  pkKey=key;pkCls=cls;
+  document.getElementById('pk-key').textContent=key;
+  document.getElementById('pk-search').value='';
   filterPicker('');
   document.getElementById('picker-modal').classList.add('open');
 }
-function closePicker(){document.getElementById('picker-modal').classList.remove('open')}
-
+function closePicker(){document.getElementById('picker-modal').classList.remove('open');}
 function filterPicker(q){
-  const seats=getSeatsForCls(pickerCls);
-  const assigned=new Set(Object.entries(seats).filter(([k])=>k!==pickerKey).map(([,v])=>v.sno));
-  const cur=seats[pickerKey];
-  const filtered=q?ROSTER.filter(s=>s.cls===pickerCls&&(s.name.includes(q)||String(s.sno).includes(q))):ROSTER.filter(s=>s.cls===pickerCls);
-  let html='<div class="picker-chip picker-clear" onclick="clearSeat(\''+pickerKey+'\',\''+pickerCls+'\')">✕ 清空此座位</div> ';
-  html+=filtered.map(s=>{
-    const taken=assigned.has(s.sno);
-    const sel=cur&&cur.sno===s.sno;
-    return`<div class="picker-chip ${sel?'sel':''} ${taken?'taken':''}" onclick="assignSeat('${pickerKey}','${pickerCls}','${s.sno}','${s.name}','${s.sid}')">
-      <span style="font-size:10px;color:var(--t2)">No.${s.sno}</span>
-      <span style="font-weight:600">${s.name}</span>
-      ${taken?'<span style="font-size:10px;color:var(--t3)">(已排)</span>':''}
-    </div>`;
-  }).join(' ');
-  document.getElementById('picker-body').innerHTML=html;
+  const seats=getSC(pkCls);
+  const used=new Set(Object.entries(seats).filter(([k])=>k!==pkKey).map(([,v])=>v.sno));
+  const cur=seats[pkKey];
+  const fl=q?ROSTER.filter(s=>s.cls===pkCls&&(s.name.includes(q)||String(s.sno).includes(q))):ROSTER.filter(s=>s.cls===pkCls);
+  let html='<div class="pchip pclr" onclick="clrSeat(\''+pkKey+'\',\''+pkCls+'\')">✕ 清空</div> ';
+  html+=fl.map(s=>{const tk=used.has(s.sno),sl=cur&&cur.sno===s.sno;return'<div class="pchip'+(sl?' sel':'')+(tk?' taken':'')+'" onclick="asgSeat(\''+pkKey+'\',\''+pkCls+'\',\''+s.sno+'\',\''+s.name+'\',\''+s.sid+'\')"><span style="font-size:10px;color:var(--t2)">No.'+s.sno+'</span><span style="font-weight:600">'+s.name+'</span>'+(tk?'<span style="font-size:10px;color:var(--t3)">(已排)</span>':'')+'</div>';}).join(' ');
+  document.getElementById('pk-body').innerHTML=html;
 }
-
-function assignSeat(key,cls,sno,name,sid){
-  if(!SEATS[cls]) SEATS[cls]={};
-  SEATS[cls][key]={sno,name,sid};
-  closePicker(); rebuildEditor();
-  toast(name+' → '+key);
-}
-
-function clearSeat(key,cls){
-  if(SEATS[cls]) delete SEATS[cls][key];
-  closePicker(); rebuildEditor();
-  toast('已清空 '+key);
-}
-
-function saveSeats(){
-  const rows=parseInt(document.getElementById('s-rows').value)||4;
-  const cols=parseInt(document.getElementById('s-cols').value)||5;
-  SROWS=rows; SCOLS=cols;
-  saveLocal(); renderSeatGrid();
-  toast('✅ 座位表已儲存');
-}
-
-function clearSeats(){
-  const cls=document.getElementById('seat-cls-sel').value;
-  if(!confirm('確定清空 '+cls+' 的座位？')) return;
-  if(cls) SEATS[cls]={}; else SEATS={};
-  rebuildEditor(); toast('已清空');
-}
-
+function asgSeat(key,cls,sno,name,sid){if(!SEATS[cls])SEATS[cls]={};SEATS[cls][key]={sno,name,sid};closePicker();rebuildEditor();toast(name+' → '+key);}
+function clrSeat(key,cls){if(SEATS[cls])delete SEATS[cls][key];closePicker();rebuildEditor();toast('已清空 '+key);}
+function saveSeats(){const rows=parseInt(document.getElementById('s-rows').value)||4,cols=parseInt(document.getElementById('s-cols').value)||5;SROWS=rows;SCOLS=cols;saveLS();renderSG();toast('✅ 座位表已儲存');}
+function clearSeats(){const cls=document.getElementById('seat-cls').value;if(!confirm('確定清空？'))return;if(cls)SEATS[cls]={};else SEATS={};rebuildEditor();toast('已清空');}
 function autoAssign(){
-  const cls=document.getElementById('seat-cls-sel').value;
-  if(!cls){toast('請先選擇班級');return;}
-  const rows=parseInt(document.getElementById('s-rows').value)||4;
-  const cols=parseInt(document.getElementById('s-cols').value)||5;
-  const students=ROSTER.filter(s=>s.cls===cls).sort((a,b)=>parseInt(a.sno)-parseInt(b.sno));
-  if(!students.length){toast('此班級沒有學生');return;}
-  SEATS[cls]={};
-  let i=0;
-  for(let r=1;r<=rows&&i<students.length;r++)
-    for(let c=0;c<cols&&i<students.length;c++){
-      const key=r+String.fromCharCode(65+c);
-      const s=students[i++];
-      SEATS[cls][key]={sno:s.sno,name:s.name,sid:s.sid};
-    }
-  rebuildEditor();
-  toast('✅ 已自動排列 '+i+' 位學生');
+  const cls=document.getElementById('seat-cls').value;if(!cls){toast('請先選擇班級');return;}
+  const rows=parseInt(document.getElementById('s-rows').value)||4,cols=parseInt(document.getElementById('s-cols').value)||5;
+  const sts=ROSTER.filter(s=>s.cls===cls).sort((a,b)=>parseInt(a.sno)-parseInt(b.sno));
+  if(!sts.length){toast('此班無學生');return;}
+  SEATS[cls]={};let i=0;
+  for(let r=1;r<=rows&&i<sts.length;r++)for(let c=0;c<cols&&i<sts.length;c++){const key=r+String.fromCharCode(65+c),s=sts[i++];SEATS[cls][key]={sno:s.sno,name:s.name,sid:s.sid};}
+  rebuildEditor();toast('✅ 已排列 '+i+' 位學生');
 }
 
-// ═══════════════════ 出席名冊 ═══════════════════
+// ── 出席名冊 ──
 function renderRoster(){
-  const cls=document.getElementById('roster-cls').value;
-  updateStats(cls);
-  const tbl=document.getElementById('roster-tbl');
-  if(!cls){tbl.innerHTML='<div class="empty"><span class="empty-ico">👥</span>請選擇班級</div>';return;}
-  const seats=getSeatsForCls(cls);
-  const att=getAttLocal(cls);
-  const order=getSeatOrder().filter(s=>seats[s]);
-  const rows=order.map(seat=>{
-    const info=seats[seat];
-    const rec=att[seat];
-    if(rec) return {seat,sno:info.sno,name:rec.name||info.name,time:rec.timeStr||rec.time||'',status:rec.late||rec.status==='遲到'?'遲到':'準時到課',absent:false};
-    return {seat,sno:info.sno,name:info.name,time:'—',status:'缺席',absent:true};
+  const cls=document.getElementById('r-cls').value;updStats(cls);
+  const tbl=document.getElementById('r-tbl');if(!tbl)return;
+  if(!cls){tbl.innerHTML='<div class="empty"><span class="eico">👥</span>請選擇班級</div>';return;}
+  const seats=getSC(cls),att=getAtt(cls),order=getSO().filter(s=>seats[s]);
+  if(!order.length){tbl.innerHTML='<div class="empty"><span class="eico">🪑</span>此班尚未設定座位表</div>';return;}
+  const rows=order.map(seat=>{const info=seats[seat],rec=att[seat];
+    if(rec)return{seat,sno:info.sno,name:rec.name||info.name,time:rec.timeStr||'',status:rec.late?'遲到':'準時到課',late:rec.late,abs:false};
+    return{seat,sno:info.sno,name:info.name,time:'—',status:'缺席',abs:true};
   });
-  if(!rows.length){tbl.innerHTML='<div class="empty"><span class="empty-ico">🪑</span>此班尚未設定座位表</div>';return;}
-  const on=rows.filter(r=>!r.absent&&r.status!=='遲到').length;
-  const late=rows.filter(r=>r.status==='遲到').length;
-  const abs=rows.filter(r=>r.absent).length;
-  document.getElementById('r-on').textContent=on;
-  document.getElementById('r-late').textContent=late;
-  document.getElementById('r-abs').textContent=abs;
-  document.getElementById('r-total').textContent=rows.length;
-  tbl.innerHTML=`<div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th>座位</th><th>座號</th><th>姓名</th><th>簽到時間</th><th>狀態</th></tr></thead>
-    <tbody>${rows.map(r=>`<tr>
-      <td><span class="tag">${r.seat}</span></td>
-      <td style="color:var(--t2)">${r.sno||'—'}</td>
-      <td style="font-weight:${r.absent?400:600}">${r.name}</td>
-      <td style="font-variant-numeric:tabular-nums;color:${r.absent?'var(--t3)':'var(--t1)'}">${r.time}</td>
-      <td><span class="badge ${r.absent?'b-gray':r.status==='遲到'?'b-red':'b-green'}">${r.status}</span></td>
-    </tr>`).join('')}</tbody>
-  </table></div>`;
+  document.getElementById('r-on').textContent=rows.filter(r=>!r.abs&&!r.late).length;
+  document.getElementById('r-late').textContent=rows.filter(r=>r.late).length;
+  document.getElementById('r-abs').textContent=rows.filter(r=>r.abs).length;
+  document.getElementById('r-tot').textContent=rows.length;
+  tbl.innerHTML='<div class="tw"><table><thead><tr><th>座位</th><th>座號</th><th>姓名</th><th>簽到時間</th><th>狀態</th></tr></thead><tbody>'+rows.map(r=>'<tr><td><span class="tag">'+r.seat+'</span></td><td style="color:var(--t2)">'+r.sno+'</td><td style="font-weight:'+(r.abs?400:600)+'">'+r.name+'</td><td style="font-variant-numeric:tabular-nums;color:'+(r.abs?'var(--t3)':'var(--t1)')+'">'+r.time+'</td><td><span class="badge '+(r.abs?'bm':r.late?'br':'bg')+'">'+r.status+'</span></td></tr>').join('')+'</tbody></table></div>';
 }
 
-function exportRosterCSV(){
-  const cls=document.getElementById('roster-cls').value;
-  if(!cls){toast('請先選擇班級');return;}
-  const seats=getSeatsForCls(cls);
-  const att=getAttLocal(cls);
-  const order=getSeatOrder().filter(s=>seats[s]);
-  const lines=order.map(seat=>{
-    const info=seats[seat];const rec=att[seat];
-    if(rec) return `${seat},${info.sno},${rec.name||info.name},${rec.timeStr||''},${rec.late||rec.status==='遲到'?'遲到':'準時到課'}`;
-    return `${seat},${info.sno},${info.name},—,缺席`;
+function expCSV(){
+  const cls=document.getElementById('r-cls').value;if(!cls){toast('請選擇班級');return;}
+  const seats=getSC(cls),att=getAtt(cls),order=getSO().filter(s=>seats[s]);
+  if(!order.length){toast('尚無資料');return;}
+  const lines=order.map(seat=>{const info=seats[seat],rec=att[seat];
+    if(rec)return seat+','+info.sno+','+rec.name+','+rec.timeStr+','+(rec.late?'遲到':'準時到課');
+    return seat+','+info.sno+','+info.name+',—,缺席';
   });
-  const hdr=CFG.course?`課程,${CFG.course},班級,${cls},日期,${CFG.dateStr||todayStr()}\n\n`:'';
+  const hdr=CFG.course?'課程,'+CFG.course+',班級,'+cls+',日期,'+todayStr()+'\n\n':'';
   const csv='\uFEFF'+hdr+'座位,座號,姓名,簽到時間,狀態\n'+lines.join('\n');
-  dlBlob(csv,'text/csv',`出席名冊_${cls}_${CFG.dateStr||todayStr()}.csv`);
-  toast('CSV 已下載');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download='出席_'+cls+'_'+todayStr()+'.csv';a.click();URL.revokeObjectURL(url);toast('CSV 已下載');
 }
 
-function updateManualSelect(){
-  const cls=currentCls()||CFG.cls||'';
-  const seats=getSeatsForCls(cls);
-  const att=getAttLocal(cls);
-  const sel=document.getElementById('man-name'); if(!sel) return;
-  sel.innerHTML='<option value="">— 選擇學生 —</option>'+
-    getSeatOrder().filter(s=>seats[s]).map(seat=>{
-      const info=seats[seat];const done=!!att[seat];
-      return`<option value="${seat}" ${done?'disabled':''}>${info.name}（${seat}）${done?' ✓':''}</option>`;
-    }).join('');
+function updManSel(){
+  const cls=curCls()||CFG.cls||'';const att=getAtt(cls);const seats=getSC(cls);
+  const sel=document.getElementById('man-nm');if(!sel)return;
+  sel.innerHTML='<option value="">— 選擇學生 —</option>'+getSO().filter(s=>seats[s]).map(seat=>{const info=seats[seat],done=!!att[seat];return'<option value="'+seat+'" '+(done?'disabled':'')+'>'+(info.name)+'（'+seat+'）'+(done?' ✓':'')+'</option>';}).join('');
 }
-
-function manualCheckin(){
-  const seat=document.getElementById('man-name').value;
-  const status=document.getElementById('man-status').value;
+function manualCI(){
+  const seat=document.getElementById('man-nm').value,st=document.getElementById('man-st').value;
   if(!seat){toast('請選擇學生');return;}
-  const cls=currentCls()||CFG.cls||'';
-  const att=getAttLocal(cls);
+  const cls=curCls()||CFG.cls||'',att=getAtt(cls);
   if(att[seat]){toast('此學生已有紀錄');return;}
-  const info=getSeatsForCls(cls)[seat];
-  const isLate=status==='late';
-  att[seat]={name:info.name,seat,sno:info.sno,timeStr:nowStr(),ts:Date.now(),late:isLate,status:isLate?'遲到':'準時'};
-  saveAttLocal(cls,att);
-  updateStats(cls);renderSeatGrid(cls);renderRecList(cls);updateManualSelect();renderRoster();
+  const info=getSC(cls)[seat];const isLate=st==='late';
+  att[seat]={name:info.name,seat,sno:info.sno,timeStr:nowStr(),ts:Date.now(),late:isLate};
+  saveAtt(cls,att);syncAll();updManSel();renderRoster();
   toast('已補登：'+info.name+'（'+(isLate?'遲到':'準時')+'）');
 }
 
-// ═══════════════════ 週報表 ═══════════════════
-async function loadWeekly(){
+// ── 週報表 ──
+function loadWeekly(){
   const cls=document.getElementById('wk-cls').value;
   const from=document.getElementById('wk-from').value;
   const to=document.getElementById('wk-to').value;
   if(!cls){toast('請選擇班級');return;}
-  if(!from||!to){toast('請選擇日期範圍');return;}
-  const tbl=document.getElementById('weekly-tbl');
-  tbl.innerHTML='<div class="empty"><span class="empty-ico">⏳</span>載入中...</div>';
+  const tbl=document.getElementById('wk-tbl');
+  tbl.innerHTML='<div class="empty"><span class="eico">⏳</span>計算中...</div>';
 
-  // 從 API 取資料
-  let data=null;
-  if(API_URL){
-    const res=await apiFetch({action:'getWeekly',cls,from:from.replace(/-/g,'/'),to:to.replace(/-/g,'/')});
-    if(res&&res.ok) data=res.data;
-  }
-
-  // 若沒有 API，從 localStorage 組合
-  if(!data){
-    data=buildWeeklyFromLocal(cls,from,to);
-  }
-
-  weeklyData={cls,from,to,...data};
-  renderWeekly(data);
-}
-
-function buildWeeklyFromLocal(cls,from,to){
-  // 從所有 localStorage 的 att 紀錄中找
-  const dates=new Set();
-  const byName={};
-  const seats=getSeatsForCls(cls);
-  // 掃描所有 token 的紀錄
+  // 從 localStorage 找所有出席紀錄
+  const dates=new Set(),byNm={};
+  const seats=getSC(cls);
   for(let i=0;i<localStorage.length;i++){
-    const key=localStorage.key(i);
-    if(!key.startsWith(LS.attendance)) continue;
+    const k=localStorage.key(i);
+    if(!k.startsWith(LS.at))continue;
     try{
-      const att=JSON.parse(localStorage.getItem(key)||'{}');
+      const att=JSON.parse(localStorage.getItem(k)||'{}');
       Object.values(att).forEach(rec=>{
-        if(!rec.name) return;
-        // 從日期判斷
+        if(!rec.name)return;
         const d=rec.date||CFG.dateStr||todayStr();
-        const df=from.replace(/-/g,'/');const dt=to.replace(/-/g,'/');
-        if(d<df||d>dt) return;
+        const df=from.replace(/-/g,'/'),dt=to.replace(/-/g,'/');
+        if(d<df||d>dt)return;
         dates.add(d);
-        if(!byName[rec.name]) byName[rec.name]={sno:rec.sno||''};
-        byName[rec.name][d]=rec.late||rec.status==='遲到'?'遲到':'準時';
+        if(!byNm[rec.name])byNm[rec.name]={sno:rec.sno||''};
+        byNm[rec.name][d]=rec.late?'遲到':'準時';
       });
     }catch(e){}
   }
-  // 補缺席學生
-  Object.values(seats).forEach(info=>{
-    if(!byName[info.name]) byName[info.name]={sno:info.sno};
-  });
-  const sortedDates=[...dates].sort();
-  const students=Object.entries(byName).map(([name,info])=>({
-    name,sno:info.sno,
-    records:sortedDates.map(d=>info[d]||'缺席')
-  })).sort((a,b)=>parseInt(a.sno||999)-parseInt(b.sno||999));
-  return{dates:sortedDates,students};
+  // 補名冊中的缺席學生
+  Object.values(seats).forEach(info=>{if(!byNm[info.name])byNm[info.name]={sno:info.sno};});
+
+  const sdates=[...dates].sort();
+  const students=Object.entries(byNm).map(([name,info])=>({name,sno:info.sno,records:sdates.map(d=>info[d]||'缺席')})).sort((a,b)=>parseInt(a.sno||999)-parseInt(b.sno||999));
+  wkData={cls,from,to,dates:sdates,students};
+  renderWeekly(sdates,students);
 }
 
-function renderWeekly(data){
-  const tbl=document.getElementById('weekly-tbl');
-  if(!data.dates||!data.dates.length){
-    tbl.innerHTML='<div class="empty"><span class="empty-ico">📭</span>此區間無紀錄</div>';return;
-  }
-  const {dates,students}=data;
-  tbl.innerHTML=`<div class="tbl-wrap"><table class="tbl">
-    <thead><tr>
-      <th>座號</th><th>姓名</th>
-      ${dates.map(d=>'<th class="wk-cell">'+d.replace(/^\d+\//,'').replace('/','/').slice(-5)+'</th>').join('')}
-      <th>出席</th><th>遲到</th><th>缺席</th>
-    </tr></thead>
-    <tbody>${students.map(s=>{
-      const on=s.records.filter(r=>r==='準時').length;
-      const late=s.records.filter(r=>r==='遲到').length;
-      const abs=s.records.filter(r=>r==='缺席').length;
-      return`<tr>
-        <td style="color:var(--t2)">${s.sno||'—'}</td>
-        <td style="font-weight:600">${s.name}</td>
-        ${s.records.map(r=>{
-          const cls=r==='準時'?'wk-ok':r==='遲到'?'wk-late':'wk-abs';
-          const ico=r==='準時'?'✓':r==='遲到'?'⚠':'✗';
-          return`<td class="wk-cell"><span class="badge ${cls==='wk-ok'?'b-green':cls==='wk-late'?'b-red':'b-gray'}" style="min-width:28px;justify-content:center">${ico}</span></td>`;
-        }).join('')}
-        <td style="color:var(--green);font-weight:600">${on}</td>
-        <td style="color:var(--red);font-weight:600">${late}</td>
-        <td style="color:var(--t2)">${abs}</td>
-      </tr>`;
-    }).join('')}</tbody>
-  </table></div>`;
+function renderWeekly(dates,students){
+  const tbl=document.getElementById('wk-tbl');
+  if(!dates.length){tbl.innerHTML='<div class="empty"><span class="eico">📭</span>此區間無紀錄</div>';return;}
+  tbl.innerHTML='<div class="tw"><table><thead><tr><th>座號</th><th>姓名</th>'+dates.map(d=>'<th class="wkc">'+d.slice(-5)+'</th>').join('')+'<th>出席</th><th>遲到</th><th>缺席</th></tr></thead><tbody>'+students.map(s=>{
+    const on=s.records.filter(r=>r==='準時').length,late=s.records.filter(r=>r==='遲到').length,abs=s.records.filter(r=>r==='缺席').length;
+    return'<tr><td style="color:var(--t2)">'+s.sno+'</td><td style="font-weight:600">'+s.name+'</td>'+s.records.map(r=>'<td class="wkc"><span class="badge '+(r==='準時'?'bg':r==='遲到'?'br':'bm')+'" style="min-width:24px;justify-content:center">'+(r==='準時'?'✓':r==='遲到'?'⚠':'✗')+'</span></td>').join('')+'<td style="color:var(--grn);font-weight:600">'+on+'</td><td style="color:var(--red);font-weight:600">'+late+'</td><td style="color:var(--t2)">'+abs+'</td></tr>';
+  }).join('')+'</tbody></table></div>';
 }
 
-function exportWeeklyExcel(){
-  if(!weeklyData||!weeklyData.dates||!weeklyData.dates.length){toast('請先查詢週報表');return;}
-  const {dates,students,cls,from,to}=weeklyData;
-  const header=['座號','姓名',...dates,'出席','遲到','缺席'];
+function expWeekly(){
+  if(!wkData||!wkData.dates||!wkData.dates.length){toast('請先查詢');return;}
+  const{dates,students,cls,from,to}=wkData;
+  // 用 CSV 格式匯出（不依賴 XLSX）
+  const hdr=['座號','姓名',...dates,'出席','遲到','缺席'].join(',');
   const rows=students.map(s=>{
-    const on=s.records.filter(r=>r==='準時').length;
-    const late=s.records.filter(r=>r==='遲到').length;
-    const abs=s.records.filter(r=>r==='缺席').length;
-    return[s.sno,s.name,...s.records,on,late,abs];
+    const on=s.records.filter(r=>r==='準時').length,late=s.records.filter(r=>r==='遲到').length,abs=s.records.filter(r=>r==='缺席').length;
+    return[s.sno,s.name,...s.records,on,late,abs].join(',');
   });
-  const ws=XLSX.utils.aoa_to_sheet([header,...rows]);
-  // 設定欄寬
-  ws['!cols']=[{wch:8},{wch:10},...dates.map(()=>({wch:10})),{wch:6},{wch:6},{wch:6}];
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'週報表');
-  XLSX.writeFile(wb,`週報表_${cls}_${from}_${to}.xlsx`);
-  toast('Excel 已下載');
-}
-
-// ═══════════════════ 輔助 ═══════════════════
-function dlBlob(content,type,filename){
-  const blob=new Blob([content],{type});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download=filename;a.click();
-  URL.revokeObjectURL(url);
+  const csv='\uFEFF週報表：'+cls+'\n日期：'+from+' 至 '+to+'\n\n'+hdr+'\n'+rows.join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download='週報表_'+cls+'_'+from+'_'+to+'.csv';a.click();URL.revokeObjectURL(url);toast('CSV 已下載');
 }
 
 init();
 </script>
+
+<!-- ═══ XLSX（非同步載入，載入失敗也不影響主功能）═══ -->
+<script async src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </body>
 </html>
