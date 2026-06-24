@@ -6,9 +6,9 @@
 <title>課堂簽到</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;background:#f5f5f3;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:1.5rem 1rem}
+body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;background:#f5f5f3;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem}
 .page{width:100%;max-width:420px}
-.hdr{text-align:center;margin-bottom:1.5rem}
+.hdr{text-align:center;margin-bottom:1.75rem}
 .hdr-title{font-size:22px;font-weight:700;color:#1a1a1a}
 .hdr-sub{font-size:13px;color:#888;margin-top:4px}
 .card{background:#fff;border:.5px solid #e0e0e0;border-radius:14px;padding:1.25rem;margin-bottom:1rem}
@@ -22,27 +22,15 @@ input[type=text]{height:48px;padding:0 14px;border-radius:10px;border:.5px solid
 input:focus{outline:none;border-color:#1a1a1a;box-shadow:0 0 0 3px rgba(0,0,0,.07)}
 .btn{width:100%;height:52px;border-radius:12px;border:none;background:#1a1a1a;color:#fff;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
 .btn:hover{background:#333}.btn:active{transform:scale(.98)}
-.btn:disabled{background:#ccc;cursor:not-allowed}
-.btn-outline{background:#fff;color:#1a1a1a;border:.5px solid #d0d0d0;height:44px;font-size:14px}
+.btn-outline{background:#fff;color:#1a1a1a;border:.5px solid #d0d0d0;height:44px;font-size:14px;border-radius:10px}
 .btn-outline:hover{background:#f5f5f3}
 .alert{border-radius:10px;padding:12px 14px;font-size:13px;display:flex;align-items:flex-start;gap:10px;margin-bottom:1rem;line-height:1.5}
-.a-ok{background:#f0fdf4;color:#15803d;border:.5px solid #86efac}
 .a-err{background:#fef2f2;color:#b91c1c;border:.5px solid #fca5a5}
 .a-warn{background:#fffbeb;color:#b45309;border:.5px solid #fcd34d}
-.a-info{background:#eff6ff;color:#1d4ed8;border:.5px solid #bfdbfe}
-.steps{display:flex;align-items:center;margin-bottom:1.5rem}
-.step-item{flex:1;text-align:center;font-size:11px;color:#bbb}
-.step-dot{width:26px;height:26px;border-radius:50%;border:1.5px solid #e0e0e0;background:#fafafa;display:flex;align-items:center;justify-content:center;margin:0 auto 5px;font-size:12px;font-weight:600}
-.step-item.active .step-dot{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
-.step-item.done .step-dot{background:#f0fdf4;color:#15803d;border-color:#86efac}
-.step-item.active{color:#1a1a1a;font-weight:600}
-.step-line{flex:1;height:1px;background:#e0e0e0;margin-bottom:20px}
 .center{text-align:center}
 .big-icon{font-size:60px;margin-bottom:14px;display:block}
 .result-title{font-size:22px;font-weight:700;margin-bottom:8px}
 .result-sub{font-size:14px;color:#666;margin-bottom:1.25rem;line-height:1.6}
-@keyframes spin{to{transform:rotate(360deg)}}
-.spin{display:inline-block;animation:spin .8s linear infinite}
 </style>
 </head>
 <body>
@@ -52,16 +40,8 @@ input:focus{outline:none;border-color:#1a1a1a;box-shadow:0 0 0 3px rgba(0,0,0,.0
     <div class="hdr-sub" id="hdr-sub">載入中...</div>
   </div>
 
-  <div class="steps">
-    <div class="step-item active" id="step1"><div class="step-dot">1</div>位置</div>
-    <div class="step-line"></div>
-    <div class="step-item" id="step2"><div class="step-dot">2</div>姓名</div>
-    <div class="step-line"></div>
-    <div class="step-item" id="step3"><div class="step-dot">3</div>完成</div>
-  </div>
-
-  <!-- 步驟1：GPS 驗證 -->
-  <div id="view-gps">
+  <!-- 簽到表單 -->
+  <div id="view-form">
     <div class="card">
       <div class="card-title">課程資訊</div>
       <div class="info-row"><span style="color:#888">課程</span><span class="info-val" id="c-course">—</span></div>
@@ -69,18 +49,6 @@ input:focus{outline:none;border-color:#1a1a1a;box-shadow:0 0 0 3px rgba(0,0,0,.0
       <div class="info-row"><span style="color:#888">上課時間</span><span class="info-val" id="c-time">—</span></div>
       <div class="info-row"><span style="color:#888">簽到截止</span><span class="info-val" id="c-deadline">—</span></div>
     </div>
-    <div class="alert a-info">
-      📍 系統需要確認你在教室內才能簽到。請點下方按鈕，在手機跳出提示時選「允許」。
-    </div>
-    <button class="btn" id="gps-btn" onclick="startGPS()">📍 驗證我的位置</button>
-    <div id="gps-loading" style="display:none;text-align:center;padding:1rem;color:#888;font-size:14px">
-      <span class="spin" style="font-size:24px">↻</span><br>取得位置中，請稍候...
-    </div>
-  </div>
-
-  <!-- 步驟2：輸入姓名 -->
-  <div id="view-name" style="display:none">
-    <div class="alert a-ok" id="gps-ok-msg">✅ 位置驗證通過</div>
     <div class="card">
       <div class="card-title">輸入你的姓名</div>
       <div class="field">
@@ -91,7 +59,7 @@ input:focus{outline:none;border-color:#1a1a1a;box-shadow:0 0 0 3px rgba(0,0,0,.0
     </div>
   </div>
 
-  <!-- 步驟3：完成 -->
+  <!-- 完成 -->
   <div id="view-done" style="display:none" class="center">
     <span class="big-icon" id="done-icon">✅</span>
     <div class="result-title" id="done-title">簽到成功！</div>
@@ -100,7 +68,6 @@ input:focus{outline:none;border-color:#1a1a1a;box-shadow:0 0 0 3px rgba(0,0,0,.0
       <div class="info-row"><span style="color:#888">姓名</span><span class="info-val" id="done-name">—</span></div>
       <div class="info-row"><span style="color:#888">座位</span><span class="info-val" id="done-seat">—</span></div>
       <div class="info-row"><span style="color:#888">簽到時間</span><span class="info-val" id="done-time">—</span></div>
-      <div class="info-row"><span style="color:#888">GPS 距離</span><span class="info-val" id="done-dist">—</span></div>
       <div class="info-row"><span style="color:#888">出席狀態</span><span class="info-val" id="done-status">—</span></div>
     </div>
     <div id="done-late" class="alert a-warn" style="display:none;text-align:left;margin-top:.75rem">
@@ -113,9 +80,6 @@ input:focus{outline:none;border-color:#1a1a1a;box-shadow:0 0 0 3px rgba(0,0,0,.0
     <span class="big-icon">🚫</span>
     <div class="result-title" id="err-title">無法完成簽到</div>
     <div class="alert a-err" id="err-msg" style="text-align:left;margin-bottom:1rem"></div>
-    <div style="font-size:13px;color:#666;line-height:1.7;margin-bottom:1rem">
-      若確實在教室內但仍無法通過，可能是室內 GPS 訊號較弱，請向老師說明，由老師手動補登。
-    </div>
     <button class="btn btn-outline" onclick="location.reload()">重新嘗試</button>
   </div>
 
@@ -130,99 +94,46 @@ input:focus{outline:none;border-color:#1a1a1a;box-shadow:0 0 0 3px rgba(0,0,0,.0
 </div>
 
 <script>
-// 讀取 URL 參數（短參數名）
-const p       = new URLSearchParams(location.search);
-const course  = p.get('c')  || p.get('course')    || '';
-const dateStr = p.get('d')  || p.get('date')      || '';
-const clsTime = p.get('t')  || p.get('classTime') || '';
-const deadline= p.get('dl') || p.get('deadline')  || '';
-const lat     = parseFloat(p.get('la') || p.get('lat') || '0');
-const lng     = parseFloat(p.get('ln') || p.get('lng') || '0');
-const radius  = parseInt(p.get('r')  || p.get('radius') || '80');
-const token   = p.get('tk') || p.get('token') || '';
+const p        = new URLSearchParams(location.search);
+const course   = p.get('c')  || p.get('course')    || '';
+const dateStr  = p.get('d')  || p.get('date')       || '';
+const clsTime  = p.get('t')  || p.get('classTime')  || '';
+const deadline = p.get('dl') || p.get('deadline')   || '';
+const token    = p.get('tk') || p.get('token')      || '';
 
 function show(id) {
-  ['view-gps','view-name','view-done','view-error','view-invalid'].forEach(v =>
+  ['view-form','view-done','view-error','view-invalid'].forEach(v =>
     document.getElementById(v).style.display = (v===id) ? 'block' : 'none');
 }
-function setStep(n) {
-  for (let i = 1; i <= 3; i++) {
-    const el = document.getElementById('step'+i);
-    el.className = 'step-item' + (i<n?' done':i===n?' active':'');
-  }
-}
-function haversine(a,b,c,d) {
-  const R=6371000, rad=x=>x*Math.PI/180;
-  const s = Math.sin(rad(c-a)/2)**2 + Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(rad(d-b)/2)**2;
-  return Math.round(R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s)));
-}
 
-// 驗證參數
-if (!course || !deadline || !lat || !lng || !token) {
+if (!course || !deadline || !token) {
   show('view-invalid');
 } else {
-  document.getElementById('hdr-sub').textContent = course + '　' + dateStr;
-  document.getElementById('c-course').textContent   = course;
-  document.getElementById('c-date').textContent     = dateStr;
-  document.getElementById('c-time').textContent     = clsTime;
-  document.getElementById('c-deadline').textContent = deadline + '（超過視為遲到）';
-}
-
-let gpsDist = 0;
-
-function startGPS() {
-  document.getElementById('gps-btn').style.display    = 'none';
-  document.getElementById('gps-loading').style.display = 'block';
-
-  if (!navigator.geolocation) {
-    showError('此裝置不支援 GPS 定位，請向老師說明');
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(pos => {
-    const dist = haversine(pos.coords.latitude, pos.coords.longitude, lat, lng);
-    gpsDist = dist;
-    if (dist <= radius) {
-      // 通過
-      document.getElementById('gps-ok-msg').textContent = `✅ 位置驗證通過（距教室約 ${dist} 公尺）`;
-      show('view-name');
-      setStep(2);
-      setTimeout(() => document.getElementById('stu-name').focus(), 200);
-    } else {
-      showError(`你目前距離教室約 ${dist} 公尺，超過允許的 ${radius} 公尺範圍。<br>若確實在教室內，請向老師說明。`);
-    }
-  }, err => {
-    const msg = err.code === 1
-      ? '你拒絕了位置授權。請重新整理頁面，並在提示出現時選「允許」。'
-      : '無法取得位置，請確認手機的 GPS 和定位服務已開啟。';
-    showError(msg);
-  }, {timeout: 15000, enableHighAccuracy: true});
-}
-
-function showError(msg) {
-  document.getElementById('gps-btn').style.display = 'block';
-  document.getElementById('gps-loading').style.display = 'none';
-  document.getElementById('err-title').textContent = '位置驗證失敗';
-  document.getElementById('err-msg').innerHTML = msg;
-  show('view-error');
+  document.getElementById('hdr-sub').textContent     = course + '　' + dateStr;
+  document.getElementById('c-course').textContent    = course;
+  document.getElementById('c-date').textContent      = dateStr;
+  document.getElementById('c-time').textContent      = clsTime;
+  document.getElementById('c-deadline').textContent  = deadline + '（超過視為遲到）';
+  setTimeout(() => document.getElementById('stu-name').focus(), 300);
 }
 
 function submitName() {
   const name = document.getElementById('stu-name').value.trim();
   if (!name) { alert('請輸入姓名'); return; }
 
-  // 讀座位表（與 teacher.html 共用相同 localStorage key）
+  // 讀座位表
   let seats = {};
   try { seats = JSON.parse(localStorage.getItem('attendance_seats_v1') || '{}'); } catch(e) {}
 
   // 找座位
-  const seatEntry = Object.entries(seats).find(([,n]) => n === name);
-  if (!seatEntry) {
+  const entry = Object.entries(seats).find(([, n]) => n === name);
+  if (!entry) {
     document.getElementById('err-title').textContent = '找不到此學生';
     document.getElementById('err-msg').innerHTML = `「${name}」不在座位名冊中，請確認姓名是否正確，或請老師手動補登。`;
     show('view-error');
     return;
   }
-  const seat = seatEntry[0];
+  const seat = entry[0];
 
   // 防重複簽到
   const doneKey = `done_${token}_${seat}`;
@@ -234,14 +145,14 @@ function submitName() {
   }
 
   // 判斷遲到
-  const now    = new Date();
-  const timeStr= now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  const nowMin = now.getHours()*60 + now.getMinutes();
+  const now     = new Date();
+  const timeStr = now.toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  const nowMin  = now.getHours() * 60 + now.getMinutes();
   const [dh, dm] = deadline.split(':').map(Number);
-  const isLate = nowMin > dh*60+dm;
+  const isLate  = nowMin > dh * 60 + dm;
 
   // 寫入紀錄
-  const record = {name, seat, timeStr, ts: now.getTime(), late: isLate, dist: gpsDist};
+  const record = {name, seat, timeStr, ts: now.getTime(), late: isLate};
   const recKey = 'record_' + token;
   let allRec = {};
   try { allRec = JSON.parse(localStorage.getItem(recKey) || '{}'); } catch(e) {}
@@ -250,22 +161,17 @@ function submitName() {
   localStorage.setItem(doneKey, '1');
 
   // 顯示結果
-  document.getElementById('done-name').textContent   = name;
-  document.getElementById('done-seat').textContent   = seat;
-  document.getElementById('done-time').textContent   = timeStr;
-  document.getElementById('done-dist').textContent   = gpsDist + ' 公尺';
-  document.getElementById('done-status').innerHTML   = isLate
+  document.getElementById('done-name').textContent  = name;
+  document.getElementById('done-seat').textContent  = seat;
+  document.getElementById('done-time').textContent  = timeStr;
+  document.getElementById('done-status').innerHTML  = isLate
     ? '<span style="color:#b91c1c;font-weight:700">遲到</span>'
     : '<span style="color:#15803d;font-weight:700">準時到課</span>';
-  document.getElementById('done-icon').textContent   = isLate ? '⏰' : '✅';
-  document.getElementById('done-title').textContent  = isLate ? '已簽到（遲到）' : '簽到成功！';
-  document.getElementById('done-sub').textContent    = isLate
-    ? '出席已記錄，但已超過截止時間。'
-    : '你的出席已成功記錄！';
+  document.getElementById('done-icon').textContent  = isLate ? '⏰' : '✅';
+  document.getElementById('done-title').textContent = isLate ? '已簽到（遲到）' : '簽到成功！';
+  document.getElementById('done-sub').textContent   = isLate ? '出席已記錄，但已超過截止時間。' : '你的出席已成功記錄！';
   document.getElementById('done-late').style.display = isLate ? 'flex' : 'none';
-
   show('view-done');
-  setStep(3);
 }
 </script>
 </body>
