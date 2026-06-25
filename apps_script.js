@@ -21,6 +21,16 @@ function doPost(e) {
     } else if (data.action === 'checkin') {
       const result = saveCheckin_(data);
       res.setContent(JSON.stringify({ ok: true, ...result }));
+    } else if (action === 'debug') {
+      const ss    = SpreadsheetApp.getActiveSpreadsheet();
+      const sheet = ss.getSheetByName(SHEET_CHECKIN);
+      if (!sheet) { res.setContent(JSON.stringify({ok:false,msg:'工作表不存在'})); return res; }
+      const all = sheet.getDataRange().getValues();
+      // 回傳前5行原始資料（含型別）
+      const sample = all.slice(0,6).map((row,ri) => 
+        row.map((v,ci) => ({ col:ci, val:String(v), type:typeof v, raw:v }))
+      );
+      res.setContent(JSON.stringify({ ok:true, totalRows:all.length, sample }));
     } else {
       res.setContent(JSON.stringify({ ok: false, msg: '未知 action' }));
     }
@@ -44,6 +54,16 @@ function doGet(e) {
       const token = e.parameter.token;
       const cls   = e.parameter.cls;
       res.setContent(JSON.stringify({ ok: true, data: getCheckins_(token, cls) }));
+    } else if (action === 'debug') {
+      const ss    = SpreadsheetApp.getActiveSpreadsheet();
+      const sheet = ss.getSheetByName(SHEET_CHECKIN);
+      if (!sheet) { res.setContent(JSON.stringify({ok:false,msg:'工作表不存在'})); return res; }
+      const all = sheet.getDataRange().getValues();
+      // 回傳前5行原始資料（含型別）
+      const sample = all.slice(0,6).map((row,ri) => 
+        row.map((v,ci) => ({ col:ci, val:String(v), type:typeof v, raw:v }))
+      );
+      res.setContent(JSON.stringify({ ok:true, totalRows:all.length, sample }));
     } else {
       res.setContent(JSON.stringify({ ok: false, msg: '未知 action' }));
     }

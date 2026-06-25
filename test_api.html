@@ -118,12 +118,46 @@ async function testGetCheckins() {
     el.innerHTML = '<span class="err">❌ ' + e.message + '</span>';
   }
 }
+
+async function debugSheet() {
+  const el = document.getElementById('debug-out');
+  el.textContent = '讀取中...';
+  try {
+    const url = API + '?action=debug';
+    const r = await fetch(url);
+    const d = await r.json();
+    if (!d.ok) { el.innerHTML = '<span class="err">❌ ' + d.msg + '</span>'; return; }
+    
+    // 顯示每一行的 token 欄（col 3）和 cls 欄（col 2）
+    let out = '總行數: ' + d.totalRows + '\n\n';
+    out += 'col2=班級, col3=token\n';
+    out += '---\n';
+    d.sample.forEach((row, i) => {
+      if (i === 0) {
+        out += '標題行: ' + row.map(c => c.val).join(' | ') + '\n---\n';
+      } else {
+        const cls = row[2];
+        const tok = row[3];
+        out += `行${i}: cls="${cls.val}"(${cls.type}) token="${tok.val}"(${tok.type})\n`;
+      }
+    });
+    el.textContent = out;
+  } catch(e) {
+    el.innerHTML = '<span class="err">❌ ' + e.message + '</span>';
+  }
+}
 </script>
 <div class="card">
   <b>4. 讀取真實簽到資料</b>
   <p style="font-size:12px;color:#666;margin:6px 0">用 localStorage 的 TOKEN 和 cls 讀 Apps Script</p>
   <button class="btn btn-g" onclick="testGetCheckins()">讀取今日簽到</button>
   <pre id="checkin-out">點擊讀取...</pre>
+</div>
+<div class="card">
+  <b>5. 直接查看 Sheet 原始資料</b>
+  <p style="font-size:12px;color:#666;margin:6px 0">看 Sheet 裡 token 欄位的實際型別和值</p>
+  <button class="btn" style="background:#92400E" onclick="debugSheet()">查看 Sheet 原始資料</button>
+  <pre id="debug-out" style="max-height:300px">點擊查看...</pre>
 </div>
 </body>
 </html>
