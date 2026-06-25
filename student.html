@@ -47,8 +47,22 @@ input[type=text]:focus{outline:none;border-color:#2A6049;box-shadow:0 0 0 3px rg
     <div class="sub" id="hdr-sub"></div>
   </div>
 
+  <!-- 載入中 -->
+  <div id="view-loading">
+    <div class="deadline">
+      <div class="dl-lbl">簽到截止</div>
+      <div class="dl-time" id="dl-time0">—</div>
+    </div>
+    <div class="card">
+      <div class="clabel">課程資訊</div>
+      <div class="ip"><span class="ik">班級</span><span class="iv" id="c-cls0">—</span></div>
+      <div class="ip"><span class="ik">上課時間</span><span class="iv" id="c-time0">—</span></div>
+    </div>
+    <div class="alert a-info" id="load-status">⏳ 讀取座位資料中...</div>
+  </div>
+
   <!-- 表單 -->
-  <div id="view-form">
+  <div id="view-form" style="display:none">
     <div class="deadline">
       <div class="dl-lbl">簽到截止</div>
       <div class="dl-time" id="dl-time">—</div>
@@ -89,7 +103,7 @@ input[type=text]:focus{outline:none;border-color:#2A6049;box-shadow:0 0 0 3px rg
       <div class="ip"><span class="ik">座位</span><span class="iv" id="d-seat">—</span></div>
       <div class="ip"><span class="ik">座號</span><span class="iv" id="d-sno">—</span></div>
       <div class="ip"><span class="ik">簽到時間</span><span class="iv" id="d-time">—</span></div>
-      <div class="ip"><span class="ik">出席狀態</span><span class="ip" id="d-status">—</span></div>
+      <div class="ip"><span class="ik">出席狀態</span><span class="iv" id="d-status">—</span></div>
     </div>
     <div id="d-late" class="alert a-warn" style="display:none;text-align:left;margin-top:.75rem">⚠️ 已超過截止時間，本次記錄為遲到</div>
   </div>
@@ -111,61 +125,90 @@ input[type=text]:focus{outline:none;border-color:#2A6049;box-shadow:0 0 0 3px rg
 </div>
 
 <script>
-// QR URL 參數
+// ★ 把你的 Apps Script 網址貼在這裡
+// 格式：https://script.google.com/macros/s/XXXX/exec
+const API_URL = localStorage.getItem('att_api_script') || '';
+
 const p        = new URLSearchParams(location.search);
 const clsTime  = p.get('t')   || '';
 const deadline = p.get('dl')  || '';
 const cls      = p.get('cls') || '';
 const token    = p.get('tk')  || '';
-const apiUrl   = p.get('api') || '';  // Apps Script URL
 const course   = p.get('c')   || '';
 const dateStr  = p.get('d')   || '';
 
-// 座位表從 localStorage 讀（teacher 和 student 同 origin，可共享）
 let SEATS = {};
-try {
-  const s = JSON.parse(localStorage.getItem('att_se3') || '{}');
-  SEATS = s[cls] || {};
-} catch(e) {}
 
 function show(id) {
-  ['view-form','view-submitting','view-done','view-error','view-invalid']
+  ['view-loading','view-form','view-submitting','view-done','view-error','view-invalid']
     .forEach(v => { const e=document.getElementById(v); if(e) e.style.display=(v===id)?'block':'none'; });
 }
+function setStatus(msg, type='info') {
+  const el=document.getElementById('load-status');
+  el.className='alert a-'+type;
+  el.textContent=msg;
+}
 function showErr(title, msg) {
-  document.getElementById('e-title').textContent = title;
-  document.getElementById('e-msg').textContent   = msg;
+  document.getElementById('e-title').textContent=title;
+  document.getElementById('e-msg').textContent=msg;
   show('view-error');
 }
 
 if (!deadline || !token || !cls) {
   show('view-invalid');
 } else {
+  // 填課程資訊
   document.getElementById('hdr-title').textContent = course || '課堂簽到';
-  document.getElementById('hdr-sub').textContent   = (dateStr ? dateStr + '　' : '') + cls;
+  document.getElementById('hdr-sub').textContent   = (dateStr?dateStr+'　':'') + cls;
+  document.getElementById('dl-time0').textContent  = deadline;
+  document.getElementById('c-cls0').textContent    = cls;
+  document.getElementById('c-time0').textContent   = clsTime || '—';
   document.getElementById('dl-time').textContent   = deadline;
   document.getElementById('c-cls').textContent     = cls;
   document.getElementById('c-time').textContent    = clsTime || '—';
   document.getElementById('c-dl').textContent      = deadline + '（超過視為遲到）';
-  setTimeout(() => { try { document.getElementById('stu-name').focus(); } catch(e){} }, 400);
+  loadSeats();
+}
+
+async function loadSeats() {
+  if (!API_URL) {
+    setStatus('❌ 系統尚未設定 API，請聯絡老師', 'err');
+    return;
+  }
+  setStatus('⏳ 讀取座位資料中...', 'info');
+  try {
+    const url = API_URL + '?action=getSeats&cls=' + encodeURIComponent(cls);
+    const r   = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.msg || '伺服器錯誤');
+    SEATS = d.data || {};
+    if (!Object.keys(SEATS).length)
+      throw new Error('此班（'+cls+'）尚無座位資料，請老師先儲存座位表');
+    show('view-form');
+    setTimeout(() => { try { document.getElementById('stu-name').focus(); } catch(e){} }, 300);
+  } catch(e) {
+    setStatus('❌ ' + e.message, 'err');
+  }
 }
 
 async function doSubmit() {
   const name = document.getElementById('stu-name').value.trim();
   if (!name) { alert('請輸入姓名'); return; }
-
   show('view-submitting');
 
   const now     = new Date();
-  const timeStr = now.toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-  const nowMin  = now.getHours()*60 + now.getMinutes();
+  const timeStr = now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const nowMin  = now.getHours()*60+now.getMinutes();
   const [dh,dm] = deadline.split(':').map(Number);
   const isLate  = nowMin > dh*60+dm;
+  const todayStr = now.toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
 
-  // 在座位表找姓名
+  // 找座位
   const entry = Object.entries(SEATS).find(([,v]) => v.name === name);
   if (!entry) {
-    showErr('找不到此學生', '「'+name+'」不在本班座位表中。請確認姓名是否與名冊完全相符，或請老師手動補登。');
+    showErr('找不到此學生',
+      '「'+name+'」不在本班座位表中。\n請確認：\n1. 姓名與名冊完全相符（包含全名）\n2. 老師已儲存座位表\n\n或請老師手動補登。');
     return;
   }
   const [seat, info] = entry;
@@ -177,38 +220,27 @@ async function doSubmit() {
     return;
   }
 
-  const rec = {
-    name, seat, sno: info.sno||'', sid: info.sid||'',
-    timeStr, ts: now.getTime(), late: isLate,
-    date: now.toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}),
-    cls, token, course, dateStr
-  };
-
-  // 送到 Apps Script
-  let ok = false;
-  if (apiUrl) {
-    try {
-      const r = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(rec)
-      });
-      const d = await r.json();
-      if (d.ok) ok = true;
-      else if (d.duplicate) {
-        showErr('已完成簽到', '你已完成今日簽到，請勿重複送出。');
-        localStorage.setItem(doneKey, '1');
-        return;
-      } else {
-        showErr('簽到失敗', d.msg || '伺服器回應錯誤，請稍後再試或請老師手動補登。');
-        return;
-      }
-    } catch(e) {
-      showErr('網路錯誤', '無法連接伺服器（'+e.message+'），請確認網路連線後重試。');
+  // POST 到 Apps Script
+  try {
+    const r = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'checkin',
+        name, seat, sno: info.sno||'', sid: info.sid||'',
+        timeStr, late: isLate,
+        date: todayStr, course, cls, token
+      })
+    });
+    const d = await r.json();
+    if (d.duplicate) {
+      showErr('已完成簽到', '你已完成今日簽到，請勿重複送出。');
+      localStorage.setItem(doneKey,'1');
       return;
     }
-  } else {
-    showErr('系統錯誤', '找不到伺服器設定，請請老師確認系統設定是否完成。');
+    if (!d.ok) throw new Error(d.msg || '伺服器錯誤');
+  } catch(e) {
+    showErr('簽到失敗', '無法連接伺服器：'+e.message+'\n請確認網路連線，或請老師手動補登。');
     return;
   }
 

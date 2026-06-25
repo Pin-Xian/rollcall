@@ -546,7 +546,8 @@ function renderRL(cls){
 
 // ── QR Code ──
 function getQRUrl(){
-  const p=new URLSearchParams({t:CFG.classTime,dl:CFG.lateDeadline,cls:CFG.cls,tk:TOKEN,api:API_URL,c:CFG.course,d:CFG.dateStr});
+  // api URL 存在 student.html，不放 QR（QR 太長掃不到）
+  const p=new URLSearchParams({t:CFG.classTime,dl:CFG.lateDeadline,cls:CFG.cls,tk:TOKEN,c:CFG.course,d:CFG.dateStr});
   return STUDENT_URL+'?'+p.toString();
 }
 
@@ -897,14 +898,25 @@ function clrSeat(){
   if(inp){inp.value='';inp.className='';}
   closePicker();
 }
-function saveSeats(){
+async function saveSeats(){
   const cls=curSeatCls();if(!cls){toast('請先選擇班級');return;}
   const rows=parseInt(document.getElementById('s-rows').value)||4;
   const cols=parseInt(document.getElementById('s-cols').value)||5;
   if(!LAYOUT[cls])LAYOUT[cls]={};
   LAYOUT[cls].rows=rows;LAYOUT[cls].cols=cols;
   saveSeatsLS();
-  toast('✅ 座位表已儲存！');
+  if(!API_URL){toast('✅ 座位表已存本機（請先設定 API 才能讓學生簽到）',4000);return;}
+  toast('上傳座位表中...');
+  try{
+    const r=await fetch(API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'saveSeats',cls,seats:getSC(cls)})
+    });
+    const d=await r.json();
+    if(d.ok)toast('✅ 座位表已儲存並同步！');
+    else toast('⚠️ 同步失敗：'+(d.msg||'未知'),4000);
+  }catch(e){toast('⚠️ 上傳失敗：'+e.message,4000);}
 }
 function clearSeats(){
   const cls=curSeatCls();if(!cls){toast('請先選擇班級');return;}
