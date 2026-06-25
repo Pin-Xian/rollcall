@@ -168,7 +168,7 @@ tbody tr:hover td{background:var(--bg)}
 <!-- QR Code -->
 <div id="page-qr" class="panel">
   <div class="ph"><div><div class="pt">產生 QR Code</div><div class="ps">學生掃描後直接在手機填姓名簽到</div></div></div>
-  <div id="qr-no-gist" class="al al-y" style="margin-bottom:1rem">
+  <div id="qr-no-gist" class="al al-y" style="margin-bottom:1rem;display:none">
     ⚠️ 尚未設定 GitHub Gist Token，學生手機無法讀取座位表。請先至「⚙️ Gist 設定」完成設定。
   </div>
   <div class="g2">
@@ -614,6 +614,7 @@ function go(id,el){
   if(id==='dashboard')syncAll();
   if(id==='clsmgr')renderClsMgr();
   if(id==='import')renderCurRoster();
+  if(id==='qr')checkGistStatus();
 }
 
 function popCls(){
@@ -623,6 +624,11 @@ function popCls(){
 }
 
 function checkGistStatus(){
+  // 重新從 localStorage 讀，確保是最新值
+  const token=localStorage.getItem(LS.gt)||'';
+  const gist=localStorage.getItem(LS.gi)||'';
+  if(token) GH_TOKEN=token;
+  if(gist)  GIST_ID=gist;
   const ok=!!(GH_TOKEN&&GIST_ID);
   const warn=document.getElementById('qr-no-gist');
   if(warn)warn.style.display=ok?'none':'flex';
@@ -641,18 +647,47 @@ function saveGistSettings(){
 async function testGist(){
   const res=document.getElementById('gist-test-result');
   if(!GH_TOKEN){res.innerHTML='<div class="al al-r">❌ 請先填入 Token</div>';return;}
-  res.innerHTML='<div class="al al-b">🔌 測試中...</div>';
+  res.innerHTML='<div class="al al-b">🔌 測試寫入權限中...</div>';
   try{
-    const r=await fetch(GIST_API+(GIST_ID?'/'+GIST_ID:''),{headers:{Authorization:'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json'}});
-    if(r.ok){
-      res.innerHTML='<div class="al al-g">✅ 連線成功！Token 有效</div>';
-      checkGistStatus();
-    }else if(r.status===404&&GIST_ID){
-      res.innerHTML='<div class="al al-y">⚠️ Token 有效但 Gist ID 不存在，請清空 Gist ID 讓系統自動建立</div>';
+    // 直接測試寫入（建立或更新），這才是真正需要的權限
+    const authHdr=(GH_TOKEN.startsWith('github_pat_')?'Bearer ':'token ')+GH_TOKEN;
+    let r,method,url;
+    if(GIST_ID){
+      // 嘗試更新現有 Gist
+      method='PATCH';url=GIST_API+'/'+GIST_ID;
     }else{
-      res.innerHTML=`<div class="al al-r">❌ 失敗（HTTP ${r.status}）</div>`;
+      // 嘗試建立新 Gist
+      method='POST';url=GIST_API;
     }
-  }catch(e){res.innerHTML=`<div class="al al-r">❌ 網路錯誤：${e.message}</div>`;}
+    r=await fetch(url,{
+      method,
+      headers:{Authorization:authHdr,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+      body:JSON.stringify({description:'點名系統座位表',public:false,files:{'seats.json':{content:JSON.stringify({test:true,ts:Date.now()})}}})
+    });
+    if(r.ok){
+      const data=await r.json();
+      if(!GIST_ID){
+        GIST_ID=data.id;
+        localStorage.setItem(LS.gi,GIST_ID);
+        document.getElementById('gh-gist-id').value=GIST_ID;
+        res.innerHTML='<div class="al al-g">✅ 連線成功！已自動建立 Gist，ID 已填入上方</div>';
+      }else{
+        res.innerHTML='<div class="al al-g">✅ 連線成功！Token 有讀寫權限，可以正常使用</div>';
+      }
+      checkGistStatus();
+    }else{
+      const txt=await r.text();
+      let hint='';
+      if(r.status===401)hint='Token 無效或已過期，請重新產生';
+      else if(r.status===403)hint='Token 沒有 gist 寫入權限，請確認勾選了 gist scope';
+      else if(r.status===404)hint='Gist ID 不存在，請清空讓系統自動建立';
+      else if(r.status===422)hint='請求格式錯誤：'+txt.slice(0,100);
+      else hint='HTTP '+r.status+'：'+txt.slice(0,100);
+      res.innerHTML='<div class="al al-r">❌ '+hint+'</div>';
+    }
+  }catch(e){
+    res.innerHTML='<div class="al al-r">❌ 網路錯誤：'+e.message+'<br>（可能是 CORS 問題，請確認用 GitHub 網址開啟此頁面）</div>';
+  }
 }
 
 async function uploadToGist(data){
@@ -661,9 +696,9 @@ async function uploadToGist(data){
   try{
     let r;
     if(GIST_ID){
-      r=await fetch(GIST_API+'/'+GIST_ID,{method:'PATCH',headers:{Authorization:'token '+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(body)});
+      r=await fetch(GIST_API+'/'+GIST_ID,{method:'PATCH',headers:{Authorization:(GH_TOKEN.startsWith('github_pat_')?'Bearer ':'token ')+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(body)});
     }else{
-      r=await fetch(GIST_API,{method:'POST',headers:{Authorization:'token '+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(body)});
+      r=await fetch(GIST_API,{method:'POST',headers:{Authorization:(GH_TOKEN.startsWith('github_pat_')?'Bearer ':'token ')+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(body)});
     }
     if(r.ok){
       const data2=await r.json();
@@ -673,8 +708,15 @@ async function uploadToGist(data){
         document.getElementById('gh-gist-id').value=GIST_ID;
       }
       return GIST_ID;
+    }else{
+      const errText=await r.text();
+      console.error('Gist API error:', r.status, errText);
+      return {error: r.status+': '+errText.slice(0,200)};
     }
-  }catch(e){}
+  }catch(e){
+    console.error('Gist fetch error:', e);
+    return {error: e.message};
+  }
   return null;
 }
 
@@ -1093,8 +1135,14 @@ async function saveSeats(){
   if(!GH_TOKEN){toast('⚠️ 未設定 Gist Token，資料僅存本機。請至「⚙️ Gist 設定」',5000);return;}
   toast('上傳中...');
   const gid=await uploadToGist({seats:SEATS,layout:LAYOUT});
-  if(gid){toast('✅ 座位表已儲存並上傳！學生現在可以掃 QR 簽到');}
-  else{toast('⚠️ 上傳失敗，請至「⚙️ Gist 設定」檢查 Token',4000);}
+  if(gid&&typeof gid==='string'){
+    toast('✅ 座位表已儲存並上傳！學生現在可以掃 QR 簽到');
+  }else if(gid&&gid.error){
+    toast('❌ 上傳失敗：'+gid.error,6000);
+    console.error('Upload failed:', gid.error);
+  }else{
+    toast('⚠️ 上傳失敗，請至「⚙️ Gist 設定」重新測試連線',4000);
+  }
 }
 
 function clearSeats(){
