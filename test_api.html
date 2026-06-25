@@ -101,17 +101,19 @@ API (localStorage): <span class="${api?'ok':'err'}">${api?'✅ 有':'❌ 空（�
 async function testGetCheckins() {
   const el = document.getElementById('checkin-out');
   el.textContent = '讀取中...';
+  // 用日期當 token（和現在 teacher.html 一致）
+  const token = new Date().toISOString().slice(0,10).replace(/-/g,'');
   const cfg = JSON.parse(localStorage.getItem('att_cf3')||'{}');
-  const token = cfg.token||'';
-  const cls = cfg.cls||'';
-  if (!token||!cls) { el.innerHTML = '<span class="err">❌ TOKEN 或 cls 是空的，請先在 teacher.html 產生 QR Code</span>'; return; }
+  const cls = cfg.cls || '一組十七班';
+  const url = API + '?token=' + encodeURIComponent(token) + '&cls=' + encodeURIComponent(cls);
+  el.textContent = 'TOKEN: ' + token + '\ncls: ' + cls + '\nURL:\n' + url + '\n\n等待回應...';
   try {
-    const url = API + '?token=' + encodeURIComponent(token) + '&cls=' + encodeURIComponent(cls);
-    el.textContent = '讀取 URL:\n' + url + '\n\n等待...';
     const r = await fetch(url);
-    const d = await r.json();
+    const text = await r.text();
+    let d;
+    try { d = JSON.parse(text); } catch(e) { el.innerHTML = '<span class="err">回應不是 JSON:\n' + text.slice(0,300) + '</span>'; return; }
     const count = Object.keys(d.data||{}).length;
-    el.innerHTML = '<span class="' + (count>0?'ok':'err') + '">找到 '+count+' 筆簽到</span>\n\n' + JSON.stringify(d, null, 2).slice(0,600);
+    el.innerHTML = 'TOKEN: ' + token + '\ncls: ' + cls + '\n\n<span class="' + (count>0?'ok':'err') + '">找到 '+count+' 筆簽到</span>\n\n' + JSON.stringify(d, null, 2).slice(0,800);
   } catch(e) {
     el.innerHTML = '<span class="err">❌ ' + e.message + '</span>';
   }
