@@ -400,155 +400,8 @@ tbody tr:hover td{background:var(--bg)}
 
 <div id="toast"></div>
 
-<!-- ════ QR Code 引擎（qrcode-generator 相容實作） ════ -->
-<script>
-// 使用 qrcodejs 相容的 API，這是業界最廣泛使用的格式
-// 完整 Reed-Solomon + 最優 mask 選擇
-window.QRCode = (function(){
-  // GF(256)
-  const EXP=new Uint8Array(512),LOG=new Uint8Array(256);
-  (function(){let x=1;for(let i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x=x<128?x*2:(x*2)^0x11D;}for(let i=255;i<512;i++)EXP[i]=EXP[i-255];})();
-  const gm=(a,b)=>a&&b?EXP[(LOG[a]+LOG[b])%255]:0;
-
-  function rsPoly(n){let p=[1];for(let i=0;i<n;i++){const q=[1,EXP[i]],r=Array(p.length+q.length-1).fill(0);for(let j=0;j<p.length;j++)for(let k=0;k<q.length;k++)r[j+k]^=gm(p[j],q[k]);p=r;}return p;}
-  function rsEncode(data,n){const g=rsPoly(n),m=[...data,...Array(n).fill(0)];for(let i=0;i<data.length;i++){const c=m[i];if(c)for(let j=0;j<g.length;j++)m[i+j]^=gm(g[j],c);}return m.slice(data.length);}
-
-  // Version params [total_dw, ec_per_blk, n1, k1, n2, k2] for EC=M
-  const VP=[[],[16,10,1,16,0,0],[28,16,1,28,0,0],[44,26,1,44,0,0],[64,18,2,32,0,0],[86,24,2,43,0,0],[108,16,4,27,0,0],[124,18,4,31,0,0],[154,22,2,38,4,39],[182,22,3,36,5,37],[216,26,4,43,1,44]];
-  const TD=[0,16,28,44,64,86,108,124,154,182,216]; // total data CW per version
-  const AL=[[],[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,28,46],[6,26,46]];
-  const RM=[0,0,7,7,7,0,0,0,0,0,0];
-  // Format strings for EC=M, masks 0-7
-  const FMT=[21522,20773,24188,23371,17913,16590,20375,19104];
-  const MASKS=[(r,c)=>(r+c)%2===0,(r,c)=>r%2===0,(r,c)=>c%3===0,(r,c)=>(r+c)%3===0,(r,c)=>(Math.floor(r/2)+Math.floor(c/3))%2===0,(r,c)=>(r*c)%2+(r*c)%3===0,(r,c)=>((r*c)%2+(r*c)%3)%2===0,(r,c)=>((r+c)%2+(r*c)%3)%2===0];
-
-  function pickVer(n){for(let v=1;v<=10;v++)if(n+2<=TD[v])return v;return 10;}
-
-  function buildCW(bytes,ver){
-    const b=[],add=(v,n)=>{for(let i=n-1;i>=0;i--)b.push((v>>i)&1);};
-    add(4,4);add(bytes.length,8);for(const x of bytes)add(x,8);
-    add(0,4);while(b.length%8)b.push(0);
-    const pd=[0xEC,0x11];let pi=0;while(b.length<TD[ver]*8){add(pd[pi%2],8);pi++;}
-    const cw=[];for(let i=0;i<b.length;i+=8){let x=0;for(let j=0;j<8;j++)x=(x<<1)|(b[i+j]||0);cw.push(x);}
-    return cw;
-  }
-
-  function interleave(cw,ver){
-    const[,ep,n1,k1,n2,k2]=VP[ver];const blks=[];let p=0;
-    for(let i=0;i<n1;i++){blks.push(cw.slice(p,p+k1));p+=k1;}
-    for(let i=0;i<n2;i++){blks.push(cw.slice(p,p+k2));p+=k2;}
-    const ec=blks.map(b=>rsEncode(b,ep));
-    const out=[];const mx=Math.max(k1,k2);
-    for(let i=0;i<mx;i++)for(const b of blks)if(i<b.length)out.push(b[i]);
-    for(let i=0;i<ep;i++)for(const b of ec)out.push(b[i]);
-    return out;
-  }
-
-  function makeMatrix(text){
-    const bytes=[...new TextEncoder().encode(text)];
-    const ver=pickVer(bytes.length);
-    const dim=ver*4+17;
-    const allCW=interleave(buildCW(bytes,ver),ver);
-    const bits=[];for(const c of allCW)for(let i=7;i>=0;i--)bits.push((c>>i)&1);
-    for(let i=0;i<(RM[ver]||0);i++)bits.push(0);
-
-    let bestM=null,bestScore=Infinity;
-
-    for(let mid=0;mid<8;mid++){
-      const M=Array.from({length:dim},()=>new Uint8Array(dim));
-      const F=Array.from({length:dim},()=>new Uint8Array(dim)); // function modules
-      const set=(r,c,v)=>{if(r>=0&&r<dim&&c>=0&&c<dim){M[r][c]=v;F[r][c]=1;}};
-
-      // Finder patterns
-      const finder=(tr,tc)=>{
-        for(let dr=-1;dr<=7;dr++)for(let dc=-1;dc<=7;dc++){
-          if(tr+dr<0||tr+dr>=dim||tc+dc<0||tc+dc>=dim)continue;
-          if(dr>=-1&&dr<=7&&dc>=-1&&dc<=7){
-            const v=(dr>=0&&dr<=6&&dc>=0&&dc<=6)&&(dr===0||dr===6||dc===0||dc===6||(dr>=2&&dr<=4&&dc>=2&&dc<=4))?1:0;
-            set(tr+dr,tc+dc,v);
-          }
-        }
-      };
-      finder(0,0);finder(0,dim-7);finder(dim-7,0);
-
-      // Timing
-      for(let i=8;i<dim-8;i++){if(!F[6][i])set(6,i,i%2===0?1:0);if(!F[i][6])set(i,6,i%2===0?1:0);}
-      set(dim-8,8,1);
-
-      // Alignment
-      for(const ar of (AL[ver]||[]))for(const ac of (AL[ver]||[])){
-        if(F[ar][ac])continue;
-        for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++)
-          set(ar+dr,ac+dc,(Math.abs(dr)===2||Math.abs(dc)===2||dr===0&&dc===0)?1:0);
-      }
-
-      // Format placeholders
-      [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8],
-       [8,dim-1],[8,dim-2],[8,dim-3],[8,dim-4],[8,dim-5],[8,dim-6],[8,dim-7],
-       [dim-7,8],[dim-6,8],[dim-5,8],[dim-4,8],[dim-3,8],[dim-2,8],[dim-1,8]
-      ].forEach(([r,c])=>{F[r][c]=1;});
-
-      // Data zigzag
-      let bi=0,up=true,col=dim-1;
-      while(col>=0){
-        if(col===6)col--;
-        for(let row=0;row<dim;row++){
-          const r=up?dim-1-row:row;
-          for(let dc=0;dc<2;dc++){const c=col-dc;if(!F[r][c]&&bi<bits.length)M[r][c]=bits[bi++];}
-        }
-        up=!up;col-=2;
-      }
-
-      // Apply mask
-      const mfn=MASKS[mid];
-      for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)if(!F[r][c]&&mfn(r,c))M[r][c]^=1;
-
-      // Write format info
-      const fmt=FMT[mid],fb=[];for(let i=14;i>=0;i--)fb.push((fmt>>i)&1);
-      for(let i=0;i<6;i++)M[8][i]=fb[i];
-      M[8][7]=fb[6];M[8][8]=fb[7];M[7][8]=fb[8];
-      for(let i=0;i<6;i++)M[5-i][8]=fb[9+i];
-      for(let i=0;i<8;i++)M[dim-1-i][8]=fb[i];
-      for(let i=0;i<7;i++)M[8][dim-7+i]=fb[8+i];
-
-      // Score
-      let s=0;
-      for(let r=0;r<dim;r++){let n=1,v=M[r][0];for(let c=1;c<dim;c++){if(M[r][c]===v){n++;}else{if(n>=5)s+=n-2;n=1;v=M[r][c];}if(n>=5)s+=n-2;}}
-      for(let c=0;c<dim;c++){let n=1,v=M[0][c];for(let r=1;r<dim;r++){if(M[r][c]===v){n++;}else{if(n>=5)s+=n-2;n=1;v=M[r][c];}if(n>=5)s+=n-2;}}
-      for(let r=0;r<dim-1;r++)for(let c=0;c<dim-1;c++)if(M[r][c]===M[r][c+1]&&M[r][c]===M[r+1][c]&&M[r][c]===M[r+1][c+1])s+=3;
-      let dk=0;for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)if(M[r][c])dk++;
-      s+=Math.floor(Math.abs(dk*100/(dim*dim)-50)/5)*10;
-      if(s<bestScore){bestScore=s;bestM=M.map(r=>Uint8Array.from(r));}
-    }
-    return{matrix:bestM,dim,version:ver};
-  }
-
-  // 畫到 canvas，同時設定 CSS 尺寸避免縮放模糊
-  function drawToCanvas(text,canvas,size){
-    const{matrix,dim}=makeMatrix(text);
-    const q=4,cell=size/(dim+q*2);
-    canvas.width=size;canvas.height=size;
-    canvas.style.width=size+'px';canvas.style.height=size+'px';
-    const ctx=canvas.getContext('2d');
-    ctx.fillStyle='#ffffff';ctx.fillRect(0,0,size,size);
-    ctx.fillStyle='#000000';
-    for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)
-      if(matrix[r][c])ctx.fillRect((q+c)*cell,(q+r)*cell,cell+.5,cell+.5); // +0.5 避免縫隙
-  }
-
-  // 轉成 SVG 字串（比 canvas 更清晰，手機掃描成功率更高）
-  function toSVG(text,size){
-    const{matrix,dim}=makeMatrix(text);
-    const q=4,total=dim+q*2,cell=size/total;
-    let rects='';
-    for(let r=0;r<dim;r++)for(let c=0;c<dim;c++)
-      if(matrix[r][c])rects+=`<rect x="${(q+c)*cell}" y="${(q+r)*cell}" width="${cell+.1}" height="${cell+.1}"/>`;
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" fill="white"/><g fill="black">${rects}</g></svg>`;
-  }
-
-  return{drawToCanvas,toSVG};
-})();
-</script>
+<!-- QRCode.js by kazuhikoarase (業界標準，實際可掃描) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <!-- ════ 主程式 ════ -->
 <script>
@@ -763,14 +616,24 @@ function getQRUrl(){
 
 function renderQRToEl(el,size){
   el.innerHTML='';
-  // 用 SVG 而非 canvas，SVG 在任何解析度都清晰，掃描成功率更高
   try{
-    const svg=QRCode.toSVG(getQRUrl(),size);
-    const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
-    img.width=size;img.height=size;
-    img.style.cssText='display:block;border-radius:5px;width:'+size+'px;height:'+size+'px';
-    el.appendChild(img);
-  }catch(e){el.innerHTML='<div style="color:var(--red);padding:1rem;font-size:13px">QR 產生失敗：'+e.message+'</div>';}
+    // 使用 QRCode.js（業界標準函式庫，手機一定掃得到）
+    new QRCode(el,{
+      text: getQRUrl(),
+      width: size,
+      height: size,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    // 確保 canvas/img 尺寸正確
+    setTimeout(()=>{
+      const c=el.querySelector('canvas,img');
+      if(c){c.style.width=size+'px';c.style.height=size+'px';c.style.display='block';}
+    },10);
+  }catch(e){
+    el.innerHTML='<div style="color:var(--red);padding:1rem;font-size:13px;text-align:center">QR 產生失敗：'+e.message+'</div>';
+  }
 }
 
 async function genQR(){
@@ -806,19 +669,19 @@ function resizeQR(v){QRSZ=parseInt(v);document.getElementById('sz-lbl').textCont
 
 function dlQR(){
   if(!QRon){toast('請先產生 QR Code');return;}
-  try{
-    const svg=QRCode.toSVG(getQRUrl(),800);
-    const blob=new Blob([svg],{type:'image/svg+xml'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download='QR_'+CFG.cls+'_'+CFG.dateStr+'.svg';a.click();
-    URL.revokeObjectURL(url);toast('✅ 已下載 SVG（高品質）');
-  }catch(e){toast('下載失敗');}
+  const c=document.querySelector('#qr-box canvas');
+  if(c){
+    const a=document.createElement('a');
+    a.download='QR_'+CFG.cls+'_'+CFG.dateStr+'.png';
+    a.href=c.toDataURL('image/png');a.click();
+    toast('✅ 已下載 PNG');
+  }else{toast('QR Code 尚未產生');}
 }
 
 function openFS(){
   if(!QRon){toast('請先產生 QR Code');return;}
   document.getElementById('fsov').classList.add('open');
-  renderQRToEl(document.getElementById('fs-qr'),500);
+  renderQRToEl(document.getElementById('fs-qr'),480);
   document.getElementById('fs-title').textContent=CFG.cls+' · '+CFG.course+'　'+CFG.dateStr+'　截止 '+CFG.lateDeadline;
 }
 function closeFS(){document.getElementById('fsov').classList.remove('open');}
