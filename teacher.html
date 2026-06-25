@@ -509,25 +509,24 @@ async function syncAll(){
 }
 
 async function fetchCheckinsFromScript(cls){
-  // 每次執行都重新讀 API_URL，確保最新
   const apiUrl=localStorage.getItem(LS.as)||'';
-  if(!apiUrl){ console.warn('syncAll: API_URL 空'); return; }
-  if(!TOKEN){  console.warn('syncAll: TOKEN 空'); return; }
-  if(!cls){    console.warn('syncAll: cls 空');   return; }
+  if(!apiUrl){ toast('⚠️ 未設定 API 網址，請至「⚙️ API 設定」',3000); return; }
+  if(!TOKEN){  toast('⚠️ TOKEN 是空的，請重新產生 QR Code',3000); return; }
+  if(!cls){    toast('⚠️ 未選擇班級',3000); return; }
   try{
     const url=apiUrl+'?token='+encodeURIComponent(TOKEN)+'&cls='+encodeURIComponent(cls);
     const r=await fetch(url);
-    if(!r.ok){ console.warn('syncAll: HTTP',r.status); return; }
+    if(!r.ok){ toast('❌ API 回應錯誤 HTTP '+r.status,3000); return; }
     const d=await r.json();
     if(d.ok && d.data && Object.keys(d.data).length){
       const existing=getAtt(cls);
       const merged=Object.assign({},d.data,existing);
       saveAtt(cls,merged);
-      console.log('syncAll: 讀到',Object.keys(d.data).length,'筆');
+      toast('✅ 同步到 '+Object.keys(d.data).length+' 筆簽到');
     } else {
-      console.log('syncAll: 尚無資料 token='+TOKEN+' cls='+cls);
+      toast('📭 目前尚無簽到（token='+TOKEN+'）',3000);
     }
-  }catch(e){ console.warn('syncAll error:',e.message); }
+  }catch(e){ toast('❌ 同步失敗：'+e.message,3000); }
 }
 
 function updStats(cls){
