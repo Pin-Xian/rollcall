@@ -427,7 +427,7 @@ function loadLS(){
       if(CFG.course)document.getElementById('course-name').value=CFG.course;
       if(CFG.classTime)document.getElementById('class-time').value=CFG.classTime;
       if(CFG.lateMin)document.getElementById('late-min').value=CFG.lateMin;
-      if(CFG.token){TOKEN=CFG.token;QRon=true;}
+      TOKEN=new Date().toISOString().slice(0,10).replace(/-/g,'');if(CFG.token)QRon=true;
     }
     API_URL=localStorage.getItem(LS.as)||'';
     if(API_URL){const el=document.getElementById('api-script-url');if(el)el.value=API_URL;}
@@ -610,12 +610,12 @@ function renderQRToEl(el,size){
 async function genQR(){
   const cls=document.getElementById('qr-cls').value;
   if(!cls){toast('請先選擇班級');return;}
-  if(!API_URL){toast('⚠️ 請先至「⚙️ API 設定」完成設定',4000);return;}
+  const apiUrl=localStorage.getItem(LS.as)||'';if(!apiUrl){toast('⚠️ 請先至「⚙️ API 設定」填入網址',4000);return;}
   const course=document.getElementById('course-name').value.trim()||'課程';
   const classTime=document.getElementById('class-time').value;
   const lateMin=parseInt(document.getElementById('late-min').value)||15;
   const dateStr=todayStr(),lateDeadline=addMins(classTime,lateMin);
-  TOKEN=String(Date.now()).slice(-8);
+  TOKEN=new Date().toISOString().slice(0,10).replace(/-/g,'');
   CFG={course,classTime,lateMin,dateStr,lateDeadline,cls,token:TOKEN};
   QRon=true;saveCFG();
   document.getElementById('qr-info').style.display='block';
@@ -946,18 +946,18 @@ async function saveSeats(){
   if(!LAYOUT[cls])LAYOUT[cls]={};
   LAYOUT[cls].rows=rows;LAYOUT[cls].cols=cols;
   saveSeatsLS();
-  if(!API_URL){toast('✅ 座位表已存本機（請先設定 API 才能讓學生簽到）',4000);return;}
-  toast('上傳座位表中...');
+  // 同步到 Apps Script
+  const apiUrl=localStorage.getItem(LS.as)||'';
+  if(!apiUrl){toast('✅ 座位表已儲存（未設定 API）');return;}
   try{
-    const r=await fetch(API_URL,{
+    const r=await fetch(apiUrl,{
       method:'POST',
       headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({action:'saveSeats',cls,seats:getSC(cls)})
     });
     const d=await r.json();
-    if(d.ok)toast('✅ 座位表已儲存並同步！');
-    else toast('⚠️ 同步失敗：'+(d.msg||'未知'),4000);
-  }catch(e){toast('⚠️ 上傳失敗：'+e.message,4000);}
+    toast(d.ok?'✅ 座位表已儲存並同步！':'⚠️ 同步失敗：'+(d.msg||''));
+  }catch(e){toast('✅ 座位表已儲存（離線模式）');}
 }
 function clearSeats(){
   const cls=curSeatCls();if(!cls){toast('請先選擇班級');return;}
