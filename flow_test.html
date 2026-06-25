@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>完整流程測試</title>
+<style>
+body{font-family:sans-serif;padding:20px;max-width:500px;margin:0 auto}
+.card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:16px;margin-bottom:12px}
+.btn{background:#18181A;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;width:100%}
+#qr{display:flex;justify-content:center;margin:12px 0}
+pre{background:#f5f5f2;padding:10px;border-radius:8px;font-size:11px;word-break:break-all;white-space:pre-wrap}
+.ok{color:green;font-weight:600}.err{color:red;font-weight:600}
+</style>
+</head>
+<body>
+<h2 style="margin-bottom:16px">🔍 完整流程測試</h2>
+
+<div class="card">
+  <b>步驟 1：檢查 localStorage</b>
+  <div id="ls-status" style="margin-top:8px;font-size:13px"></div>
+</div>
+
+<div class="card">
+  <b>步驟 2：產生測試 QR Code</b>
+  <div id="qr"></div>
+  <pre id="qr-url" style="margin-top:8px"></pre>
+  <button class="btn" onclick="genTestQR()">產生 QR</button>
+</div>
+
+<div class="card">
+  <b>步驟 3：手動測試 Gist 讀取</b>
+  <div id="gist-result" style="font-size:13px;margin-top:8px">點擊測試</div>
+  <button class="btn" style="margin-top:8px;background:#2A6049" onclick="testGistFetch()">測試 Gist 讀取</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const STUDENT_URL = 'https://pin-xian.github.io/rollcall/student.html';
+
+// 步驟 1：顯示 localStorage 狀態
+function checkLS() {
+  const token = localStorage.getItem('att_gh_token') || localStorage.getItem('att_gt') || '';
+  const gistId = localStorage.getItem('att_gh_gist') || localStorage.getItem('att_gi') || '';
+  const cfg = JSON.parse(localStorage.getItem('att_cf3') || '{}');
+  const seats = JSON.parse(localStorage.getItem('att_se3') || '{}');
+  
+  const el = document.getElementById('ls-status');
+  el.innerHTML = [
+    'Token: ' + (token ? '<span class="ok">✅ 有（'+token.slice(0,8)+'...）</span>' : '<span class="err">❌ 無</span>'),
+    'Gist ID: ' + (gistId ? '<span class="ok">✅ '+gistId.slice(0,8)+'...</span>' : '<span class="err">❌ 無</span>'),
+    '班級設定: ' + (cfg.cls || '<span class="err">無</span>'),
+    '座位表班級: ' + Object.keys(seats).join(', ') || '無',
+  ].join('<br>');
+  
+  return {token, gistId, cfg, seats};
+}
+
+const ls = checkLS();
+
+// 步驟 2：產生 QR
+function genTestQR() {
+  const {token, gistId, cfg} = ls;
+  if (!gistId) { alert('沒有 Gist ID！請先在 teacher.html 完成 Gist 設定'); return; }
+  
+  const p = new URLSearchParams({
+    t: cfg.classTime || '09:00',
+    dl: cfg.lateDeadline || '09:15',
+    cls: cfg.cls || 'TEST',
+    tk: cfg.token || String(Date.now()).slice(-8),
+    g: gistId
+  });
+  const url = STUDENT_URL + '?' + p.toString();
+  
+  document.getElementById('qr-url').textContent = 'URL (' + url.length + ' chars):\n' + url;
+  document.getElementById('qr').innerHTML = '';
+  
+  new QRCode(document.getElementById('qr'), {
+    text: url, width: 256, height: 256,
+    colorDark: '#000000', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+}
+
+// 步驟 3：測試 Gist 讀取
+async function testGistFetch() {
+  const {gistId, cfg} = ls;
+  const el = document.getElementById('gist-result');
+  
+  if (!gistId) { el.innerHTML = '<span class="err">❌ 沒有 Gist ID</span>'; return; }
+  
+  el.innerHTML = '⏳ 讀取中...';
+  try {
+    const r = await fetch('https://api.github.com/gists/' + gistId, {
+      headers: {Accept: 'application/vnd.github.v3+json'}
+    });
+    if (!r.ok) { el.innerHTML = '<span class="err">❌ HTTP ' + r.status + '</span>'; return; }
+    
+    const data = await r.json();
+    const content = data.files['seats.json']?.content;
+    if (!content) { el.innerHTML = '<span class="err">❌ 找不到 seats.json</span>'; return; }
+    
+    const parsed = JSON.parse(content);
+    const cls = cfg.cls || '';
+    const clsSeats = parsed.seats?.[cls] || parsed[cls] || {};
+    const count = Object.keys(clsSeats).length;
+    
+    el.innerHTML = '<span class="ok">✅ Gist 讀取成功！</span><br>' +
+      '班級「' + cls + '」座位數：' + count + '<br>' +
+      '<small style="color:#666">Gist 檔案：' + Object.keys(data.files).join(', ') + '</small><br>' +
+      '<details><summary style="cursor:pointer;font-size:12px;color:#666">查看座位資料</summary>' +
+      '<pre style="font-size:11px">' + JSON.stringify(clsSeats, null, 2).slice(0, 500) + '</pre></details>';
+  } catch(e) {
+    el.innerHTML = '<span class="err">❌ 錯誤：' + e.message + '</span>';
+  }
+}
+</script>
+</body>
+</html>
