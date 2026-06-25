@@ -138,6 +138,7 @@ tbody tr:hover td{background:var(--bg)}
     <div class="btnrow">
       <select id="dash-cls" style="height:36px;min-width:130px" onchange="syncAll()"><option value="">— 選擇班級 —</option></select>
       <button class="btn btn-sm" onclick="syncAll()">🔄 重新整理</button>
+      <span id="last-sync" style="font-size:12px;color:var(--t2)"></span>
       <button class="btn btn-sm" onclick="resetToday()">🗑️ 重置今日</button>
     </div>
   </div>
@@ -488,6 +489,8 @@ function restoreQRState(){
   const dc=document.getElementById('dash-cls');if(dc&&CFG.cls)dc.value=CFG.cls;
   if(window._si)clearInterval(window._si);
   window._si=setInterval(syncAll,8000);
+  // 頁面載入後立刻同步一次
+  setTimeout(syncAll, 500);
 }
 
 // ── 同步（從 Apps Script 讀簽到）──
@@ -495,21 +498,31 @@ async function syncAll(){
   const cls=curCls();if(!cls)return;
   await fetchCheckinsFromScript(cls);
   updStats(cls);renderSG(cls);renderRL(cls);
+  // 更新最後同步時間
+  const el=document.getElementById('last-sync');
+  if(el)el.textContent='上次同步：'+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
 
 async function fetchCheckinsFromScript(cls){
-  if(!API_URL||!TOKEN||!cls)return;
+  // 每次執行都重新讀 API_URL，確保最新
+  const apiUrl=localStorage.getItem(LS.as)||'';
+  if(!apiUrl){ console.warn('syncAll: API_URL 空'); return; }
+  if(!TOKEN){  console.warn('syncAll: TOKEN 空'); return; }
+  if(!cls){    console.warn('syncAll: cls 空');   return; }
   try{
-    const url=API_URL+'?token='+encodeURIComponent(TOKEN)+'&cls='+encodeURIComponent(cls);
+    const url=apiUrl+'?token='+encodeURIComponent(TOKEN)+'&cls='+encodeURIComponent(cls);
     const r=await fetch(url);
-    if(!r.ok)return;
+    if(!r.ok){ console.warn('syncAll: HTTP',r.status); return; }
     const d=await r.json();
-    if(d.ok&&d.data&&Object.keys(d.data).length){
+    if(d.ok && d.data && Object.keys(d.data).length){
       const existing=getAtt(cls);
       const merged=Object.assign({},d.data,existing);
       saveAtt(cls,merged);
+      console.log('syncAll: 讀到',Object.keys(d.data).length,'筆');
+    } else {
+      console.log('syncAll: 尚無資料 token='+TOKEN+' cls='+cls);
     }
-  }catch(e){}
+  }catch(e){ console.warn('syncAll error:',e.message); }
 }
 
 function updStats(cls){

@@ -97,6 +97,31 @@ cls: <span class="${cfg.cls?'ok':'err'}">${cfg.cls||'❌ 空'}</span>
 API (localStorage): <span class="${api?'ok':'err'}">${api?'✅ 有':'❌ 空（正常，已硬寫進 student.html）'}</span>
 座位表班級: ${Object.keys(seats).join(', ')||'無'}`;
 }
+
+async function testGetCheckins() {
+  const el = document.getElementById('checkin-out');
+  el.textContent = '讀取中...';
+  const cfg = JSON.parse(localStorage.getItem('att_cf3')||'{}');
+  const token = cfg.token||'';
+  const cls = cfg.cls||'';
+  if (!token||!cls) { el.innerHTML = '<span class="err">❌ TOKEN 或 cls 是空的，請先在 teacher.html 產生 QR Code</span>'; return; }
+  try {
+    const url = API + '?token=' + encodeURIComponent(token) + '&cls=' + encodeURIComponent(cls);
+    el.textContent = '讀取 URL:\n' + url + '\n\n等待...';
+    const r = await fetch(url);
+    const d = await r.json();
+    const count = Object.keys(d.data||{}).length;
+    el.innerHTML = '<span class="' + (count>0?'ok':'err') + '">找到 '+count+' 筆簽到</span>\n\n' + JSON.stringify(d, null, 2).slice(0,600);
+  } catch(e) {
+    el.innerHTML = '<span class="err">❌ ' + e.message + '</span>';
+  }
+}
 </script>
+<div class="card">
+  <b>4. 讀取真實簽到資料</b>
+  <p style="font-size:12px;color:#666;margin:6px 0">用 localStorage 的 TOKEN 和 cls 讀 Apps Script</p>
+  <button class="btn btn-g" onclick="testGetCheckins()">讀取今日簽到</button>
+  <pre id="checkin-out">點擊讀取...</pre>
+</div>
 </body>
 </html>
