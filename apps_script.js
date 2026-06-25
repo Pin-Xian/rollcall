@@ -113,7 +113,7 @@ function saveCheckin_(data) {
   // 防重複
   const all = sheet.getDataRange().getValues();
   for (let i = 1; i < all.length; i++) {
-    if (all[i][3] === data.token && all[i][4] === data.seat) {
+    if (String(all[i][3]).trim() === String(data.token).trim() && String(all[i][4]).trim() === String(data.seat).trim()) {
       return { duplicate: true };
     }
   }
@@ -142,9 +142,12 @@ function getCheckins_(token, cls) {
 
   const all    = sheet.getDataRange().getValues();
   const result = {};
+  // 全部轉字串比對，避免 Sheet 把數字型 token 和字串型不匹配
+  const tokenStr = String(token).trim();
+  const clsStr   = String(cls).trim();
   for (let i = 1; i < all.length; i++) {
-    if (all[i][3] === token && all[i][2] === cls) {
-      const seat = all[i][4];
+    if (String(all[i][3]).trim() === tokenStr && String(all[i][2]).trim() === clsStr) {
+      const seat = String(all[i][4]);
       result[seat] = {
         date: all[i][0], course: all[i][1], cls: all[i][2],
         token: all[i][3], seat, sno: String(all[i][5]),
