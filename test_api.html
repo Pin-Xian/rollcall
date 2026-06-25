@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API 測試</title>
+<style>
+body{font-family:sans-serif;padding:20px;max-width:500px;margin:0 auto;background:#f5f5f2}
+.card{background:#fff;border-radius:10px;padding:16px;margin-bottom:12px;border:1px solid #ddd}
+.btn{background:#18181A;color:#fff;border:none;padding:10px 16px;border-radius:7px;cursor:pointer;font-size:14px;margin:4px;width:100%}
+.btn-g{background:#2A6049}
+pre{background:#f0f0f0;padding:10px;border-radius:6px;font-size:11px;white-space:pre-wrap;word-break:break-all;max-height:150px;overflow-y:auto}
+.ok{color:#2A6049;font-weight:700}.err{color:#B91C1C;font-weight:700}
+</style>
+</head>
+<body>
+<h2 style="margin-bottom:12px">🔧 API 直接測試</h2>
+
+<div class="card">
+  <b>1. 測試 GET（讀座位表）</b>
+  <button class="btn btn-g" style="margin-top:8px" onclick="testGet()">測試 GET 座位表</button>
+  <pre id="get-out">點擊測試...</pre>
+</div>
+
+<div class="card">
+  <b>2. 測試 POST（模擬學生簽到）</b>
+  <button class="btn" style="margin-top:8px" onclick="testPost()">測試 POST 簽到</button>
+  <pre id="post-out">點擊測試...</pre>
+</div>
+
+<div class="card">
+  <b>3. localStorage 狀態</b>
+  <button class="btn btn-g" style="margin-top:8px" onclick="checkLS()">檢查設定</button>
+  <pre id="ls-out">點擊檢查...</pre>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbyd-V_C8usIT9WwHejXWpd3xehcbc6vx_FBP-f3OImo1R0kSPeSOH8iXgrDfpIACcL7/exec';
+
+async function testGet() {
+  const el = document.getElementById('get-out');
+  el.textContent = '請求中...';
+  try {
+    const cls = JSON.parse(localStorage.getItem('att_cf3')||'{}').cls || '一組十七班';
+    const url = API + '?action=getSeats&cls=' + encodeURIComponent(cls);
+    el.textContent = '請求 URL:\n' + url + '\n\n等待回應...';
+    const r = await fetch(url);
+    const text = await r.text();
+    let parsed;
+    try { parsed = JSON.parse(text); } catch(e) { parsed = text; }
+    el.innerHTML = '<span class="' + (r.ok?'ok':'err') + '">HTTP ' + r.status + '</span>\n' + JSON.stringify(parsed, null, 2).slice(0, 500);
+  } catch(e) {
+    el.innerHTML = '<span class="err">❌ ' + e.message + '</span>';
+  }
+}
+
+async function testPost() {
+  const el = document.getElementById('post-out');
+  el.textContent = '送出中...';
+  const cfg = JSON.parse(localStorage.getItem('att_cf3')||'{}');
+  const testData = {
+    action: 'checkin',
+    name: '測試學生',
+    seat: '1A',
+    sno: '1',
+    sid: 'TEST',
+    timeStr: new Date().toLocaleTimeString('zh-TW'),
+    late: false,
+    date: new Date().toLocaleDateString('zh-TW'),
+    course: cfg.course || '地理',
+    cls: cfg.cls || '一組十七班',
+    token: cfg.token || 'TEST_TOKEN'
+  };
+  el.textContent = '送出資料:\n' + JSON.stringify(testData, null, 2) + '\n\n等待回應...';
+  try {
+    const r = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(testData)
+    });
+    const text = await r.text();
+    let parsed;
+    try { parsed = JSON.parse(text); } catch(e) { parsed = text; }
+    el.innerHTML = '<span class="' + (r.ok?'ok':'err') + '">HTTP ' + r.status + '</span>\n回應:\n' + JSON.stringify(parsed, null, 2).slice(0, 500);
+  } catch(e) {
+    el.innerHTML = '<span class="err">❌ ' + e.message + '</span>';
+  }
+}
+
+function checkLS() {
+  const el = document.getElementById('ls-out');
+  const cfg = JSON.parse(localStorage.getItem('att_cf3')||'{}');
+  const api = localStorage.getItem('att_api_script')||'';
+  const seats = JSON.parse(localStorage.getItem('att_se3')||'{}');
+  el.innerHTML = `TOKEN: <span class="${cfg.token?'ok':'err'}">${cfg.token||'❌ 空'}</span>
+cls: <span class="${cfg.cls?'ok':'err'}">${cfg.cls||'❌ 空'}</span>
+API (localStorage): <span class="${api?'ok':'err'}">${api?'✅ 有':'❌ 空（正常，已硬寫進 student.html）'}</span>
+座位表班級: ${Object.keys(seats).join(', ')||'無'}`;
+}
+</script>
+</body>
+</html>
