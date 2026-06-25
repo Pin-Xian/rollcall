@@ -137,7 +137,7 @@ tbody tr:hover td{background:var(--bg)}
     <div><div class="pt">今日總覽</div><div class="ps" id="dash-sub">尚未產生今日 QR Code</div></div>
     <div class="btnrow">
       <select id="dash-cls" style="height:36px;min-width:130px" onchange="syncAll()"><option value="">— 選擇班級 —</option></select>
-      <button class="btn btn-sm" onclick="syncAll()">🔄 重新整理</button>
+      <button class="btn btn-sm" onclick="manualSync()">🔄 重新整理</button>
       <span id="last-sync" style="font-size:12px;color:var(--t2)"></span>
       <button class="btn btn-sm" onclick="resetToday()">🗑️ 重置今日</button>
     </div>
@@ -495,15 +495,39 @@ function restoreQRState(){
 
 // ── 同步（從 Apps Script 讀簽到）──
 async function syncAll(){
-  // curCls() 讀 select，若未選則 fallback 用 CFG.cls
   const cls=curCls()||CFG.cls||'';
   if(!cls)return;
-  // 確保 select 顯示正確班級
   const dc=document.getElementById('dash-cls');
   if(dc&&!dc.value&&cls)dc.value=cls;
   await fetchCheckinsFromScript(cls);
   updStats(cls);renderSG(cls);renderRL(cls);
-  // 更新最後同步時間
+  const el=document.getElementById('last-sync');
+  if(el)el.textContent='上次同步：'+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+// 手動同步：強制顯示目前狀態再執行
+async function manualSync(){
+  // 先診斷目前狀態
+  const cls=curCls()||CFG.cls||'';
+  const apiUrl=localStorage.getItem(LS.as)||'';
+  toast('🔄 同步中... cls='+( cls||'空' )+' TOKEN='+(TOKEN||'空'));
+  if(!cls){
+    // 嘗試從 CFG 讀並填入 select
+    if(CFG.cls){
+      const dc=document.getElementById('dash-cls');
+      if(dc){dc.value=CFG.cls;}
+      toast('班級已設為：'+CFG.cls);
+    } else {
+      toast('⚠️ 請先選擇班級或產生 QR Code',3000);
+      return;
+    }
+  }
+  if(!TOKEN&&CFG.token){
+    TOKEN=CFG.token;
+    toast('TOKEN 已還原：'+TOKEN);
+  }
+  await fetchCheckinsFromScript(cls||CFG.cls);
+  updStats(cls||CFG.cls);renderSG(cls||CFG.cls);renderRL(cls||CFG.cls);
   const el=document.getElementById('last-sync');
   if(el)el.textContent='上次同步：'+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
