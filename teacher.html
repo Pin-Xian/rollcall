@@ -414,7 +414,7 @@ let impRaw=[],impHd=[],pkKey='',pkCls='',wkData=null;
 let GH_TOKEN='',GIST_ID='';
 
 function init(){
-  loadLS();popCls();clock();setInterval(clock,1000);
+  loadLS();popCls();restoreQRState();clock();setInterval(clock,1000);
   const t=new Date(),mo=new Date(t);mo.setDate(t.getDate()-t.getDay()+1);
   const su=new Date(mo);su.setDate(mo.getDate()+6);
   document.getElementById('wk-from').value=mo.toISOString().slice(0,10);
@@ -433,6 +433,8 @@ function loadLS(){
       if(CFG.course)document.getElementById('course-name').value=CFG.course;
       if(CFG.classTime)document.getElementById('class-time').value=CFG.classTime;
       if(CFG.lateMin)document.getElementById('late-min').value=CFG.lateMin;
+      // 還原今日 QR Code 狀態
+      if(CFG.token){TOKEN=CFG.token;QRon=true;}
     }
     GH_TOKEN=localStorage.getItem(LS.gt)||'';
     GIST_ID=localStorage.getItem(LS.gi)||'';
@@ -443,7 +445,25 @@ function loadLS(){
 
 function saveRoster(){try{localStorage.setItem(LS.ro,JSON.stringify(ROSTER));}catch(e){toast('⚠️ 儲存失敗');}}
 function saveSeatsLS(){try{localStorage.setItem(LS.se,JSON.stringify(SEATS));localStorage.setItem(LS.la,JSON.stringify(LAYOUT));}catch(e){}}
-function saveCFG(){try{localStorage.setItem(LS.cf,JSON.stringify({course:document.getElementById('course-name').value,classTime:document.getElementById('class-time').value,lateMin:document.getElementById('late-min').value}));}catch(e){}}
+function saveCFG(){
+  try{localStorage.setItem(LS.cf,JSON.stringify({
+    course:document.getElementById('course-name').value,
+    classTime:document.getElementById('class-time').value,
+    lateMin:document.getElementById('late-min').value,
+    token:TOKEN, cls:CFG.cls||'',
+    dateStr:CFG.dateStr||'', lateDeadline:CFG.lateDeadline||''
+  }));}catch(e){}}
+// 頁面重新載入後還原 QR Code 狀態
+function restoreQRState(){
+  if(!TOKEN||!CFG.cls) return;
+  document.getElementById('dash-sub').textContent=
+    (CFG.cls||'')+' · '+(CFG.course||'')+' · '+(CFG.dateStr||'')+'　截止 '+(CFG.lateDeadline||'');
+  const dc=document.getElementById('dash-cls');
+  if(dc&&CFG.cls) dc.value=CFG.cls;
+  if(window._si) clearInterval(window._si);
+  window._si=setInterval(syncAll,8000);
+}
+
 function getAtt(cls){if(!TOKEN||!cls)return{};try{return JSON.parse(localStorage.getItem(LS.at+TOKEN+'_'+cls)||'{}');}catch(e){return{};}}
 function saveAtt(cls,att){try{localStorage.setItem(LS.at+TOKEN+'_'+cls,JSON.stringify(att));}catch(e){}}
 
