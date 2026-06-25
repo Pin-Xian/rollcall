@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>診斷工具</title>
+<style>
+body{font-family:sans-serif;padding:16px;max-width:600px;margin:0 auto;background:#f5f5f2}
+.card{background:#fff;border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid #ddd}
+h3{font-size:14px;font-weight:700;margin-bottom:8px;color:#333}
+pre{background:#f0f0f0;padding:10px;border-radius:6px;font-size:11px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto}
+.btn{background:#18181A;color:#fff;border:none;padding:9px 16px;border-radius:7px;cursor:pointer;font-size:13px;margin:4px 4px 4px 0}
+.ok{color:#2A6049;font-weight:700}.err{color:#B91C1C;font-weight:700}
+.warn{color:#92400E;font-weight:700}
+label{font-size:12px;color:#666;display:block;margin-bottom:3px}
+input{width:100%;height:34px;padding:0 10px;border:1px solid #ccc;border-radius:6px;font-size:13px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<h2 style="margin-bottom:12px">🔍 簽到系統診斷</h2>
+
+<div class="card">
+  <h3>1. localStorage 狀態</h3>
+  <div id="ls-out"></div>
+</div>
+
+<div class="card">
+  <h3>2. Gist 實際內容</h3>
+  <button class="btn" onclick="fetchGist()">讀取 Gist</button>
+  <div id="gist-out" style="margin-top:8px"></div>
+</div>
+
+<div class="card">
+  <h3>3. 比對 TOKEN</h3>
+  <div id="token-out"></div>
+</div>
+
+<div class="card">
+  <h3>4. 手動觸發同步</h3>
+  <button class="btn" onclick="manualSync()">立即同步簽到資料</button>
+  <div id="sync-out" style="margin-top:8px"></div>
+</div>
+
+<script>
+// 讀 localStorage
+function readLS() {
+  const out = document.getElementById('ls-out');
+  const items = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    items[k] = localStorage.getItem(k);
+  }
+  
+  const cfg  = JSON.parse(items['att_cf3'] || '{}');
+  const token = cfg.token || '';
+  const cls   = cfg.cls   || '';
+  const gistId = items['att_gi'] || items['att_gh_gist'] || '';
+  
+  out.innerHTML = `
+    <pre>TOKEN (att_cf3.token): <span class="${token?'ok':'err'}">${token || '❌ 空的！'}</span>
+cls (att_cf3.cls): <span class="${cls?'ok':'err'}">${cls || '❌ 空的！'}</span>
+GIST_ID (att_gi): <span class="${gistId?'ok':'err'}">${gistId || '❌ 空的！'}</span>
+GH_TOKEN (att_gt): <span class="${items['att_gt']?'ok':'err'}">${items['att_gt']?'✅ 有（'+items['att_gt'].slice(0,8)+'...）':'❌ 無'}</span>
+
+CFG 完整內容:
+${JSON.stringify(cfg, null, 2)}
+
+所有 att_ 開頭的 key:
+${Object.keys(items).filter(k=>k.startsWith('att_')).map(k=>k+' = '+items[k]?.slice(0,60)).join('\n')}</pre>`;
+  
+  return {token, cls, gistId, ghToken: items['att_gt']||''};
+}
+
+const ls = readLS();
+
+async function fetchGist() {
+  const out = document.getElementById('gist-out');
+  if (!ls.gistId) { out.innerHTML = '<span class="err">❌ 沒有 Gist ID</span>'; return; }
+  out.innerHTML = '⏳ 讀取中...';
+  try {
+    const r = await fetch('https://api.github.com/gists/' + ls.gistId, {
+      headers: { Accept: 'application/vnd.github.v3+json' }
+    });
+    const data = await r.json();
+    const content = data.files?.['seats.json']?.content;
+    if (!content) { out.innerHTML = '<span class="err">❌ 找不到 seats.json</span>'; return; }
+    
+    const parsed = JSON.parse(content);
+    const keys = Object.keys(parsed);
+    
+    out.innerHTML = `<pre>Gist 頂層 keys: ${JSON.stringify(keys)}
+
+has wt (write token): <span class="${parsed.wt?'ok':'err'}">${parsed.wt?'✅ 有':'❌ 沒有！請重新儲存座位表'}</span>
+
+has seats: <span class="${parsed.seats?'ok':'err'}">${parsed.seats?'✅ '+JSON.stringify(Object.keys(parsed.seats)):'❌ 無'}</span>
+
+has checkins: <span class="${parsed.checkins?'ok':'warn'}">${parsed.checkins?'✅ '+JSON.stringify(Object.keys(parsed.checkins)):'⚠️ 尚無簽到（學生未簽到或寫入失敗）'}</span>
+
+TOKEN from LS: ${ls.token||'❌ 空'}
+cls from LS: ${ls.cls||'❌ 空'}
+
+checkins[TOKEN][cls] = ${JSON.stringify(parsed.checkins?.[ls.token]?.[ls.cls] || '❌ 找不到')}</pre>`;
+    
+    // 存 gist 資料供後續使用
+    window._gist = parsed;
+    checkTokenMatch(parsed);
+  } catch(e) {
+    out.innerHTML = '<span class="err">❌ ' + e.message + '</span>';
+  }
+}
+
+function checkTokenMatch(parsed) {
+  const out = document.getElementById('token-out');
+  const checkins = parsed.checkins || {};
+  const allTokens = Object.keys(checkins);
+  
+  out.innerHTML = `<pre>Gist 裡的 TOKEN 清單: ${JSON.stringify(allTokens)}
+LS 的 TOKEN: ${ls.token||'❌ 空'}
+是否匹配: <span class="${allTokens.includes(ls.token)?'ok':'err'}">${allTokens.includes(ls.token)?'✅ 匹配':'❌ 不匹配！'}</span>
+
+${!allTokens.includes(ls.token) && allTokens.length > 0 ? '→ Gist 裡有資料但 TOKEN 不同，老師端 TOKEN 可能是舊的' : ''}
+${allTokens.length === 0 ? '→ Gist 裡沒有任何簽到資料，學生簽到可能沒有成功寫入 Gist' : ''}</pre>`;
+}
+
+async function manualSync() {
+  const out = document.getElementById('sync-out');
+  if (!ls.gistId || !ls.token || !ls.cls) {
+    out.innerHTML = '<span class="err">❌ 缺少 GIST_ID、TOKEN 或 cls</span>';
+    return;
+  }
+  out.innerHTML = '⏳ 同步中...';
+  try {
+    const r = await fetch('https://api.github.com/gists/' + ls.gistId, {
+      headers: { Accept: 'application/vnd.github.v3+json' }
+    });
+    const data = await r.json();
+    const content = data.files?.['seats.json']?.content;
+    if (!content) { out.innerHTML = '<span class="err">❌ 找不到 seats.json</span>'; return; }
+    
+    const parsed = JSON.parse(content);
+    const checkins = parsed.checkins?.[ls.token]?.[ls.cls] || {};
+    const count = Object.keys(checkins).length;
+    
+    if (count > 0) {
+      // 寫入 localStorage
+      const attKey = 'att_at_' + ls.token + '_' + ls.cls;
+      const existing = JSON.parse(localStorage.getItem(attKey)||'{}');
+      const merged = Object.assign({}, checkins, existing);
+      localStorage.setItem(attKey, JSON.stringify(merged));
+      out.innerHTML = `<span class="ok">✅ 找到 ${count} 筆簽到，已寫入 localStorage</span><br><pre>${JSON.stringify(checkins,null,2)}</pre>`;
+    } else {
+      out.innerHTML = `<span class="warn">⚠️ Gist 裡 checkins[${ls.token}][${ls.cls}] 是空的</span>
+<pre>Gist checkins 完整內容: ${JSON.stringify(parsed.checkins, null, 2)}</pre>`;
+    }
+  } catch(e) {
+    out.innerHTML = '<span class="err">❌ ' + e.message + '</span>';
+  }
+}
+</script>
+</body>
+</html>
