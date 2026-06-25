@@ -532,8 +532,9 @@ async function manualSync(){
 }
 
 async function fetchCheckinsFromScript(cls){
-  const apiUrl=localStorage.getItem(LS.as)||'';
-  if(!apiUrl){ toast('⚠️ 未設定 API 網址，請至「⚙️ API 設定」',3000); return; }
+  // 優先用硬寫的 API URL，其次才讀 localStorage
+  const apiUrl='https://script.google.com/macros/s/AKfycbyd-V_C8usIT9WwHejXWpd3xehcbc6vx_FBP-f3OImo1R0kSPeSOH8iXgrDfpIACcL7/exec'||localStorage.getItem(LS.as)||'';
+  if(!apiUrl){ toast('⚠️ 未設定 API 網址',3000); return; }
   if(!TOKEN){  toast('⚠️ TOKEN 是空的，請重新產生 QR Code',3000); return; }
   if(!cls){    toast('⚠️ 未選擇班級',3000); return; }
   try{
@@ -609,7 +610,7 @@ function renderQRToEl(el,size){
 async function genQR(){
   const cls=document.getElementById('qr-cls').value;
   if(!cls){toast('請先選擇班級');return;}
-  const apiUrl=localStorage.getItem(LS.as)||'';if(!apiUrl){toast('⚠️ 請先至「⚙️ API 設定」填入網址',4000);return;}
+  const apiUrl='https://script.google.com/macros/s/AKfycbyd-V_C8usIT9WwHejXWpd3xehcbc6vx_FBP-f3OImo1R0kSPeSOH8iXgrDfpIACcL7/exec'||localStorage.getItem(LS.as)||'';if(!apiUrl){toast('⚠️ 請先至「⚙️ API 設定」填入網址',4000);return;}
   const course=document.getElementById('course-name').value.trim()||'課程';
   const classTime=document.getElementById('class-time').value;
   const lateMin=parseInt(document.getElementById('late-min').value)||15;
@@ -946,7 +947,7 @@ async function saveSeats(){
   LAYOUT[cls].rows=rows;LAYOUT[cls].cols=cols;
   saveSeatsLS();
   // 同步到 Apps Script
-  const apiUrl=localStorage.getItem(LS.as)||'';
+  const apiUrl='https://script.google.com/macros/s/AKfycbyd-V_C8usIT9WwHejXWpd3xehcbc6vx_FBP-f3OImo1R0kSPeSOH8iXgrDfpIACcL7/exec'||localStorage.getItem(LS.as)||'';
   if(!apiUrl){toast('✅ 座位表已儲存（未設定 API）');return;}
   try{
     const r=await fetch(apiUrl,{
@@ -1063,10 +1064,11 @@ function saveApiUrl(){
 }
 async function testApiUrl(){
   const el=document.getElementById('api-test-result');if(!el)return;
-  if(!API_URL){el.innerHTML='<div class="al al-r">❌ 請先填入網址</div>';return;}
+  const apiUrl='https://script.google.com/macros/s/AKfycbyd-V_C8usIT9WwHejXWpd3xehcbc6vx_FBP-f3OImo1R0kSPeSOH8iXgrDfpIACcL7/exec'||API_URL;
+  if(!apiUrl){el.innerHTML='<div class="al al-r">❌ 請先填入網址</div>';return;}
   el.innerHTML='<div class="al al-b">🔌 測試中...</div>';
   try{
-    const r=await fetch(API_URL+'?token=TEST&cls=TEST');
+    const r=await fetch(apiUrl+'?token=TEST&cls=TEST');
     const d=await r.json();
     if(d.ok){el.innerHTML='<div class="al al-g">✅ 連線成功！Apps Script 運作正常</div>';}
     else{el.innerHTML='<div class="al al-r">❌ 回應錯誤：'+(d.msg||'未知')+'</div>';}
