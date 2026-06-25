@@ -125,7 +125,7 @@ tbody tr:hover td{background:var(--bg)}
     <div class="sb-sec">報表</div>
     <div class="sb-item" onclick="go('weekly',this)"><span class="sb-ico">📊</span><span>週報表</span></div>
     <div class="sb-sec">設定</div>
-    <div class="sb-item" onclick="go('settings',this)"><span class="sb-ico">⚙️</span><span>Gist 設定</span></div>
+    <div class="sb-item" onclick="go('settings',this)"><span class="sb-ico">⚙️</span><span>API 設定</span></div>
   </nav>
   <div class="sb-ft" id="sb-ft"></div>
 </aside>
@@ -169,7 +169,7 @@ tbody tr:hover td{background:var(--bg)}
 <div id="page-qr" class="panel">
   <div class="ph"><div><div class="pt">產生 QR Code</div><div class="ps">學生掃描後直接在手機填姓名簽到</div></div></div>
   <div id="qr-no-gist" class="al al-y" style="margin-bottom:1rem;display:none">
-    ⚠️ 尚未設定 GitHub Gist Token，學生手機無法讀取座位表。請先至「⚙️ Gist 設定」完成設定。
+    ⚠️ 尚未設定 Apps Script 網址，請先至「⚙️ API 設定」完成設定。
   </div>
   <div class="g2">
     <div>
@@ -340,45 +340,40 @@ tbody tr:hover td{background:var(--bg)}
   <div class="card"><div id="wk-tbl"><div class="empty"><span class="eico">📊</span>選擇班級與日期後查詢</div></div></div>
 </div>
 
-<!-- Gist 設定 -->
+<!-- Apps Script 設定 -->
 <div id="page-settings" class="panel">
-  <div class="ph"><div><div class="pt">Gist 設定</div><div class="ps">設定後座位表會自動同步到雲端，學生手機才能讀取</div></div></div>
-  <div style="max-width:540px">
+  <div class="ph"><div><div class="pt">API 設定</div><div class="ps">設定 Google Apps Script，學生簽到資料才能即時傳回</div></div></div>
+  <div style="max-width:560px">
     <div class="card">
-      <div class="ct" style="margin-bottom:.9rem">GitHub Personal Access Token</div>
+      <div class="ct" style="margin-bottom:.9rem">Apps Script 網頁應用程式網址</div>
       <div class="al al-b" style="margin-bottom:.9rem">
-        📌 Token 只需要 <strong>gist</strong> 權限，不會存取你的程式碼。
+        📌 請先完成 Apps Script 部署，取得「網頁應用程式網址」後貼入下方
       </div>
       <div class="field" style="margin-bottom:.9rem">
-        <label>Token（格式：ghp_xxxx 或 github_pat_xxxx）</label>
-        <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxx"/>
-      </div>
-      <div class="field" style="margin-bottom:.9rem">
-        <label>Gist ID（第一次留空，系統會自動建立）</label>
-        <input type="text" id="gh-gist-id" placeholder="留空讓系統自動建立"/>
+        <label>網址（格式：https://script.google.com/macros/s/.../exec）</label>
+        <input type="text" id="api-script-url" placeholder="https://script.google.com/macros/s/..."/>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-g" onclick="saveGistSettings()">💾 儲存設定</button>
-        <button class="btn" onclick="testGist()">🔌 測試連線</button>
+        <button class="btn btn-g" onclick="saveApiUrl()">💾 儲存並測試</button>
+        <button class="btn" onclick="testApiUrl()">🔌 測試連線</button>
       </div>
-      <div id="gist-test-result" style="margin-top:.75rem"></div>
+      <div id="api-test-result" style="margin-top:.75rem"></div>
     </div>
     <div class="card">
-      <div class="ct" style="margin-bottom:.9rem">📖 取得 Token 步驟</div>
-      <div style="font-size:13px;color:var(--t2);line-height:2">
-        <div>1. 開啟 <a href="https://github.com/settings/tokens/new" target="_blank" style="color:var(--grn)">GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)</a></div>
-        <div>2. 點「Generate new token (classic)」</div>
-        <div>3. Note 填「點名系統」，Expiration 選 No expiration</div>
-        <div>4. 只勾選 <strong style="color:var(--t1)">gist</strong>，其他都不用勾</div>
-        <div>5. 點「Generate token」，複製 token 貼到上方</div>
+      <div class="ct" style="margin-bottom:.9rem">📖 設定步驟（一次設定，永久使用）</div>
+      <div style="font-size:13px;color:var(--t2);line-height:2.2">
+        <div>1. 開啟 <a href="https://sheets.google.com" target="_blank" style="color:var(--grn)">Google 試算表</a>，建立新的試算表</div>
+        <div>2. 點上方選單「擴充功能」→「Apps Script」</div>
+        <div>3. 刪除原有程式碼，貼上提供的 <code style="background:var(--bg);padding:1px 5px;border-radius:4px">apps_script.js</code> 內容</div>
+        <div>4. 點「部署」→「新增部署」→ 類型選「<strong>網頁應用程式</strong>」</div>
+        <div>5. 執行身分選「<strong>我</strong>」，存取權選「<strong>所有人</strong>」→ 部署</div>
+        <div>6. 複製「網頁應用程式網址」貼到上方欄位，按「儲存並測試」</div>
       </div>
     </div>
   </div>
 </div>
 
 </main>
-</div>
-
 <!-- 全螢幕 QR -->
 <div id="fsov" onclick="closeFS()">
   <div id="fs-qr" style="background:#fff;padding:20px;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.15)"></div>
@@ -400,18 +395,15 @@ tbody tr:hover td{background:var(--bg)}
 
 <div id="toast"></div>
 
-<!-- QRCode.js by kazuhikoarase (業界標準，實際可掃描) -->
+<!-- QRCode.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-<!-- ════ 主程式 ════ -->
 <script>
 const STUDENT_URL='https://pin-xian.github.io/rollcall/student.html';
-const GIST_API='https://api.github.com/gists';
-const LS={ro:'att_ro3',se:'att_se3',la:'att_la3',cf:'att_cf3',at:'att_at_',gt:'att_gh_token',gi:'att_gh_gist'};
+const LS={ro:'att_ro3',se:'att_se3',la:'att_la3',cf:'att_cf3',at:'att_at_',as:'att_api_script'};
 
-let ROSTER=[],SEATS={},LAYOUT={},CFG={},TOKEN='',QRon=false,QRSZ=280;
+let ROSTER=[],SEATS={},LAYOUT={},CFG={},TOKEN='',QRon=false,QRSZ=280,API_URL='';
 let impRaw=[],impHd=[],pkKey='',pkCls='',wkData=null;
-let GH_TOKEN='',GIST_ID='';
 
 function init(){
   loadLS();popCls();restoreQRState();clock();setInterval(clock,1000);
@@ -429,17 +421,15 @@ function loadLS(){
     if(r)ROSTER=JSON.parse(r);
     if(s)SEATS=JSON.parse(s);
     if(l)LAYOUT=JSON.parse(l);
-    if(c){CFG=JSON.parse(c);
+    if(c){
+      CFG=JSON.parse(c);
       if(CFG.course)document.getElementById('course-name').value=CFG.course;
       if(CFG.classTime)document.getElementById('class-time').value=CFG.classTime;
       if(CFG.lateMin)document.getElementById('late-min').value=CFG.lateMin;
-      // 還原今日 QR Code 狀態
       if(CFG.token){TOKEN=CFG.token;QRon=true;}
     }
-    GH_TOKEN=localStorage.getItem(LS.gt)||'';
-    GIST_ID=localStorage.getItem(LS.gi)||'';
-    if(GH_TOKEN){document.getElementById('gh-token').value=GH_TOKEN;}
-    if(GIST_ID){document.getElementById('gh-gist-id').value=GIST_ID;}
+    API_URL=localStorage.getItem(LS.as)||'';
+    if(API_URL){const el=document.getElementById('api-script-url');if(el)el.value=API_URL;}
   }catch(e){}
 }
 
@@ -450,46 +440,14 @@ function saveCFG(){
     course:document.getElementById('course-name').value,
     classTime:document.getElementById('class-time').value,
     lateMin:document.getElementById('late-min').value,
-    token:TOKEN, cls:CFG.cls||'',
-    dateStr:CFG.dateStr||'', lateDeadline:CFG.lateDeadline||''
-  }));}catch(e){}}
-// 頁面重新載入後還原 QR Code 狀態
-function restoreQRState(){
-  if(!TOKEN||!CFG.cls) return;
-  document.getElementById('dash-sub').textContent=
-    (CFG.cls||'')+' · '+(CFG.course||'')+' · '+(CFG.dateStr||'')+'　截止 '+(CFG.lateDeadline||'');
-  const dc=document.getElementById('dash-cls');
-  if(dc&&CFG.cls) dc.value=CFG.cls;
-  if(window._si) clearInterval(window._si);
-  window._si=setInterval(syncAll,8000);
+    token:TOKEN,cls:CFG.cls||'',dateStr:CFG.dateStr||'',lateDeadline:CFG.lateDeadline||''
+  }));}catch(e){}
 }
-
 function getAtt(cls){if(!TOKEN||!cls)return{};try{return JSON.parse(localStorage.getItem(LS.at+TOKEN+'_'+cls)||'{}');}catch(e){return{};}}
 function saveAtt(cls,att){try{localStorage.setItem(LS.at+TOKEN+'_'+cls,JSON.stringify(att));}catch(e){}}
 
-// 從 Gist 讀取學生簽到資料，合併到 localStorage
-async function fetchCheckinsFromGist(cls){
-  if(!GIST_ID) return;
-  try{
-    const r=await fetch('https://api.github.com/gists/'+GIST_ID,
-      {headers:{Accept:'application/vnd.github.v3+json'}});
-    if(!r.ok) return;
-    const data=await r.json();
-    const content=data.files['seats.json']?.content;
-    if(!content) return;
-    const parsed=JSON.parse(content);
-    const checkins=parsed.checkins?.[TOKEN]?.[cls];
-    if(checkins&&Object.keys(checkins).length){
-      // 合併到 localStorage
-      const existing=getAtt(cls);
-      const merged=Object.assign({},checkins,existing); // 本地補登優先
-      saveAtt(cls,merged);
-    }
-  }catch(e){}
-}
-
 function toast(m,d=2400){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
-function clock(){const n=new Date();document.getElementById('sb-ft').textContent=n.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit',weekday:'short'})+'\n'+n.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function clock(){const n=new Date();const d=n.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit',weekday:'short'});const t=n.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});document.getElementById('sb-ft').textContent=d+'\n'+t;}
 function addMins(t,m){const[h,mm]=t.split(':').map(Number),tot=h*60+mm+m;return String(Math.floor(tot/60)%24).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
 function nowStr(){return new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 function todayStr(){return new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});}
@@ -518,107 +476,40 @@ function popCls(){
 }
 
 function checkGistStatus(){
-  // 重新從 localStorage 讀，確保是最新值
-  const token=localStorage.getItem(LS.gt)||'';
-  const gist=localStorage.getItem(LS.gi)||'';
-  if(token) GH_TOKEN=token;
-  if(gist)  GIST_ID=gist;
-  const ok=!!(GH_TOKEN&&GIST_ID);
+  API_URL=localStorage.getItem(LS.as)||'';
+  const ok=!!API_URL;
   const warn=document.getElementById('qr-no-gist');
   if(warn)warn.style.display=ok?'none':'flex';
 }
 
-// ── Gist 設定 ──
-function saveGistSettings(){
-  GH_TOKEN=document.getElementById('gh-token').value.trim();
-  GIST_ID=document.getElementById('gh-gist-id').value.trim();
-  localStorage.setItem(LS.gt,GH_TOKEN);
-  localStorage.setItem(LS.gi,GIST_ID);
-  toast('設定已儲存，測試連線中...');
-  testGist();
+function restoreQRState(){
+  if(!TOKEN||!CFG.cls)return;
+  document.getElementById('dash-sub').textContent=(CFG.cls||'')+' · '+(CFG.course||'')+' · '+(CFG.dateStr||'')+'　截止 '+(CFG.lateDeadline||'');
+  const dc=document.getElementById('dash-cls');if(dc&&CFG.cls)dc.value=CFG.cls;
+  if(window._si)clearInterval(window._si);
+  window._si=setInterval(syncAll,8000);
 }
 
-async function testGist(){
-  const res=document.getElementById('gist-test-result');
-  if(!GH_TOKEN){res.innerHTML='<div class="al al-r">❌ 請先填入 Token</div>';return;}
-  res.innerHTML='<div class="al al-b">🔌 測試寫入權限中...</div>';
-  try{
-    // 直接測試寫入（建立或更新），這才是真正需要的權限
-    const authHdr=(GH_TOKEN.startsWith('github_pat_')?'Bearer ':'token ')+GH_TOKEN;
-    let r,method,url;
-    if(GIST_ID){
-      // 嘗試更新現有 Gist
-      method='PATCH';url=GIST_API+'/'+GIST_ID;
-    }else{
-      // 嘗試建立新 Gist
-      method='POST';url=GIST_API;
-    }
-    r=await fetch(url,{
-      method,
-      headers:{Authorization:authHdr,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
-      body:JSON.stringify({description:'點名系統座位表',public:false,files:{'seats.json':{content:JSON.stringify({test:true,ts:Date.now()})}}})
-    });
-    if(r.ok){
-      const data=await r.json();
-      if(!GIST_ID){
-        GIST_ID=data.id;
-        localStorage.setItem(LS.gi,GIST_ID);
-        document.getElementById('gh-gist-id').value=GIST_ID;
-        res.innerHTML='<div class="al al-g">✅ 連線成功！已自動建立 Gist，ID 已填入上方</div>';
-      }else{
-        res.innerHTML='<div class="al al-g">✅ 連線成功！Token 有讀寫權限，可以正常使用</div>';
-      }
-      checkGistStatus();
-    }else{
-      const txt=await r.text();
-      let hint='';
-      if(r.status===401)hint='Token 無效或已過期，請重新產生';
-      else if(r.status===403)hint='Token 沒有 gist 寫入權限，請確認勾選了 gist scope';
-      else if(r.status===404)hint='Gist ID 不存在，請清空讓系統自動建立';
-      else if(r.status===422)hint='請求格式錯誤：'+txt.slice(0,100);
-      else hint='HTTP '+r.status+'：'+txt.slice(0,100);
-      res.innerHTML='<div class="al al-r">❌ '+hint+'</div>';
-    }
-  }catch(e){
-    res.innerHTML='<div class="al al-r">❌ 網路錯誤：'+e.message+'<br>（可能是 CORS 問題，請確認用 GitHub 網址開啟此頁面）</div>';
-  }
-}
-
-async function uploadToGist(data){
-  if(!GH_TOKEN)return null;
-  const body={description:'點名系統座位表',public:false,files:{'seats.json':{content:JSON.stringify({...data,wt:GH_TOKEN})}}};
-  try{
-    let r;
-    if(GIST_ID){
-      r=await fetch(GIST_API+'/'+GIST_ID,{method:'PATCH',headers:{Authorization:(GH_TOKEN.startsWith('github_pat_')?'Bearer ':'token ')+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(body)});
-    }else{
-      r=await fetch(GIST_API,{method:'POST',headers:{Authorization:(GH_TOKEN.startsWith('github_pat_')?'Bearer ':'token ')+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(body)});
-    }
-    if(r.ok){
-      const data2=await r.json();
-      if(!GIST_ID){
-        GIST_ID=data2.id;
-        localStorage.setItem(LS.gi,GIST_ID);
-        document.getElementById('gh-gist-id').value=GIST_ID;
-      }
-      return GIST_ID;
-    }else{
-      const errText=await r.text();
-      console.error('Gist API error:', r.status, errText);
-      return {error: r.status+': '+errText.slice(0,200)};
-    }
-  }catch(e){
-    console.error('Gist fetch error:', e);
-    return {error: e.message};
-  }
-  return null;
-}
-
-// ── 同步 ──
+// ── 同步（從 Apps Script 讀簽到）──
 async function syncAll(){
   const cls=curCls();if(!cls)return;
-  await fetchCheckinsFromGist(cls);
+  await fetchCheckinsFromScript(cls);
   updStats(cls);renderSG(cls);renderRL(cls);
+}
+
+async function fetchCheckinsFromScript(cls){
+  if(!API_URL||!TOKEN||!cls)return;
+  try{
+    const url=API_URL+'?token='+encodeURIComponent(TOKEN)+'&cls='+encodeURIComponent(cls);
+    const r=await fetch(url);
+    if(!r.ok)return;
+    const d=await r.json();
+    if(d.ok&&d.data&&Object.keys(d.data).length){
+      const existing=getAtt(cls);
+      const merged=Object.assign({},d.data,existing);
+      saveAtt(cls,merged);
+    }
+  }catch(e){}
 }
 
 function updStats(cls){
@@ -655,40 +546,29 @@ function renderRL(cls){
 
 // ── QR Code ──
 function getQRUrl(){
-  const p=new URLSearchParams({t:CFG.classTime,dl:CFG.lateDeadline,cls:CFG.cls,tk:TOKEN,g:GIST_ID});
+  const p=new URLSearchParams({t:CFG.classTime,dl:CFG.lateDeadline,cls:CFG.cls,tk:TOKEN,api:API_URL,c:CFG.course,d:CFG.dateStr});
   return STUDENT_URL+'?'+p.toString();
 }
 
 function renderQRToEl(el,size){
   el.innerHTML='';
-  // QRCode.js 會同時產生 canvas 和 img，用暫存 div 只取 canvas
   const tmp=document.createElement('div');
   tmp.style.cssText='position:absolute;left:-9999px';
   document.body.appendChild(tmp);
   try{
-    new QRCode(tmp,{
-      text:getQRUrl(),width:size,height:size,
-      colorDark:'#000000',colorLight:'#ffffff',
-      correctLevel:QRCode.CorrectLevel.M
-    });
+    new QRCode(tmp,{text:getQRUrl(),width:size,height:size,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
     setTimeout(()=>{
       const canvas=tmp.querySelector('canvas');
-      if(canvas){
-        canvas.style.cssText='display:block;border-radius:6px;width:'+size+'px;height:'+size+'px';
-        el.appendChild(canvas);
-      }
+      if(canvas){canvas.style.cssText='display:block;border-radius:6px;width:'+size+'px;height:'+size+'px';el.appendChild(canvas);}
       document.body.removeChild(tmp);
     },50);
-  }catch(e){
-    document.body.removeChild(tmp);
-    el.innerHTML='<div style="color:var(--red);padding:1rem;font-size:13px;text-align:center">QR 產生失敗：'+e.message+'</div>';
-  }
+  }catch(e){document.body.removeChild(tmp);el.innerHTML='<div style="color:var(--red);padding:1rem;font-size:13px;text-align:center">QR 產生失敗：'+e.message+'</div>';}
 }
 
 async function genQR(){
   const cls=document.getElementById('qr-cls').value;
   if(!cls){toast('請先選擇班級');return;}
-  if(!GIST_ID){toast('⚠️ 請先至「⚙️ Gist 設定」完成設定，否則學生無法簽到',4000);return;}
+  if(!API_URL){toast('⚠️ 請先至「⚙️ API 設定」完成設定',4000);return;}
   const course=document.getElementById('course-name').value.trim()||'課程';
   const classTime=document.getElementById('class-time').value;
   const lateMin=parseInt(document.getElementById('late-min').value)||15;
@@ -719,12 +599,8 @@ function resizeQR(v){QRSZ=parseInt(v);document.getElementById('sz-lbl').textCont
 function dlQR(){
   if(!QRon){toast('請先產生 QR Code');return;}
   const c=document.querySelector('#qr-box canvas');
-  if(c){
-    const a=document.createElement('a');
-    a.download='QR_'+CFG.cls+'_'+CFG.dateStr+'.png';
-    a.href=c.toDataURL('image/png');a.click();
-    toast('✅ 已下載 PNG');
-  }else{toast('QR Code 尚未產生');}
+  if(!c){toast('尚未產生');return;}
+  const a=document.createElement('a');a.download='QR_'+CFG.cls+'_'+CFG.dateStr+'.png';a.href=c.toDataURL('image/png');a.click();toast('✅ 已下載 PNG');
 }
 
 function openFS(){
@@ -749,9 +625,8 @@ function resetToday(){
   toast('已重置');
 }
 
-// ── 匯入名冊（支援 Excel xlsx + CSV，自動偵測編碼）──
+// ── 匯入名冊（支援 xlsx 和 CSV）──
 function dropF(e){e.preventDefault();document.getElementById('upzone').classList.remove('over');const f=e.dataTransfer.files[0];if(f)readF(f);}
-
 function readF(file){
   if(!file)return;
   const ext=file.name.split('.').pop().toLowerCase();
@@ -761,83 +636,62 @@ function readF(file){
       if(ext==='xlsx'||ext==='xls'){
         parseXLSX(e.target.result);
       }else{
-        parseCSVBuf(e.target.result);
+        const bytes=new Uint8Array(e.target.result);
+        let text='';
+        if(bytes[0]===0xEF&&bytes[1]===0xBB&&bytes[2]===0xBF)text=new TextDecoder('utf-8').decode(bytes.slice(3));
+        else if(bytes[0]===0xFF&&bytes[1]===0xFE)text=new TextDecoder('utf-16le').decode(bytes.slice(2));
+        else{const u=new TextDecoder('utf-8').decode(bytes);text=u.includes('�')?new TextDecoder('big5').decode(bytes):u;}
+        parseCSVText(text);
       }
     }catch(err){toast('⚠️ 解析失敗：'+err.message,4000);}
   };
-  if(ext==='xlsx'||ext==='xls') rd.readAsArrayBuffer(file);
-  else rd.readAsArrayBuffer(file); // 都用 ArrayBuffer 以便偵測編碼
+  if(ext==='xlsx'||ext==='xls')rd.readAsArrayBuffer(file);
+  else rd.readAsArrayBuffer(file);
 }
 
-// ── Excel (xlsx) 解析：純 JS 實作，不依賴任何函式庫 ──
 async function parseXLSX(buf){
-  // xlsx 是 ZIP 格式。用 DecompressionStream 解壓（現代瀏覽器原生支援）
   try{
     const bytes=new Uint8Array(buf);
-    // 找 xl/worksheets/sheet1.xml 在 ZIP 裡的位置
     const text=await unzipFile(bytes,'xl/worksheets/sheet1.xml');
-    if(!text){toast('⚠️ 找不到工作表資料');return;}
-    
-    // 同時讀 sharedStrings.xml（文字內容存在這裡）
+    if(!text){toast('⚠️ 找不到工作表');return;}
     const sharedStr=await unzipFile(bytes,'xl/sharedStrings.xml');
     const strings=parseSharedStrings(sharedStr||'');
-    
     const rows=parseSheetXML(text,strings);
     if(!rows.length){toast('⚠️ 找不到資料');return;}
-    
     const hd=rows[0];
-    const data=rows.slice(1).map(r=>{
-      const o={};hd.forEach((h,i)=>o[h]=(r[i]||'').toString().trim());return o;
-    }).filter(r=>Object.values(r).some(v=>v));
-    
-    impRaw=data;impHd=hd;
-    setColOpts(hd);autoDetect(hd);prevImport(data,hd);
+    const data=rows.slice(1).map(r=>{const o={};hd.forEach((h,i)=>o[h]=(r[i]||'').toString().trim());return o;}).filter(r=>Object.values(r).some(v=>v));
+    impRaw=data;impHd=hd;setColOpts(hd);autoDetect(hd);prevImport(data,hd);
     document.getElementById('apply-btn').disabled=false;
     toast('✅ Excel 載入 '+data.length+' 筆');
-  }catch(err){
-    toast('⚠️ Excel 解析失敗，請另存為 CSV 再匯入：'+err.message,5000);
-  }
+  }catch(err){toast('⚠️ Excel 解析失敗，請另存為 CSV：'+err.message,5000);}
 }
 
 function parseSharedStrings(xml){
   const strings=[];
-  const matches=xml.matchAll(/<si[^>]*>[\s\S]*?<\/si>/g);
-  for(const m of matches){
+  for(const m of xml.matchAll(/<si[^>]*>[\s\S]*?<\/si>/g)){
     const text=(m[0].match(/<t[^>]*>([\s\S]*?)<\/t>/)||[])[1]||'';
-    strings.push(text.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'"));
+    strings.push(text.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"'));
   }
   return strings;
 }
 
 function parseSheetXML(xml,strings){
   const rows=[];
-  const rowMatches=xml.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g);
-  for(const rm of rowMatches){
+  for(const rm of xml.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)){
     const cells=[];
-    const cellMatches=rm[1].matchAll(/<c r="([A-Z]+)\d+" t?="?([^"]*)"?[^>]*>[\s\S]*?<v[^>]*>([\s\S]*?)<\/v>[\s\S]*?<\/c>/g);
-    // Simpler parse
-    const cMatches=[...rm[1].matchAll(/<c\s[^>]*>([\s\S]*?)<\/c>/g)];
-    cMatches.forEach(cm=>{
+    for(const cm of rm[1].matchAll(/<c\s[^>]*>([\s\S]*?)<\/c>/g)){
       const t=(cm[0].match(/t="([^"]+)"/)||[])[1];
       const v=(cm[1].match(/<v>([\s\S]*?)<\/v>/)||[])[1]||'';
-      if(t==='s') cells.push(strings[parseInt(v)]||'');
-      else cells.push(v);
-    });
+      cells.push(t==='s'?(strings[parseInt(v)]||''):v);
+    }
     if(cells.length)rows.push(cells);
   }
   return rows;
 }
 
-// 簡易 ZIP 解壓（讀取特定檔案）
 async function unzipFile(bytes,filename){
-  // ZIP 結構：Local file headers + data
-  // 找 filename 對應的 local file header
-  const enc=new TextEncoder();
-  const fnBytes=enc.encode(filename);
-  
   let i=0;
   while(i<bytes.length-30){
-    // Local file header signature: 0x04034b50
     if(bytes[i]===0x50&&bytes[i+1]===0x4B&&bytes[i+2]===0x03&&bytes[i+3]===0x04){
       const compression=bytes[i+8]|(bytes[i+9]<<8);
       const compSize=bytes[i+18]|(bytes[i+19]<<8)|(bytes[i+20]<<16)|(bytes[i+21]<<24);
@@ -845,17 +699,13 @@ async function unzipFile(bytes,filename){
       const extraLen=bytes[i+28]|(bytes[i+29]<<8);
       const fn=new TextDecoder().decode(bytes.slice(i+30,i+30+fnLen));
       const dataStart=i+30+fnLen+extraLen;
-      
       if(fn===filename){
         const compData=bytes.slice(dataStart,dataStart+compSize);
-        if(compression===0){
-          return new TextDecoder('utf-8').decode(compData);
-        }else if(compression===8){
-          // DEFLATE
+        if(compression===0)return new TextDecoder('utf-8').decode(compData);
+        if(compression===8){
           try{
             const ds=new DecompressionStream('deflate-raw');
-            const writer=ds.writable.getWriter();
-            const reader=ds.readable.getReader();
+            const writer=ds.writable.getWriter();const reader=ds.readable.getReader();
             writer.write(compData);writer.close();
             const chunks=[];let done=false;
             while(!done){const{value,done:d}=await reader.read();if(d)done=true;else chunks.push(value);}
@@ -872,45 +722,23 @@ async function unzipFile(bytes,filename){
   return null;
 }
 
-// ── CSV 解析（支援多種編碼）──
-function parseCSVBuf(buf){
-  const bytes=new Uint8Array(buf);
-  let text='';
-  // BOM 偵測
-  if(bytes[0]===0xEF&&bytes[1]===0xBB&&bytes[2]===0xBF){
-    text=new TextDecoder('utf-8').decode(bytes.slice(3));
-  }else if(bytes[0]===0xFF&&bytes[1]===0xFE){
-    text=new TextDecoder('utf-16le').decode(bytes.slice(2));
-  }else if(bytes[0]===0xFE&&bytes[1]===0xFF){
-    text=new TextDecoder('utf-16be').decode(bytes.slice(2));
-  }else{
-    const utf8=new TextDecoder('utf-8').decode(bytes);
-    // 若有替換字元（亂碼指標），改用 Big5
-    text=utf8.includes('\uFFFD')?new TextDecoder('big5').decode(bytes):utf8;
-  }
-  parseCSVText(text);
-}
-
 function parseCSVText(text){
-  const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l=>l.trim());
-  if(lines.length<2){toast('⚠️ 需要至少標題行和一筆資料');return;}
+  const lines=text.split(/\r?\n|\r/).filter(l=>l.trim());
+  if(lines.length<2){toast('⚠️ 需要至少標題和一筆資料');return;}
   const sep=lines[0].includes('\t')?'\t':lines[0].includes(';')?';':',';
   function parseLine(line){
     const result=[];let cur='',inQ=false;
     for(let i=0;i<line.length;i++){
       const ch=line[i];
-      if(ch==='"'){inQ?( line[i+1]==='"'?(cur+='"',i++):inQ=false ):(inQ=true);}
+      if(ch==='"'){inQ?line[i+1]==='"'?(cur+='"',i++):inQ=false:inQ=true;}
       else if(ch===sep&&!inQ){result.push(cur.trim());cur='';}
       else cur+=ch;
     }
     result.push(cur.trim());return result;
   }
   const hd=parseLine(lines[0]).map(h=>h.replace(/^"|"$/g,'').trim());
-  const rows=lines.slice(1).map(l=>{
-    const c=parseLine(l);const o={};hd.forEach((h,i)=>o[h]=(c[i]||'').replace(/^"|"$/g,'').trim());return o;
-  }).filter(r=>Object.values(r).some(v=>v));
-  impRaw=rows;impHd=hd;
-  setColOpts(hd);autoDetect(hd);prevImport(rows,hd);
+  const rows=lines.slice(1).map(l=>{const c=parseLine(l);const o={};hd.forEach((h,i)=>o[h]=(c[i]||'').replace(/^"|"$/g,'').trim());return o;}).filter(r=>Object.values(r).some(v=>v));
+  impRaw=rows;impHd=hd;setColOpts(hd);autoDetect(hd);prevImport(rows,hd);
   document.getElementById('apply-btn').disabled=false;
   toast('✅ 載入 '+rows.length+' 筆');
 }
@@ -919,25 +747,21 @@ function setColOpts(hd){
   const opt='<option value="">自動偵測</option>'+hd.map(h=>'<option>'+h+'</option>').join('');
   ['col-cls','col-sno','col-sid','col-nm'].forEach(id=>document.getElementById(id).innerHTML=opt);
 }
-
-// 你的欄位順序：班級、座號、學號、姓名
 function autoDetect(hd){
   const hl=hd.map(h=>h.toLowerCase());
   const f=kws=>{for(const k of kws){const i=hl.findIndex(h=>h.includes(k));if(i>=0)return hd[i];}return '';};
   document.getElementById('col-cls').value=f(['班級','班','class']);
   document.getElementById('col-sno').value=f(['座號','座位','sno','seat']);
-  document.getElementById('col-sid').value=f(['學號','sid','id','student']);
+  document.getElementById('col-sid').value=f(['學號','sid','id']);
   document.getElementById('col-nm').value =f(['姓名','name']);
 }
-
 function prevImport(rows,hd){
   const show=rows.slice(0,5);
   document.getElementById('imp-prev').innerHTML=
-    '<div style="font-size:12px;color:var(--t2);margin-bottom:.5rem">共 '+rows.length+' 筆（預覽前 '+show.length+' 筆）</div>'
+    '<div style="font-size:12px;color:var(--t2);margin-bottom:.5rem">共 '+rows.length+' 筆（預覽 '+show.length+' 筆）</div>'
     +'<div class="tw"><table><thead><tr>'+hd.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead>'
     +'<tbody>'+show.map(r=>'<tr>'+hd.map(h=>'<td>'+r[h]+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
 }
-
 function applyImport(){
   const fC=document.getElementById('col-cls').value||impHd.find(h=>/班級|班|class/i.test(h))||impHd[0];
   const fS=document.getElementById('col-sno').value||impHd.find(h=>/座號|座位|sno/i.test(h))||impHd[1];
@@ -949,23 +773,18 @@ function applyImport(){
   let added=0,updated=0;
   for(const s of ns){const idx=ROSTER.findIndex(r=>r.cls===s.cls&&r.sno===s.sno);if(idx>=0){ROSTER[idx]=s;updated++;}else{ROSTER.push(s);added++;}}
   saveRoster();popCls();renderCurRoster();
-  toast(`✅ 新增 ${added} 人，更新 ${updated} 人，共 ${ROSTER.length} 人`);
+  toast('✅ 新增 '+added+' 人，更新 '+updated+' 人');
   document.getElementById('apply-btn').disabled=true;
   document.getElementById('imp-prev').innerHTML='<div class="empty"><span class="eico">✅</span>匯入完成！</div>';
   impRaw=[];impHd=[];
 }
-
-function clearRoster(){if(!confirm('確定清空名冊？'))return;ROSTER=[];SEATS={};LAYOUT={};saveRoster();saveSeatsLS();renderCurRoster();popCls();toast('已清空');}
-
+function clearRoster(){if(!confirm('確定清空？'))return;ROSTER=[];SEATS={};LAYOUT={};saveRoster();saveSeatsLS();renderCurRoster();popCls();toast('已清空');}
 function renderCurRoster(){
   const el=document.getElementById('cur-roster');if(!el)return;
   if(!ROSTER.length){el.innerHTML='<div class="empty"><span class="eico">📋</span>尚未匯入</div>';return;}
   const byC={};ROSTER.forEach(s=>{const c=s.cls||'未分班';if(!byC[c])byC[c]=[];byC[c].push(s);});
   let html='<div style="font-size:12px;color:var(--t2);margin-bottom:.6rem">共 '+ROSTER.length+' 位學生</div>';
-  for(const[c,ss]of Object.entries(byC)){
-    html+='<div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">'+c+'</div>';
-    html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:.6rem">'+ss.map(s=>`<span class="tag">No.${s.sno} ${s.name}</span>`).join('')+'</div>';
-  }
+  for(const[c,ss]of Object.entries(byC)){html+='<div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">'+c+'</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:.6rem">'+ss.map(s=>'<span class="tag">No.'+s.sno+' '+s.name+'</span>').join('')+'</div>';}
   el.innerHTML=html;
 }
 
@@ -980,9 +799,8 @@ function renderClsMgr(){
     return`<div class="cls-card"><div><div class="cls-name">🏫 ${cls}</div><div class="cls-info">共 ${students.length} 位學生　座位表：${hasSeats?'✅ 已設定':'⚠️ 未設定'}</div></div><button class="btn btn-sm btn-r" onclick="deleteCls('${cls}')">🗑️ 刪除此班</button></div>`;
   }).join('');
 }
-
 function deleteCls(cls){
-  if(!confirm(`確定刪除「${cls}」？`))return;
+  if(!confirm('確定刪除「'+cls+'」？'))return;
   ROSTER=ROSTER.filter(s=>s.cls!==cls);delete SEATS[cls];delete LAYOUT[cls];
   saveRoster();saveSeatsLS();popCls();renderClsMgr();toast('已刪除 '+cls);
 }
@@ -995,26 +813,40 @@ function onSeatClsChange(){
   document.getElementById('s-cols').value=cols;
   buildSeatGrid(cls,rows,cols);
 }
-
 function applyLayout(){
   const cls=curSeatCls();if(!cls){toast('請先選擇班級');return;}
   const rows=parseInt(document.getElementById('s-rows').value)||4;
   const cols=parseInt(document.getElementById('s-cols').value)||5;
   buildSeatGrid(cls,rows,cols);
-  toast('已套用 '+rows+'×'+cols+'（記得按「💾 儲存並上傳」）');
+  toast('已套用 '+rows+'×'+cols+'（記得儲存）');
 }
-
 function buildSeatGrid(cls,rows,cols){
   const seats=getSC(cls),area=document.getElementById('seat-editor');if(!area)return;
-  let html='<div class="sedit" style="grid-template-columns:repeat('+cols+',1fr);gap:5px">';
-  for(let r=1;r<=rows;r++)for(let c=0;c<cols;c++){
-    const key=r+String.fromCharCode(65+c),info=seats[key];
-    const disp=info?'No.'+info.sno+' '+info.name:'';
-    html+='<div class="sec"><div class="sel">'+key+'</div><input type="text" id="se-'+key+'" value="'+disp+'" placeholder="空位" class="'+(info?'filled':'')+'" readonly onclick="openPicker(\''+key+'\',\''+cls+'\')"/></div>';
+  const cells=[];
+  for(let r=1;r<=rows;r++){
+    for(let c=0;c<cols;c++){
+      const key=r+String.fromCharCode(65+c);
+      const info=seats[key];
+      const disp=info?('No.'+info.sno+' '+info.name):'';
+      const cell=document.createElement('div');
+      cell.className='sec';
+      const lbl=document.createElement('div');
+      lbl.className='sel';lbl.textContent=key;
+      const inp=document.createElement('input');
+      inp.type='text';inp.id='se-'+key;inp.value=disp;inp.placeholder='空位';
+      inp.className=info?'filled':'';inp.readOnly=true;
+      inp.onclick=(()=>{const k=key,cl=cls;return()=>openPicker(k,cl);})();
+      cell.appendChild(lbl);cell.appendChild(inp);cells.push(cell);
+    }
   }
-  html+='</div>';area.innerHTML=html;
+  area.innerHTML='';
+  const grid=document.createElement('div');
+  grid.className='sedit';
+  grid.style.gridTemplateColumns='repeat('+cols+',1fr)';
+  grid.style.gap='5px';
+  cells.forEach(c=>grid.appendChild(c));
+  area.appendChild(grid);
 }
-
 function openPicker(key,cls){
   if(!cls){toast('請先選擇班級');return;}
   if(!ROSTER.filter(s=>s.cls===cls).length){toast('此班沒有學生，請先匯入名冊');return;}
@@ -1028,43 +860,58 @@ function closePicker(){document.getElementById('picker-modal').classList.remove(
 function filterPicker(q){
   const seats=getSC(pkCls);
   const used=new Set(Object.entries(seats).filter(([k])=>k!==pkKey).map(([,v])=>v.sno));
-  const cur=seats[pkKey];
+  const curInfo=getSC(pkCls)[pkKey];
   const fl=ROSTER.filter(s=>s.cls===pkCls&&(!q||s.name.includes(q)||String(s.sno).includes(q)));
-  let html='<div class="pchip pclr" onclick="clrSeat()">✕ 清空此座位</div> ';
-  html+=fl.map(s=>{const tk=used.has(s.sno),sl=cur&&cur.sno===s.sno;return'<div class="pchip'+(sl?' sel':'')+(tk?' taken':'')+'" onclick="asgSeat(\''+s.sno+'\',\''+s.name+'\',\''+s.sid+'\')">'+'<span style="font-size:10px;color:var(--t2)">No.'+s.sno+'</span><span style="font-weight:600">'+s.name+'</span>'+(tk?'<span style="font-size:10px;color:var(--t3)">(已排)</span>':'')+'</div>';}).join(' ');
-  document.getElementById('pk-body').innerHTML=html;
+  const body=document.getElementById('pk-body');
+  body.innerHTML='';
+  // 清空按鈕
+  const clrBtn=document.createElement('div');
+  clrBtn.className='pchip pclr';clrBtn.textContent='✕ 清空此座位';
+  clrBtn.onclick=clrSeat;body.appendChild(clrBtn);
+  // 學生選項
+  fl.forEach(s=>{
+    const tk=used.has(s.sno),sl=curInfo&&curInfo.sno===s.sno;
+    const chip=document.createElement('div');
+    chip.className='pchip'+(sl?' sel':'')+(tk?' taken':'');
+    const snoSpan=document.createElement('span');
+    snoSpan.style.cssText='font-size:10px;color:var(--t2)';
+    snoSpan.textContent='No.'+s.sno;
+    const nameSpan=document.createElement('span');
+    nameSpan.style.fontWeight='600';nameSpan.textContent=s.name;
+    chip.appendChild(snoSpan);chip.appendChild(nameSpan);
+    if(tk){const takenSpan=document.createElement('span');takenSpan.style.cssText='font-size:10px;color:var(--t3)';takenSpan.textContent='(已排)';chip.appendChild(takenSpan);}
+    if(!tk) chip.onclick=(()=>{const sno=s.sno,name=s.name,sid=s.sid;return()=>asgSeat(sno,name,sid);})();
+    body.appendChild(chip);
+  });
 }
-function asgSeat(sno,name,sid){if(!SEATS[pkCls])SEATS[pkCls]={};SEATS[pkCls][pkKey]={sno,name,sid};const inp=document.getElementById('se-'+pkKey);if(inp){inp.value='No.'+sno+' '+name;inp.className='filled';}closePicker();toast(name+' → '+pkKey);}
-function clrSeat(){if(SEATS[pkCls])delete SEATS[pkCls][pkKey];const inp=document.getElementById('se-'+pkKey);if(inp){inp.value='';inp.className='';}closePicker();}
-
-async function saveSeats(){
+function asgSeat(sno,name,sid){
+  if(!SEATS[pkCls])SEATS[pkCls]={};
+  SEATS[pkCls][pkKey]={sno,name,sid};
+  const inp=document.getElementById('se-'+pkKey);
+  if(inp){inp.value='No.'+sno+' '+name;inp.className='filled';}
+  closePicker();toast(name+' → '+pkKey);
+}
+function clrSeat(){
+  if(SEATS[pkCls])delete SEATS[pkCls][pkKey];
+  const inp=document.getElementById('se-'+pkKey);
+  if(inp){inp.value='';inp.className='';}
+  closePicker();
+}
+function saveSeats(){
   const cls=curSeatCls();if(!cls){toast('請先選擇班級');return;}
   const rows=parseInt(document.getElementById('s-rows').value)||4;
   const cols=parseInt(document.getElementById('s-cols').value)||5;
   if(!LAYOUT[cls])LAYOUT[cls]={};
   LAYOUT[cls].rows=rows;LAYOUT[cls].cols=cols;
   saveSeatsLS();
-  if(!GH_TOKEN){toast('⚠️ 未設定 Gist Token，資料僅存本機。請至「⚙️ Gist 設定」',5000);return;}
-  toast('上傳中...');
-  const gid=await uploadToGist({seats:SEATS,layout:LAYOUT});
-  if(gid&&typeof gid==='string'){
-    toast('✅ 座位表已儲存並上傳！學生現在可以掃 QR 簽到');
-  }else if(gid&&gid.error){
-    toast('❌ 上傳失敗：'+gid.error,6000);
-    console.error('Upload failed:', gid.error);
-  }else{
-    toast('⚠️ 上傳失敗，請至「⚙️ Gist 設定」重新測試連線',4000);
-  }
+  toast('✅ 座位表已儲存！');
 }
-
 function clearSeats(){
   const cls=curSeatCls();if(!cls){toast('請先選擇班級');return;}
-  if(!confirm('確定清空「'+cls+'」的座位？'))return;
-  SEATS[cls]={};
-  buildSeatGrid(cls,parseInt(document.getElementById('s-rows').value)||4,parseInt(document.getElementById('s-cols').value)||5);
-  toast('已清空（記得按「💾 儲存並上傳」）');
+  if(!confirm('確定清空？'))return;
+  SEATS[cls]={};buildSeatGrid(cls,parseInt(document.getElementById('s-rows').value)||4,parseInt(document.getElementById('s-cols').value)||5);
+  toast('已清空（記得按儲存）');
 }
-
 function autoAssign(){
   const cls=curSeatCls();if(!cls){toast('請先選擇班級');return;}
   const rows=parseInt(document.getElementById('s-rows').value)||4;
@@ -1075,7 +922,7 @@ function autoAssign(){
   let i=0;
   for(let r=1;r<=rows&&i<sts.length;r++)for(let c=0;c<cols&&i<sts.length;c++){const key=r+String.fromCharCode(65+c),s=sts[i++];SEATS[cls][key]={sno:s.sno,name:s.name,sid:s.sid};}
   buildSeatGrid(cls,rows,cols);
-  toast('✅ 已排列 '+i+' 位（記得按「💾 儲存並上傳」）');
+  toast('✅ 已排列 '+i+' 位（記得按「💾 儲存」）');
 }
 
 // ── 出席名冊 ──
@@ -1095,22 +942,24 @@ function renderRoster(){
   document.getElementById('r-tot').textContent=rows.length;
   tbl.innerHTML='<div class="tw"><table><thead><tr><th>座位</th><th>座號</th><th>姓名</th><th>簽到時間</th><th>狀態</th></tr></thead><tbody>'+rows.map(r=>'<tr><td><span class="tag">'+r.seat+'</span></td><td style="color:var(--t2)">'+r.sno+'</td><td style="font-weight:'+(r.abs?400:600)+'">'+r.name+'</td><td style="font-variant-numeric:tabular-nums;color:'+(r.abs?'var(--t3)':'var(--t1)')+'">'+r.time+'</td><td><span class="badge '+(r.abs?'bm':r.late?'br':'bg')+'">'+r.status+'</span></td></tr>').join('')+'</tbody></table></div>';
 }
-
 function expCSV(){
   const cls=document.getElementById('r-cls').value;if(!cls){toast('請選擇班級');return;}
   const seats=getSC(cls),att=getAtt(cls),order=getSeatOrder(cls).filter(s=>seats[s]);
-  if(!order.length){toast('尚無座位資料');return;}
-  const lines=order.map(seat=>{const info=seats[seat],rec=att[seat];if(rec)return seat+','+info.sno+','+rec.name+','+rec.timeStr+','+(rec.late?'遲到':'準時到課');return seat+','+info.sno+','+info.name+',—,缺席';});
-  dlCSV('\uFEFF'+(CFG.course?'課程,'+CFG.course+',班級,'+cls+',日期,'+todayStr()+'\n\n':'')+'座位,座號,姓名,簽到時間,狀態\n'+lines.join('\n'),'出席_'+cls+'_'+todayStr()+'.csv');
+  if(!order.length){toast('尚無資料');return;}
+  const rows=order.map(seat=>{
+    const info=seats[seat],rec=att[seat];
+    if(rec)return[seat,info.sno,rec.name,rec.timeStr,rec.late?'遲到':'準時到課'].join(',');
+    return[seat,info.sno,info.name,'—','缺席'].join(',');
+  });
+  const header=CFG.course?['課程,'+CFG.course+',班級,'+cls+',日期,'+todayStr(),'','座位,座號,姓名,簽到時間,狀態'].join('\n'):['座位,座號,姓名,簽到時間,狀態'].join('\n');
+  dlCSV('\uFEFF'+header+'\n'+rows.join('\n'),'出席_'+cls+'_'+todayStr()+'.csv');
   toast('CSV 已下載');
 }
-
 function updManSel(){
   const cls=curCls()||CFG.cls||'',att=getAtt(cls),seats=getSC(cls);
   const sel=document.getElementById('man-nm');if(!sel)return;
   sel.innerHTML='<option value="">— 選擇學生 —</option>'+getSeatOrder(cls).filter(s=>seats[s]).map(seat=>{const info=seats[seat],done=!!att[seat];return'<option value="'+seat+'" '+(done?'disabled':'')+'>'+info.name+'（'+seat+'）'+(done?' ✓':'')+'</option>';}).join('');
 }
-
 function manualCI(){
   const seat=document.getElementById('man-nm').value,st=document.getElementById('man-st').value;if(!seat){toast('請選擇學生');return;}
   const cls=curCls()||CFG.cls||'',att=getAtt(cls);if(att[seat]){toast('已有紀錄');return;}
@@ -1138,13 +987,38 @@ function loadWeekly(){
   if(!sdates.length){tbl.innerHTML='<div class="empty"><span class="eico">📭</span>此區間無紀錄</div>';return;}
   tbl.innerHTML='<div class="tw"><table><thead><tr><th>座號</th><th>姓名</th>'+sdates.map(d=>'<th class="wkc">'+d.slice(-5)+'</th>').join('')+'<th>出席</th><th>遲到</th><th>缺席</th></tr></thead><tbody>'+students.map(s=>{const on=s.records.filter(r=>r==='準時').length,late=s.records.filter(r=>r==='遲到').length,abs=s.records.filter(r=>r==='缺席').length;return'<tr><td style="color:var(--t2)">'+s.sno+'</td><td style="font-weight:600">'+s.name+'</td>'+s.records.map(r=>'<td class="wkc"><span class="badge '+(r==='準時'?'bg':r==='遲到'?'br':'bm')+'" style="min-width:24px;justify-content:center">'+(r==='準時'?'✓':r==='遲到'?'⚠':'✗')+'</span></td>').join('')+'<td style="color:var(--grn);font-weight:600">'+on+'</td><td style="color:var(--red);font-weight:600">'+late+'</td><td style="color:var(--t2)">'+abs+'</td></tr>';}).join('')+'</tbody></table></div>';
 }
-
 function expWeekly(){
   if(!wkData||!wkData.dates||!wkData.dates.length){toast('請先查詢');return;}
   const{dates,students,cls,from,to}=wkData;
   const hdr=['座號','姓名',...dates,'出席','遲到','缺席'].join(',');
-  const rows=students.map(s=>{const on=s.records.filter(r=>r==='準時').length,late=s.records.filter(r=>r==='遲到').length,abs=s.records.filter(r=>r==='缺席').length;return[s.sno,s.name,...s.records,on,late,abs].join(',');});
-  dlCSV('\uFEFF週報表：'+cls+'\n日期：'+from+' 至 '+to+'\n\n'+hdr+'\n'+rows.join('\n'),'週報表_'+cls+'_'+from+'_'+to+'.csv');toast('CSV 已下載');
+  const rows=students.map(s=>{
+    const on=s.records.filter(r=>r==='準時').length;
+    const late=s.records.filter(r=>r==='遲到').length;
+    const abs=s.records.filter(r=>r==='缺席').length;
+    return[s.sno,s.name,...s.records,on,late,abs].join(',');
+  });
+  const csv='\uFEFF週報表：'+cls+'\n日期：'+from+' 至 '+to+'\n\n'+hdr+'\n'+rows.join('\n');
+  dlCSV(csv,'週報表_'+cls+'_'+from+'_'+to+'.csv');
+  toast('CSV 已下載');
+}
+
+// ── API 設定 ──
+function saveApiUrl(){
+  API_URL=document.getElementById('api-script-url').value.trim();
+  localStorage.setItem(LS.as,API_URL);
+  toast('已儲存，測試中...');
+  testApiUrl();
+}
+async function testApiUrl(){
+  const el=document.getElementById('api-test-result');if(!el)return;
+  if(!API_URL){el.innerHTML='<div class="al al-r">❌ 請先填入網址</div>';return;}
+  el.innerHTML='<div class="al al-b">🔌 測試中...</div>';
+  try{
+    const r=await fetch(API_URL+'?token=TEST&cls=TEST');
+    const d=await r.json();
+    if(d.ok){el.innerHTML='<div class="al al-g">✅ 連線成功！Apps Script 運作正常</div>';}
+    else{el.innerHTML='<div class="al al-r">❌ 回應錯誤：'+(d.msg||'未知')+'</div>';}
+  }catch(e){el.innerHTML='<div class="al al-r">❌ 連線失敗：'+e.message+'</div>';}
 }
 
 function dlCSV(content,filename){const blob=new Blob([content],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);}
