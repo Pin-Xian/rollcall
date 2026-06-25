@@ -31,6 +31,9 @@ function doPost(e) {
         row.map((v,ci) => ({ col:ci, val:String(v), type:typeof v, raw:v }))
       );
       res.setContent(JSON.stringify({ ok:true, totalRows:all.length, sample }));
+    } else if (data.action === 'clearCheckins') {
+      clearCheckins_(data.token, data.cls);
+      res.setContent(JSON.stringify({ ok: true }));
     } else {
       res.setContent(JSON.stringify({ ok: false, msg: '未知 action' }));
     }
@@ -177,4 +180,24 @@ function getCheckins_(token, cls) {
     }
   }
   return result;
+}
+
+// ── 清除指定 token+cls 的簽到紀錄 ──
+function clearCheckins_(token, cls) {
+  const ss    = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(SHEET_CHECKIN);
+  if (!sheet) return;
+  const all = sheet.getDataRange().getValues();
+  const toDelete = [];
+  const tokenStr = String(token).trim();
+  const clsStr   = cls ? String(cls).trim() : null;
+  for (let i = all.length - 1; i >= 1; i--) {
+    const rowToken = String(all[i][3]).trim();
+    const rowCls   = String(all[i][2]).trim();
+    if (rowToken === tokenStr && (!clsStr || rowCls === clsStr)) {
+      toDelete.push(i + 1);
+    }
+  }
+  toDelete.forEach(row => sheet.deleteRow(row));
+  SpreadsheetApp.flush();
 }

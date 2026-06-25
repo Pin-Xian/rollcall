@@ -653,10 +653,24 @@ function openFS(){
 }
 function closeFS(){document.getElementById('fsov').classList.remove('open');}
 
-function resetToday(){
-  if(!confirm('確定重置今日簽到紀錄？'))return;
-  if(TOKEN&&curCls())localStorage.removeItem(LS.at+TOKEN+'_'+curCls());
-  QRon=false;TOKEN='';CFG={};
+async function resetToday(){
+  if(!confirm('確定重置今日簽到紀錄？\n（也會清除 Google Sheet 中今日此班的資料）'))return;
+  const cls=curCls()||CFG.cls||'';
+  const tok=new Date().toISOString().slice(0,10).replace(/-/g,'');
+  // 清除本機
+  if(tok&&cls)localStorage.removeItem(LS.at+tok+'_'+cls);
+  // 清除 Apps Script
+  if(tok&&cls){
+    try{
+      await fetch('https://script.google.com/macros/s/AKfycbyd-V_C8usIT9WwHejXWpd3xehcbc6vx_FBP-f3OImo1R0kSPeSOH8iXgrDfpIACcL7/exec',{
+        method:'POST',
+        headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({action:'clearCheckins',token:tok,cls})
+      });
+    }catch(e){}
+  }
+  QRon=false;CFG={};
+  TOKEN=new Date().toISOString().slice(0,10).replace(/-/g,'');
   if(window._si){clearInterval(window._si);window._si=null;}
   document.getElementById('qr-info').style.display='none';
   document.getElementById('qr-display').style.display='none';
@@ -664,7 +678,7 @@ function resetToday(){
   document.getElementById('dash-sub').textContent='尚未產生今日 QR Code';
   updStats('');renderSG('');
   document.getElementById('reclist').innerHTML='<div class="empty"><span class="eico">🕐</span>等待學生簽到</div>';
-  toast('已重置');
+  toast('已重置（含 Google Sheet）');
 }
 
 // ── 匯入名冊（支援 xlsx 和 CSV）──
