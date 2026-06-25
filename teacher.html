@@ -495,7 +495,12 @@ function restoreQRState(){
 
 // ── 同步（從 Apps Script 讀簽到）──
 async function syncAll(){
-  const cls=curCls();if(!cls)return;
+  // curCls() 讀 select，若未選則 fallback 用 CFG.cls
+  const cls=curCls()||CFG.cls||'';
+  if(!cls)return;
+  // 確保 select 顯示正確班級
+  const dc=document.getElementById('dash-cls');
+  if(dc&&!dc.value&&cls)dc.value=cls;
   await fetchCheckinsFromScript(cls);
   updStats(cls);renderSG(cls);renderRL(cls);
   // 更新最後同步時間
