@@ -447,6 +447,27 @@ function saveCFG(){try{localStorage.setItem(LS.cf,JSON.stringify({course:documen
 function getAtt(cls){if(!TOKEN||!cls)return{};try{return JSON.parse(localStorage.getItem(LS.at+TOKEN+'_'+cls)||'{}');}catch(e){return{};}}
 function saveAtt(cls,att){try{localStorage.setItem(LS.at+TOKEN+'_'+cls,JSON.stringify(att));}catch(e){}}
 
+// 從 Gist 讀取學生簽到資料，合併到 localStorage
+async function fetchCheckinsFromGist(cls){
+  if(!GIST_ID) return;
+  try{
+    const r=await fetch('https://api.github.com/gists/'+GIST_ID,
+      {headers:{Accept:'application/vnd.github.v3+json'}});
+    if(!r.ok) return;
+    const data=await r.json();
+    const content=data.files['seats.json']?.content;
+    if(!content) return;
+    const parsed=JSON.parse(content);
+    const checkins=parsed.checkins?.[TOKEN]?.[cls];
+    if(checkins&&Object.keys(checkins).length){
+      // 合併到 localStorage
+      const existing=getAtt(cls);
+      const merged=Object.assign({},checkins,existing); // 本地補登優先
+      saveAtt(cls,merged);
+    }
+  }catch(e){}
+}
+
 function toast(m,d=2400){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function clock(){const n=new Date();document.getElementById('sb-ft').textContent=n.toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit',weekday:'short'})+'\n'+n.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 function addMins(t,m){const[h,mm]=t.split(':').map(Number),tot=h*60+mm+m;return String(Math.floor(tot/60)%24).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
@@ -545,7 +566,7 @@ async function testGist(){
 
 async function uploadToGist(data){
   if(!GH_TOKEN)return null;
-  const body={description:'點名系統座位表',public:false,files:{'seats.json':{content:JSON.stringify(data)}}};
+  const body={description:'點名系統座位表',public:false,files:{'seats.json':{content:JSON.stringify({...data,wt:GH_TOKEN})}}};
   try{
     let r;
     if(GIST_ID){
@@ -574,7 +595,11 @@ async function uploadToGist(data){
 }
 
 // ── 同步 ──
-function syncAll(){const cls=curCls();if(!cls)return;updStats(cls);renderSG(cls);renderRL(cls);}
+async function syncAll(){
+  const cls=curCls();if(!cls)return;
+  await fetchCheckinsFromGist(cls);
+  updStats(cls);renderSG(cls);renderRL(cls);
+}
 
 function updStats(cls){
   const att=getAtt(cls),seats=getSC(cls);
@@ -616,22 +641,26 @@ function getQRUrl(){
 
 function renderQRToEl(el,size){
   el.innerHTML='';
+  // QRCode.js 會同時產生 canvas 和 img，用暫存 div 只取 canvas
+  const tmp=document.createElement('div');
+  tmp.style.cssText='position:absolute;left:-9999px';
+  document.body.appendChild(tmp);
   try{
-    // 使用 QRCode.js（業界標準函式庫，手機一定掃得到）
-    new QRCode(el,{
-      text: getQRUrl(),
-      width: size,
-      height: size,
-      colorDark: '#000000',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M
+    new QRCode(tmp,{
+      text:getQRUrl(),width:size,height:size,
+      colorDark:'#000000',colorLight:'#ffffff',
+      correctLevel:QRCode.CorrectLevel.M
     });
-    // 確保 canvas/img 尺寸正確
     setTimeout(()=>{
-      const c=el.querySelector('canvas,img');
-      if(c){c.style.width=size+'px';c.style.height=size+'px';c.style.display='block';}
-    },10);
+      const canvas=tmp.querySelector('canvas');
+      if(canvas){
+        canvas.style.cssText='display:block;border-radius:6px;width:'+size+'px;height:'+size+'px';
+        el.appendChild(canvas);
+      }
+      document.body.removeChild(tmp);
+    },50);
   }catch(e){
+    document.body.removeChild(tmp);
     el.innerHTML='<div style="color:var(--red);padding:1rem;font-size:13px;text-align:center">QR 產生失敗：'+e.message+'</div>';
   }
 }
