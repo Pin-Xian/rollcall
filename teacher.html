@@ -413,6 +413,8 @@ function init(){
   document.getElementById('wk-from').value=mo.toISOString().slice(0,10);
   document.getElementById('wk-to').value=su.toISOString().slice(0,10);
   checkGistStatus();
+  // 確保 TOKEN 永遠是今天日期
+  TOKEN=new Date().toISOString().slice(0,10).replace(/-/g,'');
 }
 
 function loadLS(){
@@ -427,7 +429,7 @@ function loadLS(){
       if(CFG.course)document.getElementById('course-name').value=CFG.course;
       if(CFG.classTime)document.getElementById('class-time').value=CFG.classTime;
       if(CFG.lateMin)document.getElementById('late-min').value=CFG.lateMin;
-      TOKEN=new Date().toISOString().slice(0,10).replace(/-/g,'');if(CFG.token)QRon=true;
+      TOKEN=new Date().toISOString().slice(0,10).replace(/-/g,'');if(CFG.cls)QRon=true;
     }
     API_URL=localStorage.getItem(LS.as)||'';
     if(API_URL){const el=document.getElementById('api-script-url');if(el)el.value=API_URL;}
@@ -441,7 +443,7 @@ function saveCFG(){
     course:document.getElementById('course-name').value,
     classTime:document.getElementById('class-time').value,
     lateMin:document.getElementById('late-min').value,
-    token:TOKEN,cls:CFG.cls||'',dateStr:CFG.dateStr||'',lateDeadline:CFG.lateDeadline||''
+    cls:CFG.cls||'',dateStr:CFG.dateStr||'',lateDeadline:CFG.lateDeadline||''
   }));}catch(e){}
 }
 function getAtt(cls){if(!TOKEN||!cls)return{};try{return JSON.parse(localStorage.getItem(LS.at+TOKEN+'_'+cls)||'{}');}catch(e){return{};}}
@@ -522,10 +524,7 @@ async function manualSync(){
       return;
     }
   }
-  if(!TOKEN&&CFG.token){
-    TOKEN=CFG.token;
-    toast('TOKEN 已還原：'+TOKEN);
-  }
+  // TOKEN 永遠用日期，不從 CFG 還原舊值
   await fetchCheckinsFromScript(cls||CFG.cls);
   updStats(cls||CFG.cls);renderSG(cls||CFG.cls);renderRL(cls||CFG.cls);
   const el=document.getElementById('last-sync');
